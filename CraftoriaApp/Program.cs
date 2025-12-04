@@ -39,7 +39,9 @@ namespace CraftoriaApp
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreDbContext>();
 
-
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
