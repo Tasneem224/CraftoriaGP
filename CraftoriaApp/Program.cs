@@ -1,5 +1,6 @@
 
 using CloudinaryDotNet;
+using CraftoriaApp.CustomeMiddleWares;
 using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +45,7 @@ namespace CraftoriaApp
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             var app = builder.Build();
-
+            app.UseMiddleware<CustomeExceptionHandlerMiddleWare>();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

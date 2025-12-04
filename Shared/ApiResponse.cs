@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.ErrorModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,10 +25,11 @@ namespace Shared
                 Message = message,
                 Data = data,
                 Errors = null,
+                StatusCode = "200"
 
             };
         }
-        public static ApiResponse<T> FailResponse(string message, object errors = null)
+        public static ApiResponse<T> FailResponse(string message, object errors = null, string statusCode = "404")
         {
             return new ApiResponse<T>
             {
@@ -35,6 +37,7 @@ namespace Shared
                 Message = message,
                 Data = default,
                 Errors = errors,
+                StatusCode = statusCode
             };
         }
     }
