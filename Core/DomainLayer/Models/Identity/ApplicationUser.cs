@@ -19,6 +19,9 @@ namespace DomainLayer.Models.Identity
         public string? ProfileImage { get; set; } = default!;
         public string? Bio { get; set; } = string.Empty;
 
+        public string? OtpCode { get; set; }
+        public DateTime? OtpExpiration { get; set; }
+
 
         #region Artisan
         public decimal? CommissionRate { get; set; }//by default is 10%

@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class ServiceManager(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService) : IServiceManager
+    public class ServiceManager(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService) : IServiceManager
     {
-        private readonly Lazy<IAuthenticationService> _LazyAuthenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _configuration, _cloudinaryService));
+        private readonly Lazy<IAuthenticationService> _LazyAuthenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _configuration, _cloudinaryService,_emailService));
 
         public IAuthenticationService AuthenticationService => _LazyAuthenticationService.Value;
 

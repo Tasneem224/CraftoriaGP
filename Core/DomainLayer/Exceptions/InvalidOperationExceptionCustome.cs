@@ -9,6 +9,10 @@ namespace DomainLayer.Exceptions
     public sealed class InvalidOperationExceptionCustome : Exception
     {
         public List<string> Errors { get; }
+        public InvalidOperationExceptionCustome(string message):base(message) 
+        {
+            
+        }
 
         public InvalidOperationExceptionCustome(List<string> errors)
             : base(string.Join("; ", errors)) // الرسائل تتحول لstring

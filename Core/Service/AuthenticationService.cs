@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary) : IAuthenticationService
+    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService) : IAuthenticationService
     {
         public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
         {
@@ -158,6 +158,81 @@ namespace Service
             }
             throw new UnauthorizedAException();
         }
+
+        public async Task<string> ForgotPasswordAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+
+                throw new UserNotFoundException(email);
+            }
+
+            // Generate OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+
+            // Update User Properties
+            user.OtpCode = otp;
+            user.OtpExpiration = DateTime.UtcNow.AddMinutes(10);
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Could not save OTP");
+            }
+
+            // Send Email
+            await _emailService.SendEmailAsync(email, "Reset Password OTP", $"Your OTP is: {otp}");
+
+            return "OTP sent successfully.";
+        }
+
+        public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null) return false;
+
+            if (user.OtpCode == model.OtpCode && user.OtpExpiration > DateTime.UtcNow)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null) throw new UserNotFoundException(model.Email);
+
+            if (user.OtpCode != model.OtpCode || user.OtpExpiration < DateTime.UtcNow)
+            {
+                throw new InvalidException("Invalid or Expired OTP");
+            }
+
+            
+            if (await _userManager.HasPasswordAsync(user))
+            {
+                await _userManager.RemovePasswordAsync(user);
+            }
+
+            var result = await _userManager.AddPasswordAsync(user, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+           
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationExceptionCustome($"Failed to reset password: {errors}");
+            }
+
+            user.OtpCode = null;
+            user.OtpExpiration = null;
+
+            await _userManager.UpdateAsync(user);
+
+            return "Password has been reset";
+        }
+
 
     }
 

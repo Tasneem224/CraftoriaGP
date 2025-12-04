@@ -11,6 +11,9 @@ namespace ServiceAbstraction
     {
         Task<ReturnUserDTO> RegisterAsync(RegisterDto RegisterDto);
         Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto);
+        Task<string> ForgotPasswordAsync(string email);
+        Task<bool> VerifyOtpAsync(VerifyOtpDto model);
+        Task<string> ResetPasswordAsync(ResetPasswordDto model);
 
 
     }
