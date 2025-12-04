@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using DomainLayer.Exceptions;
+using Shared;
 using Shared.ErrorModels;
 using System.Text.Json;
 
@@ -23,30 +24,36 @@ namespace CraftoriaApp.CustomeMiddleWares
                 //Response
 
             }
-            catch (Exception ex)
+            
+                catch (Exception ex)
             {
-                _logger.LogError(ex,"Something went wrong while processing.");
-                //set status code for response
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                int statusCode = ex switch
+                {
+                    UserAlreadyExistsException => StatusCodes.Status400BadRequest,
+                    NotFoundException => StatusCodes.Status404NotFound,
+                    _ => StatusCodes.Status500InternalServerError
+                };
 
-                ///httpContext.Response.ContentType = "application/json";
-                ///var jsonResponse = JsonSerializer.Serialize(response);
-                ///await httpContext.Response.WriteAsync(jsonResponse);
+                _logger.LogError(ex, "Something went wrong while processing.");
+
                 var errorModel = new ErrorToReturn
                 {
-                    StatusCode = StatusCodes.Status500InternalServerError,
+                    StatusCode = statusCode,
                     ErrorMessage = ex.Message
                 };
 
                 var response = ApiResponse<string>.FailResponse(
-                    "Internal Server Error",
+                    ex is UserAlreadyExistsException ? ex.Message : "Internal Server Error",
                     errorModel,
-                    StatusCodes.Status500InternalServerError.ToString()
+                    statusCode.ToString()
                 );
 
-
-                await httpContext.Response.WriteAsJsonAsync(response);//convert content type and Serialize response and writeasync
+              
+            await httpContext.Response.WriteAsJsonAsync(response);//convert content type and Serialize response and writeasync
             }
+
+
+            
         }
     }
 }

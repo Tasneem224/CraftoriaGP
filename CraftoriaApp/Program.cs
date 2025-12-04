@@ -1,18 +1,21 @@
 
 using CloudinaryDotNet;
 using CraftoriaApp.CustomeMiddleWares;
+using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data.Contexts;
+using Persistance.Repositories;
 using Service;
 using ServiceAbstraction;
+using System.Threading.Tasks;
 
 namespace CraftoriaApp
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -42,11 +45,18 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<IDataSeeding, DataSeeding>();
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             var app = builder.Build();
+            using (var scope = app.Services.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeding>();
+                await seeder.IdentityDataSeedingAsync();
+            }
+
             app.UseMiddleware<CustomeExceptionHandlerMiddleWare>();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

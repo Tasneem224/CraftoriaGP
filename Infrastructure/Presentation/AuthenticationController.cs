@@ -19,16 +19,12 @@ namespace Presentation
             {
                 return SendErrorResponse("Validation failed", ModelState, 422);
             }
-            try
-            {
+            
                 var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
 
                 return SendSuccessResponse(user, "Registration successful");
-            }
-            catch (Exception ex)
-            {
-                return SendErrorResponse(ex.Message, null, 400);
-            }
+            
+        
         }
     }
     }
