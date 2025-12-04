@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Exceptions;
+using DomainLayer.Exceptions.DomainLayer.Exceptions;
 using Shared;
 using Shared.ErrorModels;
 using System.Text.Json;
@@ -31,6 +32,7 @@ namespace CraftoriaApp.CustomeMiddleWares
                 {
                     UserAlreadyExistsException => StatusCodes.Status400BadRequest,
                     NotFoundException => StatusCodes.Status404NotFound,
+                    UnauthorizedAException => StatusCodes.Status401Unauthorized,
                     _ => StatusCodes.Status500InternalServerError
                 };
 

@@ -10,6 +10,7 @@ namespace ServiceAbstraction
     public interface IAuthenticationService
     {
         Task<ReturnUserDTO> RegisterAsync(RegisterDto RegisterDto);
+        Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto);
 
 
     }
