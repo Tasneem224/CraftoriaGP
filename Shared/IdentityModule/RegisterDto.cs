@@ -10,8 +10,8 @@ namespace Shared.IdentityModule
 {
     public class RegisterDto
     {
-        [Required(ErrorMessage = "First name is required")]
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "First name must be between 3 and 50 characters")]
+        //[Required(ErrorMessage = "First name is required")]
+        //[StringLength(50, MinimumLength = 3, ErrorMessage = "First name must be between 3 and 50 characters")]
         [Display(Name = "First Name")]
         public string FirstName { get; set; } = default!;
 
@@ -21,17 +21,8 @@ namespace Shared.IdentityModule
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Last name must be between 3 and 50 characters")]
         public string LastName { get; set; } = String.Empty!;
 
-        [Required(ErrorMessage = "Email is required")]
-        [DataType(DataType.EmailAddress)]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
         public string Email { get; set; } = default!;
-
-        [Required(ErrorMessage = "Password is required")]
-
-        public string Password { get; set; } = default!;
-
-        [Required(ErrorMessage = "Password confirmation is required")]
-        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        public string Password { get; set; } = default!;        
         public string ConfirmPassword { get; set; } = default!;
 
         [Required]
