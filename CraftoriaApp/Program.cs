@@ -72,8 +72,18 @@ namespace CraftoriaApp
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            else
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
+                {
 
-            app.UseHttpsRedirection();
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+                    options.RoutePrefix = string.Empty;
+                });
+
+            }
+                app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
