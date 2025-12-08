@@ -1,14 +1,18 @@
 
 using CloudinaryDotNet;
 using CraftoriaApp.CustomeMiddleWares;
+using CraftoriaApp.Validators;
 using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
 using Service;
 using ServiceAbstraction;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace CraftoriaApp
@@ -43,6 +47,10 @@ namespace CraftoriaApp
                 .AddEntityFrameworkStores<StoreDbContext>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
+            builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddFluentValidationClientsideAdapters();
+
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
@@ -50,7 +58,6 @@ namespace CraftoriaApp
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
             {

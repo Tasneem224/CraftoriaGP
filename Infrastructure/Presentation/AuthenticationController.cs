@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
 using Shared.IdentityModule;
@@ -10,17 +11,12 @@ namespace Presentation
         [HttpPost("Register")]
         public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return SendErrorResponse("Validation failed", ModelState, 422);
-            }
 
-            var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
-
-            return SendSuccessResponse(user, "Registration successful");
-
-
+            
+                var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
+                return SendSuccessResponse(user, "Registration successful");
         }
+
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
