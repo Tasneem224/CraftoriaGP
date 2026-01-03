@@ -33,6 +33,7 @@ namespace Service
                 {
                     throw new UserAlreadyExistsException(_registerDto.Email);
                 }
+
                 profileImagePath = _registerDto.ProfileImage is not null ? await _cloudinary.UploadAsync(_registerDto.ProfileImage) : null;
 
                 portfolioPath = await ExpertOption(_registerDto, portfolioPath);
@@ -48,7 +49,9 @@ namespace Service
                     ProfileImage = profileImagePath,
                     Portfolio = portfolioPath,
                     Gender = (Gender)Enum.Parse(typeof(Gender), gender),
-                    YearsOfExperience = _registerDto.YearsOfExperience
+                    YearsOfExperience = _registerDto.YearsOfExperience,
+                    role=_registerDto.Role
+                    
 
                 };
 
@@ -88,6 +91,7 @@ namespace Service
 
             }
         }
+      
         public string CreatingUserName(string email)
         {
             return email.Split('@')[0].ToLower().Trim();

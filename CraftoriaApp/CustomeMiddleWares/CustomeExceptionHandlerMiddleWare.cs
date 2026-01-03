@@ -30,12 +30,12 @@ namespace CraftoriaApp.CustomeMiddleWares
             {
                 int statusCode = ex switch
                 {
-                    BadRequestException=>StatusCodes.Status400BadRequest,
+                    BadRequestException=> StatusCodes.Status400BadRequest,
                     UserAlreadyExistsException => StatusCodes.Status400BadRequest,
                     NotFoundException => StatusCodes.Status404NotFound,
                     UnauthorizedAException => StatusCodes.Status401Unauthorized,
                     InvalidException=>StatusCodes.Status422UnprocessableEntity,
-                    _ => StatusCodes.Status500InternalServerError
+                    _ => StatusCodes.Status400BadRequest
                 };
 
                 _logger.LogError(ex, "Something went wrong while processing.");

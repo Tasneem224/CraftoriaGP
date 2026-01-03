@@ -57,6 +57,10 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IDataSeeding, DataSeeding>();
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
+
+            if (string.IsNullOrWhiteSpace(cloudinaryUrl))
+                throw new Exception("Cloudinary configuration is missing");
+
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
