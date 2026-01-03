@@ -18,7 +18,6 @@ namespace Service
         public CloudinaryService(IConfiguration config)
         {
 
-
             var cloudinaryUrl = config["Cloudinary:CloudinaryUrl"];
             //var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
             //var cloudUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL");

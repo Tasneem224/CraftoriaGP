@@ -17,7 +17,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Service
 {
-    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,IMemoryCache cache) : IAuthenticationService
+    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService) : IAuthenticationService
     {
 
         public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
@@ -102,7 +102,6 @@ namespace Service
         {
             if (_registerDto.Role == RoleType.Expert)
             {
-
 
                 if (_registerDto.Portfolio is null)
                 {
