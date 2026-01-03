@@ -13,11 +13,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Service
 {
-    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService) : IAuthenticationService
+    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,IMemoryCache cache) : IAuthenticationService
     {
+
         public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
         {
             string? profileImagePath = null;
@@ -50,8 +52,8 @@ namespace Service
                     Portfolio = portfolioPath,
                     Gender = (Gender)Enum.Parse(typeof(Gender), gender),
                     YearsOfExperience = _registerDto.YearsOfExperience,
-                    role=_registerDto.Role
-                    
+                  
+
 
                 };
 
