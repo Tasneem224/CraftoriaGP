@@ -77,23 +77,24 @@ namespace Service
             }
             catch (Exception)
             {
-
-
-                if (profileImagePath is not null)
-                {
-                    _cloudinary.DeleteAsync(profileImagePath);
-                }
-
-                if (portfolioPath is not null)
-                {
-                    _cloudinary.DeleteAsync(portfolioPath);
-                }
+                exceptionConditionForProfileAndPortfolio(profileImagePath, portfolioPath);
 
                 throw;
 
             }
         }
-      
+        private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
+        {
+            if (profileImagePath is not null)
+            {
+                _cloudinary.DeleteAsync(profileImagePath);
+            }
+
+            if (portfolioPath is not null)
+            {
+                _cloudinary.DeleteAsync(portfolioPath);
+            }
+        }
         public string CreatingUserName(string email)
         {
             return email.Split('@')[0].ToLower().Trim();
@@ -141,7 +142,6 @@ namespace Service
 
 
         }
-
         public async Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
@@ -163,7 +163,6 @@ namespace Service
             }
             throw new UnauthorizedAException();
         }
-
         public async Task<string> ForgotPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -191,7 +190,6 @@ namespace Service
 
             return "OTP sent successfully.";
         }
-
         public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -204,7 +202,6 @@ namespace Service
 
             return false;
         }
-
         public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
