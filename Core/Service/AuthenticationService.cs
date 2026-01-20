@@ -52,6 +52,7 @@ namespace Service
                     Portfolio = portfolioPath,
                     Gender = (Gender)Enum.Parse(typeof(Gender), gender),
                     YearsOfExperience = _registerDto.YearsOfExperience,
+                    Specialization=_registerDto.Specialization
                   
 
 

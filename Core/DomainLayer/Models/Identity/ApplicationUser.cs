@@ -29,6 +29,7 @@ namespace DomainLayer.Models.Identity
         #region Expert_artisan
         public string? Portfolio { get; set; }
         public int? YearsOfExperience { get; set; }
+         
         #endregion
     }
 }
