@@ -32,6 +32,5 @@ namespace Shared.IdentityModule
         public int? YearsOfExperience { get; set; } = default;
         public IFormFile? ProfileImage { get; set; }
         public IFormFile? Portfolio { get; set; } = default;
-        public string? Specialization { get; set; } = default;
     }
 }
