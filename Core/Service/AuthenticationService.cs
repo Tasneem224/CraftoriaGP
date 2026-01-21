@@ -3,6 +3,7 @@
     using DomainLayer.Models.Identity;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
+
     using Microsoft.IdentityModel.Tokens;
     using ServiceAbstraction;
     using Shared.IdentityModule;
@@ -85,16 +86,8 @@
 
                 }
             }
+
             private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
-            {
-<<<<<<< HEAD
-                exceptionConditionForProfileAndPortfolio(profileImagePath, portfolioPath);
-
-                throw;
-
-            }
-        }
-        private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
         {
             if (profileImagePath is not null)
             {
@@ -106,27 +99,9 @@
                 _cloudinary.DeleteAsync(portfolioPath);
             }
         }
-        public string CreatingUserName(string email)
-        {
-            return email.Split('@')[0].ToLower().Trim();
-        }
-        private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
-        {
-            if (_registerDto.Role == RoleType.Expert)
-=======
-                if (profileImagePath is not null)
-                {
-                    _cloudinary.DeleteAsync(profileImagePath);
-                }
-
-                if (portfolioPath is not null)
-                {
-                    _cloudinary.DeleteAsync(portfolioPath);
-                }
-            }
+   
             public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
             private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
->>>>>>> send-Otp-while-registeration-to-check-email
             {
                 if (_registerDto.Role == RoleType.Expert)
                 {
@@ -143,60 +118,15 @@
             }
             private async Task<string> CreateTokenAsync(ApplicationUser user)
             {
-<<<<<<< HEAD
-
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim(ClaimTypes.Name,user.UserName!),
-                new Claim(ClaimTypes.NameIdentifier,user.Id!),
-            };
-            var roles = await _userManager.GetRolesAsync(user);
-            foreach (var role in roles)
-
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            var secretKey = _configuration.GetSection("JWTOptions")["secretKey"];
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWTOptions:issuer"],
-                audience: _configuration["JWTOptions:audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: creds
-                );
-            return new JwtSecurityTokenHandler().WriteToken(token);
-
-
-        }
-        public async Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto)
-        {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
-            if (user is null)
-            {
-                throw new UserNotFoundException(loginDto.Email);
-            }
-            //Check passwords match
-            var checkPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-            if (checkPassword)
-            {
-                return new ReturnUserDTO
-=======
                 var claims = new List<Claim>()
->>>>>>> send-Otp-while-registeration-to-check-email
                 {
 
                     new Claim(ClaimTypes.Email, user.Email!),
                     new Claim(ClaimTypes.Name,user.UserName!),
                     new Claim(ClaimTypes.NameIdentifier,user.Id!),
                 };
-<<<<<<< HEAD
-            }
-            throw new UnauthorizedAException();
-        }
-        public async Task<string> ForgotPasswordAsync(string email)
-=======
                 var roles = await _userManager.GetRolesAsync(user);
-                foreach (var role in roles)
+                    foreach (var role in roles)
 
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 var secretKey = _configuration.GetSection("JWTOptions")["secretKey"];
@@ -235,9 +165,7 @@
                 }
                 throw new UnauthorizedAException();
             }
-            public async Task<string> ForgotPasswordAsync(string email)
->>>>>>> send-Otp-while-registeration-to-check-email
-        {
+            public async Task<string> ForgotPasswordAsync(string email) { 
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -263,11 +191,8 @@
 
             return "OTP sent successfully.";
         }
-<<<<<<< HEAD
-        public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
-=======
+
             public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
->>>>>>> send-Otp-while-registeration-to-check-email
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) return false;
@@ -279,12 +204,8 @@
 
             return false;
         }
-<<<<<<< HEAD
         public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
-=======
-            public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
->>>>>>> send-Otp-while-registeration-to-check-email
-        {
+        { 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) throw new UserNotFoundException(model.Email);
 
