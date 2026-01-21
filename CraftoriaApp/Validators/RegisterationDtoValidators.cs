@@ -46,8 +46,7 @@ namespace CraftoriaApp.Validators
                  .Must((dto, exp) => dto.Role == RoleType.Expert || exp == null)
                  .WithMessage("Portfolio must be null for all roles except Expert");
 
-
-
+            
 
         }
     }
