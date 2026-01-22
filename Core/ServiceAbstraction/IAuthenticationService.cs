@@ -14,6 +14,7 @@ namespace ServiceAbstraction
         Task<string> ForgotPasswordAsync(string email);
         Task<bool> VerifyOtpAsync(VerifyOtpDto model);
         Task<string> ResetPasswordAsync(ResetPasswordDto model);
+        Task<string> VerifyEmailAsync(VerifyEmail email);
 
 
     }

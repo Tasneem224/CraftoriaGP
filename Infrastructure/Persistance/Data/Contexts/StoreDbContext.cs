@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Identity;
+﻿using DomainLayer.Models;
+using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ namespace Persistance.Data.Contexts
             builder.ApplyConfigurationsFromAssembly(typeof(ReferenceAssembly).Assembly);
 
         }
+        public DbSet<EmailVerificationCodes> EmailVerificationCodes { get; set; }
 
     }
 }

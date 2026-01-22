@@ -18,7 +18,7 @@
 
     namespace Service
     {
-        public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService) : IAuthenticationService
+        public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,) : IAuthenticationService
         {
 
             public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
@@ -86,7 +86,6 @@
 
                 }
             }
-
             private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
         {
             if (profileImagePath is not null)
@@ -99,7 +98,6 @@
                 _cloudinary.DeleteAsync(portfolioPath);
             }
         }
-   
             public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
             private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
             {
@@ -165,7 +163,8 @@
                 }
                 throw new UnauthorizedAException();
             }
-            public async Task<string> ForgotPasswordAsync(string email) { 
+            public async Task<string> ForgotPasswordAsync(string email)
+        {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -174,7 +173,7 @@
             }
 
             // Generate OTP
-            var otp = new Random().Next(100000, 999999).ToString();
+            string otp = GenerateOTP();
 
             // Update User Properties
             user.OtpCode = otp;
@@ -191,20 +190,7 @@
 
             return "OTP sent successfully.";
         }
-
-            public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
-        {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null) return false;
-
-            if (user.OtpCode == model.OtpCode && user.OtpExpiration > DateTime.UtcNow)
-            {
-                return true;
-            }
-
-            return false;
-        }
-        public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
+            public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
         { 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) throw new UserNotFoundException(model.Email);
@@ -236,6 +222,42 @@
 
                 return "Password has been reset";
             }
+            private static string GenerateOTP()=> new Random().Next(100000, 999999).ToString();
+            public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
+                 {
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+                    if (user == null) return false;
+
+                    if (user.OtpCode == model.OtpCode && user.OtpExpiration > DateTime.UtcNow)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+        public Task<string> VerifyEmailAsync(VerifyEmail email)
+        {
+
+            if (email is null)
+                throw new InvalidException("Email cannot be null.");
+            else
+            { 
+                
+                var otp=
+            
+            }
+                throw new NotImplementedException();
         }
+        //    public Task<string> VerifyEmailAsync(VerifyEmail email)
+        //    {
+        //        //if(email is null) 
+        //        //   return BadRequestException("Email cannot be null.");
+        //        //else
+        //        //{
+        //        //string 
+        //        //}
+        //}
+    }
 
     }
