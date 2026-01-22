@@ -210,6 +210,7 @@ namespace Service
                             return await _emailVerificationRepo.VerifyOtpAsync(emailOTP.Email, emailOTP.OtpCode);
             }
 
+
             private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
         {
             if (profileImagePath is not null)
