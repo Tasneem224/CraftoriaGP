@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shared.IdentityModule
 {
-    public class VerifyEmail
+    public class VerifyEmailDTO
     {
         [EmailAddress]
         public string Email { get; set; } = default!;

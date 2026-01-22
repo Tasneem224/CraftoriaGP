@@ -81,6 +81,19 @@ namespace Presentation
         }
 
 
+        [HttpPost("VerifyEmail")]
+        public async Task<IActionResult> VerifyEmail(VerifyEmailDTO verifyEmailDTO)
+        {
+           var verify= await _authenticationService.VerifyEmailAsync(verifyEmailDTO);
+            return SendSuccessResponse(verify, $"OTP is sent successfully to {verifyEmailDTO.Email} ,Check Your Email");
+        }
+        [HttpPost("CheckEmailOtp")]
+        public async Task<IActionResult> CheckEmailOtp(VerifyOtpDto verifyOtpDto)
+        {
+            var check=await _authenticationService.CheckEmailOTPAsync(verifyOtpDto);
+            return  SendSuccessResponse(check, $"Email Is verified successfully ");
+
+        }
 
     }
     

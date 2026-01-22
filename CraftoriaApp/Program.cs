@@ -50,7 +50,7 @@ namespace CraftoriaApp
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddFluentValidationClientsideAdapters();
-
+            builder.Services.AddScoped<IEmailVerificationCodeRepository, EmailVerificationCodeRepository>();
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();

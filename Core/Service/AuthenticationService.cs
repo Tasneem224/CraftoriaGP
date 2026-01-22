@@ -1,9 +1,10 @@
-﻿    using DomainLayer.Exceptions;
+﻿using DomainLayer.Contracts;
+    using DomainLayer.Exceptions;
     using DomainLayer.Exceptions.DomainLayer.Exceptions;
     using DomainLayer.Models.Identity;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
-
     using Microsoft.IdentityModel.Tokens;
     using ServiceAbstraction;
     using Shared.IdentityModule;
@@ -14,13 +15,13 @@
     using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Caching.Memory;
+using static System.Net.WebRequestMethods;
 
-    namespace Service
+namespace Service
     {
-        public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,) : IAuthenticationService
+        public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationRepo) : IAuthenticationService
         {
-
+          
             public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
             {
                 string? profileImagePath = null;
@@ -86,62 +87,6 @@
 
                 }
             }
-            private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
-        {
-            if (profileImagePath is not null)
-            {
-                _cloudinary.DeleteAsync(profileImagePath);
-            }
-
-            if (portfolioPath is not null)
-            {
-                _cloudinary.DeleteAsync(portfolioPath);
-            }
-        }
-            public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
-            private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
-            {
-                if (_registerDto.Role == RoleType.Expert)
-                {
-
-                    if (_registerDto.Portfolio is null)
-                    {
-                        throw new InvalidOperationExceptionCustome(new List<string> { "Expert registration requires Portfolio." });
-                    }
-
-                    portfolioPath = await _cloudinary.UploadAsync(_registerDto.Portfolio);
-                }
-
-                return (portfolioPath);
-            }
-            private async Task<string> CreateTokenAsync(ApplicationUser user)
-            {
-                var claims = new List<Claim>()
-                {
-
-                    new Claim(ClaimTypes.Email, user.Email!),
-                    new Claim(ClaimTypes.Name,user.UserName!),
-                    new Claim(ClaimTypes.NameIdentifier,user.Id!),
-                };
-                var roles = await _userManager.GetRolesAsync(user);
-                    foreach (var role in roles)
-
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                var secretKey = _configuration.GetSection("JWTOptions")["secretKey"];
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["JWTOptions:issuer"],
-                    audience: _configuration["JWTOptions:audience"],
-                    claims: claims,
-                    expires: DateTime.Now.AddHours(1),
-                    signingCredentials: creds
-                    );
-                return new JwtSecurityTokenHandler().WriteToken(token);
-
-
-            }
             public async Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto)
             {
                 var user = await _userManager.FindByEmailAsync(loginDto.Email);
@@ -173,7 +118,7 @@
             }
 
             // Generate OTP
-            string otp = GenerateOTP();
+            string otp = new Random().Next(100000, 999999).ToString();
 
             // Update User Properties
             user.OtpCode = otp;
@@ -222,7 +167,6 @@
 
                 return "Password has been reset";
             }
-            private static string GenerateOTP()=> new Random().Next(100000, 999999).ToString();
             public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
                  {
                     var user = await _userManager.FindByEmailAsync(model.Email);
@@ -235,29 +179,118 @@
 
                     return false;
                 }
+            public async Task<ReturnEmailOTP> VerifyEmailAsync(VerifyEmailDTO email)
+            {
+                if (email is null)
+                    throw new InvalidException("Email cannot be null.");
 
-        public Task<string> VerifyEmailAsync(VerifyEmail email)
-        {
+                await _emailVerificationRepo.MarkOldOtpsAsync(email.Email);
 
-            if (email is null)
-                throw new InvalidException("Email cannot be null.");
-            else
-            { 
-                
-                var otp=
-            
+                var otpGenerated = GenerateOTP();
+
+                await _emailVerificationRepo.CreateOtpAsync(email.Email, otpGenerated, DateTime.UtcNow.AddMinutes(5));
+
+                await SendOtpEmailAsync(email.Email, otpGenerated);
+
+                return new ReturnEmailOTP
+                {
+                    Email = email.Email,
+                    OtpCode = otpGenerated
+                };
             }
-                throw new NotImplementedException();
+            public async Task<bool> CheckEmailOTPAsync(VerifyOtpDto emailOTP)
+                {
+                    if(emailOTP.Email is null || emailOTP.OtpCode is null)
+                        throw new InvalidException("Email and OTP code cannot be null.");
+
+                            var activeOtp = await _emailVerificationRepo.GetActiveOtpByEmailAsync(emailOTP.Email);
+                            if (activeOtp is null)
+                                throw new InvalidException("OTP expired, used, or invalid. Please request a new one.");
+
+                            return await _emailVerificationRepo.VerifyOtpAsync(emailOTP.Email, emailOTP.OtpCode);
+            }
+
+            private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
+        {
+            if (profileImagePath is not null)
+            {
+                _cloudinary.DeleteAsync(profileImagePath);
+            }
+
+            if (portfolioPath is not null)
+            {
+                _cloudinary.DeleteAsync(portfolioPath);
+            }
         }
-        //    public Task<string> VerifyEmailAsync(VerifyEmail email)
-        //    {
-        //        //if(email is null) 
-        //        //   return BadRequestException("Email cannot be null.");
-        //        //else
-        //        //{
-        //        //string 
-        //        //}
-        //}
-    }
+            private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
+            {
+                if (_registerDto.Role == RoleType.Expert)
+                {
+
+                    if (_registerDto.Portfolio is null)
+                    {
+                        throw new InvalidOperationExceptionCustome(new List<string> { "Expert registration requires Portfolio." });
+                    }
+
+                    portfolioPath = await _cloudinary.UploadAsync(_registerDto.Portfolio);
+                }
+
+                return (portfolioPath);
+            }
+            private async Task<string> CreateTokenAsync(ApplicationUser user)
+            {
+                var claims = new List<Claim>()
+                {
+
+                    new Claim(ClaimTypes.Email, user.Email!),
+                    new Claim(ClaimTypes.Name,user.UserName!),
+                    new Claim(ClaimTypes.NameIdentifier,user.Id!),
+                };
+                var roles = await _userManager.GetRolesAsync(user);
+                    foreach (var role in roles)
+
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                var secretKey = _configuration.GetSection("JWTOptions")["secretKey"];
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["JWTOptions:issuer"],
+                    audience: _configuration["JWTOptions:audience"],
+                    claims: claims,
+                    expires: DateTime.Now.AddHours(1),
+                    signingCredentials: creds
+                    );
+                return new JwtSecurityTokenHandler().WriteToken(token);
+
+
+            }
+            private string BuildOtpEmailBody(   string otp)
+                                {
+                                    return $@"
+                        Hello,
+
+                        You requested to verify your email address for Craftoria App.
+
+                        Your One-Time Password (OTP) is: **{otp}**
+
+                        This OTP is valid for 10 minutes. Please do not share it with anyone.
+
+                        If you did not request this code, please ignore this email.
+
+                        Thank you,
+                        Craftoria Team
+                        ";
+                                }
+            private static string GenerateOTP()=> new Random().Next(100000, 999999).ToString();
+            private async Task SendOtpEmailAsync(string email, string otp)
+        {
+            var body = BuildOtpEmailBody(otp);
+            await _emailService.SendEmailAsync(email, "Email Verification OTP", body);
+        }
+            public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
+
 
     }
+
+}
