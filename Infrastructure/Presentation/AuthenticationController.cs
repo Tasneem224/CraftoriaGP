@@ -95,7 +95,20 @@ namespace Presentation
 
         }
 
-       
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto model)
+        {
+            // Validation
+            if (!ModelState.IsValid)
+                return SendErrorResponse("Validation failed", ModelState, 422);
+
+            // Call Service
+            var result = await _authenticationService.GoogleLoginAsync(model);
+
+            // Return Uniform Response
+            return SendSuccessResponse(result, "Google Login successful");
+        }
+
     }
-    
+
 }
