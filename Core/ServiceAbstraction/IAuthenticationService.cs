@@ -16,6 +16,8 @@ namespace ServiceAbstraction
         Task<string> ResetPasswordAsync(ResetPasswordDto model);
         Task<ReturnEmailOTP> VerifyEmailAsync(VerifyEmailDTO email);
         Task<bool> CheckEmailOTPAsync(VerifyOtpDto emailOTP);
+        Task<ReturnUserDTO> GoogleLoginAsync(GoogleLoginDto googleLoginDto);
+
 
     }
 }
