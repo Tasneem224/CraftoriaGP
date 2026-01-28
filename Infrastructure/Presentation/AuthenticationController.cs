@@ -96,7 +96,7 @@ namespace Presentation
         }
 
         [HttpPost("google-login")]
-        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto model)
+        public async Task<IActionResult> GoogleLogin( GoogleLoginDto model)
         {
             // Validation
             if (!ModelState.IsValid)
@@ -108,6 +108,20 @@ namespace Presentation
             // Return Uniform Response
             return SendSuccessResponse(result, "Google Login successful");
         }
+
+        [HttpPost("Expert-With-google")]
+        public async Task<IActionResult>ExpertWithGoolge(ExpertWithGoolgeDto infos)
+        {
+            // Validation
+            if (!ModelState.IsValid)
+                return SendErrorResponse("Validation failed", ModelState, 422);
+
+            await _authenticationService.ExpertWithGoolgeService(infos);
+            return Ok("Expert information saved successfully!😊😊😊😊");
+
+
+        }
+
 
     }
 

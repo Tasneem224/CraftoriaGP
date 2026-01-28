@@ -339,7 +339,8 @@ namespace Service
                 }
 
                 // بنديله Role افتراضي (مثلاً User)
-                await _userManager.AddToRoleAsync(user, googleLoginDto.Role);
+                string role = googleLoginDto.Role.ToString();
+                await _userManager.AddToRoleAsync(user, role);
             }
 
             // === الحالة ب: المستخدم موجود أصلاً (أو لسه عاملينه فوق) ===
@@ -357,8 +358,26 @@ namespace Service
             };
         }
 
+        public async Task ExpertWithGoolgeService(ExpertWithGoolgeDto infos)
+        {
+            var user = await _userManager.FindByEmailAsync(infos.Email);
+            if (user == null)
+            {
+                throw new UserNotFoundException(infos.Email);
+
+            }
+            var portfolioPath =await  _cloudinary.UploadAsync(infos.portfolio);
+            
+               user.Portfolio= portfolioPath;
+            user.YearsOfExperience = infos.YearsOfExp;
 
 
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+        }
     }
 
 }
