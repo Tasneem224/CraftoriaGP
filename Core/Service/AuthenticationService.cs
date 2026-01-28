@@ -292,6 +292,72 @@ namespace Service
         }
             public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
 
+        public async Task<ReturnUserDTO> GoogleLoginAsync(GoogleLoginDto googleLoginDto)
+        {
+            // 1. التجهيز: بنجيب كود التحقق بتاعنا من ملف الإعدادات
+            var settings = new GoogleJsonWebSignature.ValidationSettings()
+            {
+                Audience = new List<string> { _configuration["GoogleAuth:ClientId"] }
+            };
+
+            // 2. التحقق: بنكلم جوجل نتأكد إن التوكن سليم
+            // payload: دي النتيجة اللي راجعة من جوجل فيها (Email, Name, etc..)
+            var payload = await GoogleJsonWebSignature.ValidateAsync(googleLoginDto.IdToken, settings);
+
+            // 3. البحث: بنشوف هل اليوزر ده عندنا ولا لأ؟
+            var user = await _userManager.FindByEmailAsync(payload.Email);
+
+            // 4. القرار:
+            if (user == null)
+            {
+                // === الحالة أ: المستخدم ده جديد (مش موجود في الداتابيز) ===
+                // يبقى لازم نعمله "تسجيل" Register أوتوماتيك دلوقتي
+
+                // (استخدمت دالتك عشان نعمل يوزر نيم بنفس طريقتك)
+                var generatedUserName = CreatingUserName(payload.Email);
+
+                user = new ApplicationUser
+                {
+
+                    Email = payload.Email,
+                    UserName = generatedUserName, // ahmed.ali
+                    DisplayName = payload.Name,   // Ahmed Ali
+                    FirstName = payload.GivenName,
+                    SecondName = payload.FamilyName,
+                    Gender = Gender.Male,
+                    EmailConfirmed = true, // جوجل أكد الإيميل خلاص، مش محتاجين نبعتله OTP
+                                           // باقي البيانات ممكن تسيبيها فاضية أو بـ Default
+
+                };
+
+
+                var createResult = await _userManager.CreateAsync(user);
+
+                if (!createResult.Succeeded)
+                {
+                    throw new Exception("حصل مشكلة واحنا بنسجل اليوزر الجديد جاي من جوجل");
+                }
+
+                // بنديله Role افتراضي (مثلاً User)
+                await _userManager.AddToRoleAsync(user, googleLoginDto.Role);
+            }
+
+            // === الحالة ب: المستخدم موجود أصلاً (أو لسه عاملينه فوق) ===
+            // الخطوة النهائية: نطلعله التوكن بتاع Craftoria عشان يدخل يكمل شغل
+
+            // (استخدمت دالتك CreateTokenAsync عشان التوكن يبقى واحد في كل السيستم)
+            var jwtToken = await CreateTokenAsync(user);
+
+            // 5. الرد: بنرجع البيانات في الشكل اللي أنتي عاملاه (ReturnUserDTO)
+            return new ReturnUserDTO
+            {
+                Email = user.Email,
+                UserName = user.DisplayName, // أو user.UserName حسب ما تحبي تعرضي إيه
+                Token = jwtToken
+            };
+        }
+
+
 
     }
 
