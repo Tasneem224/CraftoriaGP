@@ -17,6 +17,5 @@ namespace ServiceAbstraction
         Task<ReturnEmailOTP> VerifyEmailAsync(VerifyEmailDTO email);
         Task<bool> CheckEmailOTPAsync(VerifyOtpDto emailOTP);
 
-
     }
 }
