@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Models.Items
 {
-    public abstract class Item
+    public abstract class Item:BaseEntity<int>
     {
-        public int Id { get; set; }
         public string Name { get; set; } = default!;
         public string? ImageUrl { get; set; } = default!;
 

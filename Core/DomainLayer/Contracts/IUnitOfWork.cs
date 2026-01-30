@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainLayer.Models.Items;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace DomainLayer.Contracts
 {
     public interface IUnitOfWork
     {
+        IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>;
 
         Task<int> SaveChanges();
 
