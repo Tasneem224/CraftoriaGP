@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Models.Categories
 {
-    public class Category
+    public class Category:BaseEntity<int>
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string image { get; set; } = string.Empty;
 
