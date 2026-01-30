@@ -33,7 +33,7 @@ namespace CraftoriaApp
             builder.Services.AddDbContext<StoreDbContext>(options =>
             {
                 options.UseSqlServer(
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("LocalConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),

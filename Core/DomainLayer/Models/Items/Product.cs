@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Identity;
+﻿using DomainLayer.Models.Categories;
+using DomainLayer.Models.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,10 +20,18 @@ namespace DomainLayer.Models.Items
         public ApplicationUser Seller { get; set; } = default!;
 
 
-       // [DisplayName("Category")]
-       // [ForeignKey("Category")]
-       //// public int CategoryId {  get; set; }
-       //// public Category Category { get; set; }
+        // [DisplayName("Category")]
+        // [ForeignKey("Category")]
+        //// public int CategoryId {  get; set; }
+        //// public Category Category { get; set; }
+        ///
+        [DisplayName("Category")]
+        [ForeignKey("Category")]
+         public int CategoryId {  get; set; }
+
+        [InverseProperty(nameof(Category.products))]
+        public Category category { get; set; } 
+
 
 
 

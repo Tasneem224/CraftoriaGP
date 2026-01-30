@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Models;
+using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +17,7 @@ namespace Persistance.Data.Contexts
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
