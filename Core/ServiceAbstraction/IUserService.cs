@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.CurrentUserDto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace ServiceAbstraction
 {
-    internal class IUserService
+    public interface IUserService
     {
+        Task<UserProfileDto> GetCurrentUserAsync();
+        Task<UserProfileDto> UpdateUserProfile(UpdateUserDto updateUserDto);
     }
 }
