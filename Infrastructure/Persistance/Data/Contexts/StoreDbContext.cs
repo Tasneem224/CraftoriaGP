@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models;
 using DomainLayer.Models.Identity;
+using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -29,6 +31,8 @@ namespace Persistance.Data.Contexts
             builder.ApplyConfigurationsFromAssembly(typeof(ReferenceAssembly).Assembly);
 
         }
+
+ 
         public DbSet<EmailVerificationCodes> EmailVerificationCodes { get; set; }
 
     }

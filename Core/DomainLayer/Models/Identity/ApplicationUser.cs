@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using DomainLayer.Models.Items;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,13 @@ namespace DomainLayer.Models.Identity
         #region Expert_artisan
         public string? Portfolio { get; set; }
         public int? YearsOfExperience { get; set; }
-         
+
         #endregion
+
+        // virtual for lazy loading
+        public virtual ICollection<Product>? Products { get; set; }
+
+
+
     }
 }
