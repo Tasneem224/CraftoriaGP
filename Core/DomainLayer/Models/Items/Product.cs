@@ -30,7 +30,7 @@ namespace DomainLayer.Models.Items
          public int CategoryId {  get; set; }
 
         [InverseProperty(nameof(Category.products))]
-        public Category category { get; set; } 
+        public Category category { get; set; } = default!;
 
 
 

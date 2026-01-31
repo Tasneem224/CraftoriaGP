@@ -1,121 +1,97 @@
 ﻿[
   {
-    "Id": 1,
     "Name": "Jewelry & Accessories",
     "image": ""
   },
   {
-    "Id": 2,
     "Name": "Clothing & Fashion",
     "image": ""
   },
   {
-    "Id": 3,
     "Name": "Bags & Wallets",
     "image": ""
   },
   {
-    "Id": 4,
     "Name": "Home Decor",
     "image": ""
   },
   {
-    "Id": 5,
     "Name": "Furniture & Woodwork",
     "image": ""
   },
   {
-    "Id": 6,
     "Name": "Pottery & Ceramics",
     "image": ""
   },
   {
-    "Id": 7,
     "Name": "Textiles & Fabric Crafts",
     "image": ""
   },
   {
-    "Id": 8,
     "Name": "Leather Products",
     "image": ""
   },
   {
-    "Id": 9,
     "Name": "Art & Paintings",
     "image": ""
   },
   {
-    "Id": 10,
     "Name": "Candles & Soaps",
     "image": ""
   },
   {
-    "Id": 11,
     "Name": "Paper Crafts & Stationery",
     "image": ""
   },
   {
-    "Id": 12,
     "Name": "Kids & Toys",
     "image": ""
   },
   {
-    "Id": 13,
     "Name": "Accessories & Gifts",
     "image": ""
   },
   {
-    "Id": 14,
     "Name": "Metal Crafts",
     "image": ""
   },
   {
-    "Id": 15,
     "Name": "Glass Crafts",
     "image": ""
   },
   {
-    "Id": 16,
     "name": "Resin Art",
     "image": ""
   },
   {
-    "Id": 17,
     "Name": "Handmade Cosmetics",
     "image": ""
   },
   {
-    "Id": 18,
     "Name": "Traditional & Cultural Crafts",
     "image": ""
   },
   {
-    "Id": 19,
     "Name": "Recycled & Eco Crafts",
     "image": ""
   },
   {
-    "Id": 20,
     "Name": "Seasonal & Event Crafts",
     "image": ""
   },
   {
-    "Id": 21,
     "Name": "Custom & Personalized Items",
     "image": ""
   },
   {
-    "Id": 22,
     "Name": "Religious & Spiritual Crafts",
     "image": ""
   },
   {
-    "Id": 23,
     "Name": "Handmade Kitchenware",
     "image": ""
   },
   {
-    "Id": 24,
     "Name": "Wall Art & Frames",
     "image": ""
   }

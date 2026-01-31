@@ -1,6 +1,7 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Models.Items;
 using Microsoft.EntityFrameworkCore;
+using Persistance.Data.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Persistance.Repositories
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork(StoreDbContext _dbContext) : IUnitOfWork
     {
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
         public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>

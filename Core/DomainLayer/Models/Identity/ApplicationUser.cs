@@ -35,7 +35,7 @@ namespace DomainLayer.Models.Identity
         #endregion
 
         // virtual for lazy loading
-        [InverseProperty(nameof(Product.))]
+        [InverseProperty(nameof(Product.Seller))]
         public virtual ICollection<Product>? Products { get; set; }
 
 
