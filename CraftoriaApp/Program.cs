@@ -46,6 +46,8 @@ namespace CraftoriaApp
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreDbContext>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+
 
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             builder.Services.AddFluentValidationAutoValidation();
@@ -55,6 +57,9 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddScoped<IDataSeeding, DataSeeding>();
+            builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
 
@@ -67,6 +72,11 @@ namespace CraftoriaApp
             {
                 var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeding>();
                 await seeder.IdentityDataSeedingAsync();
+            }
+            using (var scope = app.Services.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<ICategoriesSeeding>();
+                await seeder.CategoryDataSeedingAsync();
             }
 
             app.UseMiddleware<CustomeExceptionHandlerMiddleWare>();

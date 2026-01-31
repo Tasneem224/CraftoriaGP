@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistance.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Persistance.Data.Contexts;
 namespace Persistance.Identity.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    partial class StoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260130223923_AddCategoryTable")]
+    partial class AddCategoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,14 +198,10 @@ namespace Persistance.Identity.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -220,8 +219,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("SellerId");
 
@@ -272,12 +269,6 @@ namespace Persistance.Identity.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Items.Product", b =>
                 {
-                    b.HasOne("DomainLayer.Models.Categories.Category", "category")
-                        .WithMany("products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Seller")
                         .WithMany("Products")
                         .HasForeignKey("SellerId")
@@ -285,8 +276,6 @@ namespace Persistance.Identity.Migrations
                         .IsRequired();
 
                     b.Navigation("Seller");
-
-                    b.Navigation("category");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -302,11 +291,6 @@ namespace Persistance.Identity.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.Categories.Category", b =>
-                {
-                    b.Navigation("products");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Identity.ApplicationUser", b =>
