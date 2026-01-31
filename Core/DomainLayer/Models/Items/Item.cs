@@ -11,7 +11,7 @@ namespace DomainLayer.Models.Items
     public abstract class Item:BaseEntity<int>
     {
         public string Name { get; set; } = default!;
-        public string? ImageUrl { get; set; } = default!;
+        public string ImageUrl { get; set; } = default!;
 
         [Range(0, int.MaxValue)]
         public int? Quantity {  get; set; } = 0;
