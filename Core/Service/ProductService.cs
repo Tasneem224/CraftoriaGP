@@ -12,6 +12,7 @@ namespace Service
 {
     public class ProductService(UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
     {
+    
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
         {
             var productRepo = _unitOfWork.GetRepository<Product, int>();
@@ -227,5 +228,48 @@ namespace Service
             }
         }
 
+        public async Task<IEnumerable<ReturnProductDto>> GetAllProductsOfSpecifiUserAsync(string id)
+        {
+            var checkUser = await _userManager.FindByIdAsync(id);
+            if (checkUser is null)
+            {
+                throw new UserNotFoundException("this user is not found");
+
+            }
+            var user = await _userManager.FindByIdAsync(id);
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                if (role != RoleType.Beginner.ToString() && role != RoleType.Expert.ToString())
+                {
+                    throw new InvalidOperationException("role is not valid to do this operation");
+                }
+            }
+            var repo = _unitOfWork.GetRepository<Product, int>();
+            var query =await repo.GetAllAsync();
+            var products = query.Where(p => p.SellerId == id);
+
+            var categoryRepo = _unitOfWork.GetRepository<Category, int>();
+            var categories = await categoryRepo.GetAllAsync();
+
+            var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
+
+            return products.Select(p => new ReturnProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                Quantity = p.Quantity ?? 0,
+                Description = p.Description,
+                ImageUrl = p.ImageUrl,
+                CategoryId = p.CategoryId,
+                SellerId = p.SellerId,
+                CategoryName = categoriesDict.ContainsKey(p.CategoryId)
+                               ? categoriesDict[p.CategoryId]
+                               : "Unknown"
+            }).ToList();
+
+
+        }
     }
 }

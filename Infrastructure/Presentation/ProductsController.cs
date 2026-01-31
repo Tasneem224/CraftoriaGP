@@ -17,6 +17,12 @@ namespace Presentation.Controllers
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
+        [HttpPost("GetProductsOfSpecificUser")]
+        public async Task<IActionResult> GetProductsOfSpecificUser( string userId)
+        {
+            var products = await _productService.GetAllProductsOfSpecifiUserAsync(userId);
+            return Ok(products);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
