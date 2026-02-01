@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Models.Items;
+using DomainLayer.Models.RawMaterials;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,9 @@ namespace DomainLayer.Models.Identity
         // virtual for lazy loading
         [InverseProperty(nameof(Product.Seller))]
         public virtual ICollection<Product>? Products { get; set; }
+
+        [InverseProperty(nameof(RawMaterial.supplier))]
+        public virtual ICollection<RawMaterial>? rawMaterials { get; set; }
 
 
 
