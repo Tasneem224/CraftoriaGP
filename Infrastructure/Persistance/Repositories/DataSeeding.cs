@@ -18,11 +18,11 @@ namespace Persistance.Repositories
             {
                 if (_roleManager.Roles.Any() is false)
                 {
-                    //await _roleManager.CreateAsync(new IdentityRole("Admin"));
-                    //await _roleManager.CreateAsync(new IdentityRole("Customer"));
-                    //await _roleManager.CreateAsync(new IdentityRole("Supplier"));
-                    //await _roleManager.CreateAsync(new IdentityRole("Expert"));
-                    //await _roleManager.CreateAsync(new IdentityRole("Beginner"));
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                    await _roleManager.CreateAsync(new IdentityRole("Customer"));
+                    await _roleManager.CreateAsync(new IdentityRole("Supplier"));
+                    await _roleManager.CreateAsync(new IdentityRole("Expert"));
+                    await _roleManager.CreateAsync(new IdentityRole("Beginner"));
                 }
                 if (_userManager.Users.Any() is false)
                 {
