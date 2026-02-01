@@ -20,7 +20,7 @@ namespace Service
         }
         public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
-           var repo= _unitOfWork.GetRepository<Category, int>();
+           var repo= _unitOfWork.GetRepository<ProductCategory, int>();
               var categories=await repo.GetAllAsync();
             return categories.Select(c => new CategoryDto
             {

@@ -29,8 +29,8 @@ namespace DomainLayer.Models.Items
         [ForeignKey("Category")]
          public int CategoryId {  get; set; }
 
-        [InverseProperty(nameof(Category.products))]
-        public Category category { get; set; } = default!;
+        [InverseProperty(nameof(ProductCategory.products))]
+        public ProductCategory category { get; set; } = default!;
 
 
 

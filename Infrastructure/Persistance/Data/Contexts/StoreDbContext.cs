@@ -17,7 +17,7 @@ namespace Persistance.Data.Contexts
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Product> Products { get; set; }
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

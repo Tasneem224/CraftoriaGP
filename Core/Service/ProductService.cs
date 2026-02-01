@@ -18,7 +18,7 @@ namespace Service
             var productRepo = _unitOfWork.GetRepository<Product, int>();
             var products = await productRepo.GetAllAsync();
 
-            var categoryRepo = _unitOfWork.GetRepository<Category, int>();
+            var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var categories = await categoryRepo.GetAllAsync();
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
@@ -46,7 +46,7 @@ namespace Service
 
             if (product == null) return null;
 
-            var categoryRepo = _unitOfWork.GetRepository<Category, int>();
+            var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
 
             return new ReturnProductDto
@@ -111,7 +111,7 @@ namespace Service
             await _unitOfWork.SaveChanges();
 
             // 4. Get Category Name for response
-            var categoryRepo = _unitOfWork.GetRepository<Category, int>();
+            var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
 
             return new ReturnProductDto
@@ -170,7 +170,7 @@ namespace Service
             repo.Update(product);
             await _unitOfWork.SaveChanges();
 
-            var categoryRepo = _unitOfWork.GetRepository<Category, int>();
+            var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
 
             return new ReturnProductDto
@@ -249,7 +249,7 @@ namespace Service
             var query =await repo.GetAllAsync();
             var products = query.Where(p => p.SellerId == id);
 
-            var categoryRepo = _unitOfWork.GetRepository<Category, int>();
+            var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var categories = await categoryRepo.GetAllAsync();
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);

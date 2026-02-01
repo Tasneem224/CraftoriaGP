@@ -30,11 +30,11 @@ namespace Persistance.Repositories
 
             try
             {
-                if (!_storeDbContext.Categories.Any())
+                if (!_storeDbContext.ProductCategories.Any())
                 {
 
                  
-                    if (!_storeDbContext.Categories.AsNoTracking().Any())
+                    if (!_storeDbContext.ProductCategories.AsNoTracking().Any())
                     {
                         string filePath = Path.Combine(
                         AppContext.BaseDirectory,
@@ -43,11 +43,11 @@ namespace Persistance.Repositories
                     );
 
                         string categoryJson = File.ReadAllText(filePath);
-                        List<Category>? categories = JsonConvert.DeserializeObject<List<Category>>(categoryJson);
+                        List<ProductCategory>? categories = JsonConvert.DeserializeObject<List<ProductCategory>>(categoryJson);
 
                         if (categories != null && categories.Any())
                         {
-                            await _storeDbContext.Categories.AddRangeAsync(categories);
+                            await _storeDbContext.ProductCategories.AddRangeAsync(categories);
                             await _storeDbContext.SaveChangesAsync();
                         }
                     }

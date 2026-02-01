@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Models.Categories
 {
-    public class Category:BaseEntity<int>
+    public class ProductCategory:BaseEntity<int>
     {
         public string Name { get; set; } = string.Empty;
         public string image { get; set; } = string.Empty;
