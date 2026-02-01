@@ -31,8 +31,10 @@ namespace CraftoriaApp
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<StoreDbContext>(options =>
+
             {
                 options.UseSqlServer(
+
                     builder.Configuration.GetConnectionString("LocalConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
