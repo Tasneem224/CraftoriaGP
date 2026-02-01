@@ -18,7 +18,7 @@ namespace Service
             _unitOfWork = unitOfWork;
         
         }
-        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<CategoryDto>> GetAllProductCategoriesAsync()
         {
            var repo= _unitOfWork.GetRepository<ProductCategory, int>();
               var categories=await repo.GetAllAsync();
@@ -27,6 +27,42 @@ namespace Service
                 Id=c.Id,
                 Name=c.Name,
                 image=c.image
+            });
+        }
+
+        public async Task<IEnumerable<CategoryDto>> GetAllProductCategoriesByIdAsync(int id)
+        {
+            var repo =_unitOfWork.GetRepository<ProductCategory, int>();
+            var categories =await repo.GetAllAsync();
+            var specificCategories = categories.Where(i => i.Id == id);
+            return specificCategories.Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                image = c.image
+            });
+        }
+        public async Task<IEnumerable<CategoryDto>> GetAllMaterialsCategoriesAsync()
+        {
+           var repo= _unitOfWork.GetRepository<Raw_Category_Material, int>();
+              var categories=await repo.GetAllAsync();
+            return categories.Select(c => new CategoryDto
+            {
+                Id=c.Id,
+                Name=c.Name,
+                image=c.image
+            });
+        }
+        public async Task<IEnumerable<CategoryDto>> GetAllMaterialsCategoriesByIdAsync(int id)
+        {
+            var repo =_unitOfWork.GetRepository<Raw_Category_Material, int>();
+            var categories =await repo.GetAllAsync();
+            var specificCategories = categories.Where(i => i.Id == id);
+            return specificCategories.Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                image = c.image
             });
         }
     }

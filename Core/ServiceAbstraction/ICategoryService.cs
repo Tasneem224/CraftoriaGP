@@ -9,6 +9,9 @@ namespace ServiceAbstraction
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
+        Task<IEnumerable<CategoryDto>> GetAllProductCategoriesAsync();
+        Task<IEnumerable<CategoryDto>> GetAllProductCategoriesByIdAsync(int id);
+        Task<IEnumerable<CategoryDto>> GetAllMaterialsCategoriesAsync();
+        Task<IEnumerable<CategoryDto>> GetAllMaterialsCategoriesByIdAsync(int id);
     }
 }

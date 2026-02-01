@@ -18,11 +18,12 @@ namespace Presentation
 
             _categoryService = categoryService;
         }
-        [HttpGet]
-        public async Task<IActionResult> GetAllCategories()
-        {
-           var result=  await   _categoryService.GetAllCategoriesAsync();
-            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAllCategories()
+        //{
+        //   var result=  await   _categoryService.GetAllProductCategoriesAsync();
+        //    return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+        //}
+
     }
 }

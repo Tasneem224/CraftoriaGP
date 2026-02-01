@@ -5,7 +5,7 @@
 namespace Persistance.Identity.Migrations
 {
     /// <inheritdoc />
-    public partial class changeCategoryToProductCategoryTable : Migration
+    public partial class solveconflicts : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,6 +31,20 @@ namespace Persistance.Identity.Migrations
                     table.PrimaryKey("PK_ProductCategories", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RawMaterialCategories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    image = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RawMaterialCategories", x => x.Id);
+                });
+
             migrationBuilder.AddForeignKey(
                 name: "FK_Products_ProductCategories_CategoryId",
                 table: "Products",
@@ -49,6 +63,9 @@ namespace Persistance.Identity.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProductCategories");
+
+            migrationBuilder.DropTable(
+                name: "RawMaterialCategories");
 
             migrationBuilder.CreateTable(
                 name: "Categories",

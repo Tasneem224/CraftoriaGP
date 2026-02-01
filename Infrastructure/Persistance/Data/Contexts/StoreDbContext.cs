@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models;
 using DomainLayer.Models.Categories;
+using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +19,7 @@ namespace Persistance.Data.Contexts
     {
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<Raw_Category_Material> RawMaterialCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

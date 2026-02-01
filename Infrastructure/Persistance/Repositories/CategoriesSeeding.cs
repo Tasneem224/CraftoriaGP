@@ -25,7 +25,7 @@ namespace Persistance.Repositories
             _env = env;
         }
 
-        public async Task CategoryDataSeedingAsync()
+        public async Task ProductCategoryDataSeedingAsync()
         {
 
             try
@@ -52,6 +52,39 @@ namespace Persistance.Repositories
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Error seeding categories: {ex.Message}");
+            }
+
+        }
+
+        public async Task RawMaterialsCategoryDataSeedingAsync()
+        {
+            try
+            {
+
+
+                    if (!_storeDbContext.RawMaterialCategories.AsNoTracking().Any())
+                    {
+                        string filePath = Path.Combine(
+                        AppContext.BaseDirectory,
+                        "Seeding data Files",
+                        "Raw_Material_Categories.data.json"
+                    );
+
+                        string categoryJson = File.ReadAllText(filePath);
+                        List<Raw_Category_Material>? categories = JsonConvert.DeserializeObject<List<Raw_Category_Material>>(categoryJson);
+
+                        if (categories != null && categories.Any())
+                        {
+                            await _storeDbContext.RawMaterialCategories.AddRangeAsync(categories);
+                            await _storeDbContext.SaveChangesAsync();
+                        }
+                    }
+                
             }
             catch (Exception ex)
             {

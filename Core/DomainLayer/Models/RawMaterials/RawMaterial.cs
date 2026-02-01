@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Identity;
+﻿using DomainLayer.Models.Categories;
+using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,11 @@ namespace DomainLayer.Models.RawMaterials
 
         [ForeignKey(nameof(supplierId))]
         public ApplicationUser supplier { get; set; } = default!;
+
+
+        public int CategoryId { get; set; }
+        [ForeignKey(nameof(CategoryId))]
+        public Raw_Category_Material Category { get; set; } = default!;
 
     }
 }

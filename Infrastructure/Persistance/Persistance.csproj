@@ -8,10 +8,14 @@
 
   <ItemGroup>
     <None Remove="Seeding data Files\categories.data.json" />
+    <None Remove="Seeding data Files\Raw_Material_Categories.data.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Seeding data Files\categories.data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Seeding data Files\Raw_Material_Categories.data.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

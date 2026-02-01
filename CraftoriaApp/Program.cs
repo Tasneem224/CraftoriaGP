@@ -76,7 +76,8 @@ namespace CraftoriaApp
             using (var scope = app.Services.CreateScope())
             {
                 var seeder = scope.ServiceProvider.GetRequiredService<ICategoriesSeeding>();
-                await seeder.CategoryDataSeedingAsync();
+                await seeder.ProductCategoryDataSeedingAsync();
+                await seeder.RawMaterialsCategoryDataSeedingAsync();
             }
 
             app.UseMiddleware<CustomeExceptionHandlerMiddleWare>();

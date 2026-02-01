@@ -43,6 +43,27 @@ namespace Persistance.Identity.Migrations
                     b.ToTable("ProductCategories");
                 });
 
+            modelBuilder.Entity("DomainLayer.Models.Categories.Raw_Category_Material", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RawMaterialCategories");
+                });
+
             modelBuilder.Entity("DomainLayer.Models.EmailVerificationCodes", b =>
                 {
                     b.Property<int>("Id")
@@ -308,7 +329,7 @@ namespace Persistance.Identity.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Items.Product", b =>
                 {
-                    b.HasOne("DomainLayer.Models.Categories.ProductCategory", "category")
+                    b.HasOne("DomainLayer.Models.Categories.ProductCategory", "Category")
                         .WithMany("products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -320,9 +341,9 @@ namespace Persistance.Identity.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Seller");
+                    b.Navigation("Category");
 
-                    b.Navigation("category");
+                    b.Navigation("Seller");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.RawMaterials.RawMaterial", b =>

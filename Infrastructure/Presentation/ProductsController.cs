@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Service;
 using ServiceAbstraction;
+using Shared.Category;
 using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
-    public class ProductsController(IProductService _productService) : BaseApiController
+    public class ProductsController(IProductService _productService, ICategoryService _categoryService) : BaseApiController
     {
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -18,7 +20,7 @@ namespace Presentation.Controllers
             return Ok(products);
         }
         [HttpPost("GetProductsOfSpecificUser")]
-        public async Task<IActionResult> GetProductsOfSpecificUser( string userId)
+        public async Task<IActionResult> GetProductsOfSpecificUser(string userId)
         {
             var products = await _productService.GetAllProductsOfSpecifiUserAsync(userId);
             return Ok(products);
@@ -35,9 +37,9 @@ namespace Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);            
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await _productService.AddProductAsync(dto,dto.SellerId);
+            var result = await _productService.AddProductAsync(dto, dto.SellerId);
             return Ok(new { message = "Created Successfully", data = result });
         }
 
@@ -69,6 +71,21 @@ namespace Presentation.Controllers
 
             return Ok(new { message = "Deleted Successfully" });
         }
+        [HttpGet("GetAllProductCategories")]
+        public async Task<IActionResult> GetAllProductCategories()
+        {
+            var result = await _categoryService.GetAllProductCategoriesAsync();
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+        }
 
+      
+        [HttpPost("GetAllProductCategoriesById")]
+        public async Task<IActionResult> GetAllProductCategoriesById(int id)
+        {
+            var result = await _categoryService.GetAllProductCategoriesByIdAsync(id);
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+
+        }
+       
     }
 }

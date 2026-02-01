@@ -8,6 +8,7 @@ namespace DomainLayer.Contracts
 {
     public interface ICategoriesSeeding
     {
-        Task CategoryDataSeedingAsync();
+        Task ProductCategoryDataSeedingAsync();
+        Task RawMaterialsCategoryDataSeedingAsync();
     }
 }
