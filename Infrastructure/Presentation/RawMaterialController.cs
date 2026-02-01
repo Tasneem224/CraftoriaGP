@@ -1,0 +1,90 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Presentation.Controllers;
+using Service;
+using ServiceAbstraction;
+using Shared.Category;
+using Shared.ProductModule;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Presentation
+{
+    public class RawMaterialController(IRawMaterialServices _materialService, ICategoryService _categoryService):BaseApiController
+    {
+        [HttpGet]
+        public async Task<IActionResult> GetAllMaterials()
+        {
+            var products = await _materialService.GetAllMaterialsAsync();
+            return Ok(products);
+        }
+        [HttpPost("GetRawMaterialOfSpecificUser")]
+        public async Task<IActionResult> GetAllMaterialsOfSpecifiUser(string userId)
+        {
+            var products = await _materialService.GetAllMaterialsOfSpecifiUserAsync(userId);
+            return Ok(products);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var product = await _materialService.GetMaterialsByIdAsync(id);
+            if (product == null) return NotFound(new { message = "Raw Material not found" });
+            return Ok(product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = await _materialService.AddMaterialsAsync(dto, dto.SellerId);
+            return Ok(new { message = "Created Successfully", data = result });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+
+            try
+            {
+                var result = await _materialService.UpdateMaterialsAsync(id, dto);
+                if (result == null) return NotFound(new { message = "Raw Material not found" });
+
+                return Ok(new { message = "Updated Successfully", data = result });
+            }
+            catch (System.Exception ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _materialService.DeleteMaterialsAsync(id);
+            if (!success) return NotFound("Product not found");
+
+            return Ok(new { message = "Deleted Successfully" });
+        }
+        [HttpGet("GetAllRawMaterialCategories")]
+        public async Task<IActionResult> GetAllMaterialsCategories()
+        {
+            var result = await _categoryService.GetAllMaterialsCategoriesAsync();
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+        }
+
+
+        [HttpPost("GetAllRawMaterialsCategoriesById")]
+        public async Task<IActionResult> GetAllMaterialsCategoriesById(int id)
+        {
+            var result = await _categoryService.GetAllMaterialsCategoriesByIdAsync(id);
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+
+        }
+    }
+}

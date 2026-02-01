@@ -212,7 +212,7 @@ namespace Service
             };
         }
 
-        public async Task<ReturnProductDto> UpdateMaterialsAsync(int id, UpdateProductDto dataFromRequest, string sellerId)
+        public async Task<ReturnProductDto> UpdateMaterialsAsync(int id, UpdateProductDto dataFromRequest)
         {
             var MaterialsRepo = _unitOfWork.GetRepository<RawMaterial, int>();
             var Materials = await MaterialsRepo.GetByIdAsync(id);
@@ -265,6 +265,8 @@ namespace Service
                 CategoryName = category != null ? category.Name : "Unknown"
             };
         }
+
+   
         private string GetPublicIdFromUrl(string url)
         {
             try
