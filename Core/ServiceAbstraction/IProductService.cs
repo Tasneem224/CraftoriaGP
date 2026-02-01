@@ -14,7 +14,7 @@ namespace ServiceAbstraction
 
         Task<ReturnProductDto> GetProductByIdAsync(int id);
         Task<ReturnProductDto> AddProductAsync(CreateProductDto dto, string sellerId);
-        Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dto, string sellerId);
+        Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dto);
         Task<bool> DeleteProductAsync(int id);
 
     }

@@ -128,7 +128,7 @@ namespace Service
             };
         }
 
-        public async Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dataFromRequest, string sellerId)
+        public async Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dataFromRequest)
         {
             var repo = _unitOfWork.GetRepository<Product, int>();
             var product = await repo.GetByIdAsync(id);

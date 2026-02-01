@@ -48,11 +48,10 @@ namespace Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var userId = "test-user-id";
 
             try
             {
-                var result = await _productService.UpdateProductAsync(id, dto, userId);
+                var result = await _productService.UpdateProductAsync(id, dto);
                 if (result == null) return NotFound(new { message = "Product not found" });
 
                 return Ok(new { message = "Updated Successfully", data = result });
