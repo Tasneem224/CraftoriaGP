@@ -49,6 +49,7 @@ namespace CraftoriaApp
                 .AddEntityFrameworkStores<StoreDbContext>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IRawMaterialServices, RawMaterialServices>();
 
 
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
