@@ -157,7 +157,7 @@ namespace Service
             var roles = await _userManager.GetRolesAsync(user);
             foreach (var role in roles)
             {
-                if (role != RoleType.Beginner.ToString() && role != RoleType.Expert.ToString())
+                if (role != RoleType.Supplier.ToString())
                 {
                     throw new InvalidOperationException("role is not valid to do this operation");
                 }
