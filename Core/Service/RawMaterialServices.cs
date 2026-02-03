@@ -74,8 +74,9 @@ namespace Service
 
 
             await _unitOfWork.GetRepository<RawMaterial, int>().AddAsync(product);
-            await _unitOfWork.SaveChanges();
-
+          
+                await _unitOfWork.SaveChanges();
+           
             // 4. Get Category Name for response
             var categoryRepo = _unitOfWork.GetRepository<Raw_Category_Material, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
