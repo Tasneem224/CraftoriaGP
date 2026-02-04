@@ -78,7 +78,7 @@ namespace Presentation.Controllers
         }
 
       
-        [HttpPost("GetAllProductCategoriesById")]
+        [HttpGet("GetAllProductCategoriesById")]
         public async Task<IActionResult> GetAllProductCategoriesById(int id)
         {
             var result = await _categoryService.GetAllProductCategoriesByIdAsync(id);

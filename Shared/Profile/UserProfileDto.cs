@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.IdentityModule;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ namespace Shared.Profile
         public string Email { get; set; } = default!;
 
         public string? ProfileImage { get; set; } = default!;
+        public RoleType roleType { get; set; }
         public string? Bio { get; set; } = default!;
         public string? Specialization { get; set; } = default!;
     }

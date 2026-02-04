@@ -3,6 +3,7 @@ using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
+using Shared.IdentityModule;
 using Shared.Profile;
 using System;
 using System.Collections.Generic;
@@ -36,9 +37,14 @@ namespace Service
 
             if (string.IsNullOrEmpty(userId))
                 throw new UnauthorizedAccessException("Invalid token");
+
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
                 throw new UserNotFoundException("User not found");
+
+            // ⭐ جلب roles
+            var roles = await _userManager.GetRolesAsync(user);
 
             return new UserProfileDto
             {
@@ -49,10 +55,15 @@ namespace Service
                 Email = user.Email,
                 ProfileImage = user.ProfileImage,
                 Bio = user.Bio,
-                Specialization = user.Specialization
-            };
+                Specialization = user.Specialization,
 
+                // ⭐ تحويل role إلى enum
+                roleType = roles.Any()
+                    ? Enum.Parse<RoleType>(roles.First())
+                    : RoleType.Customer
+            };
         }
+
         public async Task<UserProfileDto> UpdateUserProfile(UpdateUserDto updateUserDto)
         {
             var userId = _httpContextAccessor.HttpContext?
