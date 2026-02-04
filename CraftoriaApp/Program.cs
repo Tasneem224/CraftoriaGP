@@ -6,13 +6,16 @@ using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
 using Service;
 using ServiceAbstraction;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CraftoriaApp
@@ -63,6 +66,23 @@ namespace CraftoriaApp
             builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+               options.TokenValidationParameters = new TokenValidationParameters
+               {
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ValidateIssuerSigningKey = true,
+
+                   ValidIssuer = builder.Configuration["JWTOptions:issuer"],
+                   ValidAudience = builder.Configuration["JWTOptions:audience"],
+
+                   IssuerSigningKey = new SymmetricSecurityKey(
+                       Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
+               };
+            });
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
 
@@ -103,6 +123,7 @@ namespace CraftoriaApp
             }
                 app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

@@ -257,9 +257,6 @@ namespace Persistance.Identity.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -282,8 +279,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("supplierId");
 
@@ -353,19 +348,11 @@ namespace Persistance.Identity.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.RawMaterials.RawMaterial", b =>
                 {
-                    b.HasOne("DomainLayer.Models.Categories.Raw_Category_Material", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "supplier")
                         .WithMany("rawMaterials")
                         .HasForeignKey("supplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Category");
 
                     b.Navigation("supplier");
                 });
