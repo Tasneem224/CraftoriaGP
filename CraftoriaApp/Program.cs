@@ -38,7 +38,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("LocalConnection"),
+                    builder.Configuration.GetConnectionString("Connection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -65,6 +65,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IDataSeeding, DataSeeding>();
             builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
