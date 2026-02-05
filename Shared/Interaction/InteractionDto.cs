@@ -12,9 +12,9 @@ namespace Shared.Interaction
     {
         public string UserId { get; set; } = default!;
         public string TargetId { get; set; } = default!;
-        public InteractionTargetType TargetType { get; set; }
+        public InteractionTargetType2 TargetType { get; set; }
         public short? Rating { get; set; }
         public string? Review { get; set; }
-        public bool IsFavourite { get; set; }
+        public bool? IsFavourite { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Models.Interaction
 {
-    public enum InteractionTargetType
+    public enum InteractionTargetType2
     {
         Product = 1,
         User = 2

@@ -13,6 +13,6 @@ namespace Shared.Interaction
         public string NameUser { get; set; } = default!;
         public string NameProduct { get; set; } = default!;
         public string Review { get; set; } = default!;
-        public short Range { get; set; }
+        public short? Rating { get; set; }
     }
 }

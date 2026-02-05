@@ -17,6 +17,17 @@ namespace Persistance.Repositories
         {
             _DbContext = storeDbContext;
         }
+        public async Task<int> GetReviewCountAsync(string targetId, InteractionTargetType type)
+        {
+            return await _DbContext.UserInteractions
+                .Where(x =>
+                    x.TargetId == targetId &&
+                    x.TargetType == type &&
+                    x.Review != null
+                )
+                .CountAsync();
+        }
+
         public async Task AddAsync(UserInteraction interaction)
         {
            await _DbContext.UserInteractions.AddAsync(interaction);
@@ -56,5 +67,20 @@ namespace Persistance.Repositories
 
             _DbContext.UserInteractions.Update(interaction);
         }
+
+        public async Task<double> GetAverageRatingAsync(string targetId, InteractionTargetType type)
+        {
+            var query = _DbContext.UserInteractions
+                .Where(x =>
+                    x.TargetId == targetId &&
+                    x.TargetType == type &&
+                    x.Rating.HasValue
+                );
+
+            return await query.AnyAsync()
+                ? await query.AverageAsync(x => (double)x.Rating!)
+                : 0;
+        }
+
     }
 }

@@ -10,8 +10,10 @@ namespace ServiceAbstraction
 {
     public interface IInteractionService
     {
+        Task<double> GetAverageRatingAsync(string targetId, InteractionTargetType2 type);
         Task<InteractionResultDto> AddOrUpdateAsync(InteractionDto dto);
-        Task<bool> DeleteAsync(string userId, string targetId, InteractionTargetType type);
-        Task<IEnumerable<InteractionResultDto>> GetAllAsync(string targetId, InteractionTargetType type);
+        Task<int> GetReviewCountAsync(string targetId, InteractionTargetType2 type);
+        Task<bool> DeleteAsync(string userId, string targetId, InteractionTargetType2 type);
+        Task<IEnumerable<InteractionResultDto>> GetAllAsync(string targetId, InteractionTargetType2 type);
     }
 }
