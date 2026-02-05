@@ -19,6 +19,13 @@ namespace DomainLayer.Contracts
         Task<IEnumerable<UserInteraction>> GetReviewsByTargetUserIdAsync(string targetUserId);
 
 
+        Task<int> GetTotalCountByProductIdAsync(int productId);
+        Task<double> GetAverageRatingByProductIdAsync(int productId);
+
+        Task<int> GetTotalCountByRawMaterialIdAsync(int rawMaterialId);
+        Task<double> GetAverageRatingByRawMaterialIdAsync(int rawMaterialId);
+
+
         Task<int> GetTotalInteractionsCountForUserAsync(string userId);
         Task<double> GetAverageRatingForUserAsync(string userId);
     }

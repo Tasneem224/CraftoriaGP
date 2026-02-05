@@ -19,16 +19,6 @@ namespace Persistance.Repositories
         {
             _context = context;
         }
-        public async Task<double> GetAverageRatingForUserAsync(string userId)
-        {
-            var query = _context.UserInteractions.Where(x =>
-                x.TargetUserId == userId ||
-                (x.Product != null && x.Product.SellerId == userId) ||
-                (x.RawMaterial != null && x.RawMaterial.supplierId == userId));
-
-            if (!await query.AnyAsync()) return 0.0;
-            return await query.AverageAsync(x => (double)x.Rating);
-        }
 
         public async Task<UserInteraction?> GetByProductAsync(string userId, int productId)
                    => await _context.UserInteractions.FirstOrDefaultAsync(x => x.UserId == userId && x.ProductId == productId);
@@ -66,6 +56,35 @@ namespace Persistance.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> GetTotalCountByProductIdAsync(int productId)
+        {
+            return await _context.UserInteractions
+                .CountAsync(x => x.ProductId == productId);
+        }
+        public async Task<double> GetAverageRatingByProductIdAsync(int productId)
+        {
+            var query = _context.UserInteractions.Where(x => x.ProductId == productId);
+
+            if (!await query.AnyAsync()) return 0.0; // لو مفيش تقييمات رجع صفر
+
+            return await query.AverageAsync(x => (double)x.Rating);
+
+        }
+
+        public async Task<int> GetTotalCountByRawMaterialIdAsync(int rawMaterialId)
+        {
+            return await _context.UserInteractions
+                .CountAsync(x => x.RawMaterialId == rawMaterialId);
+        }
+        public async Task<double> GetAverageRatingByRawMaterialIdAsync(int rawMaterialId)
+        {
+            var query = _context.UserInteractions.Where(x => x.RawMaterialId == rawMaterialId);
+
+            if (!await query.AnyAsync()) return 0.0;
+
+            return await query.AverageAsync(x => (double)x.Rating);
+        }
+
         public async Task<int> GetTotalInteractionsCountForUserAsync(string userId)
         {
             return await _context.UserInteractions.CountAsync(x =>
@@ -73,5 +92,16 @@ namespace Persistance.Repositories
                 (x.Product != null && x.Product.SellerId == userId) ||
                 (x.RawMaterial != null && x.RawMaterial.supplierId == userId));
         }
+        public async Task<double> GetAverageRatingForUserAsync(string userId)
+        {
+            var query = _context.UserInteractions.Where(x =>
+                x.TargetUserId == userId ||
+                (x.Product != null && x.Product.SellerId == userId) ||
+                (x.RawMaterial != null && x.RawMaterial.supplierId == userId));
+
+            if (!await query.AnyAsync()) return 0.0;
+            return await query.AverageAsync(x => (double)x.Rating);
+        }
+
     }
 }

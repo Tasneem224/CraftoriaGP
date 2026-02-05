@@ -13,10 +13,12 @@ namespace Persistance.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly StoreDbContext _dbContext;
+        public IUserInteractionRepository UserInteractions { get; }
 
         public UnitOfWork(StoreDbContext context)
         {
             _dbContext = context;
+            UserInteractions = new UserInteractionRepository(context);
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
 
