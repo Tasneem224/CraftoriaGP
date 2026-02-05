@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Service;
 using ServiceAbstraction;
 using Shared.Category;
@@ -6,6 +7,7 @@ using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,7 +44,17 @@ namespace Presentation.Controllers
             var result = await _productService.AddProductAsync(dto, dto.SellerId);
             return Ok(new { message = "Created Successfully", data = result });
         }
+        [HttpGet("my-products-count")]
+        [Authorize] 
+        public async Task<IActionResult> GetMyProductsCount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var count = await _productService.GetProductsCountByUserIdAsync(userId);
+            return Ok(new { totalProducts = count });
+        }
         [HttpPut("UpdateProduct")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
         {

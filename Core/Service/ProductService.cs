@@ -271,5 +271,21 @@ namespace Service
 
 
         }
+
+        public async Task<int> GetProductsCountByUserIdAsync(string userId)
+        {
+            // 1. التأكد من وجود المستخدم (اختياري حسب رغبتك)
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new UserNotFoundException("this user is not found");
+            }
+
+            // 2. الحصول على الـ Repository وعمل Count للمنتجات الخاصة بهذا المستخدم
+            var repo = _unitOfWork.GetRepository<Product, int>();
+            var query = await repo.GetAllAsync();
+
+            return query.Count(p => p.SellerId == userId);
+        }
     }
 }

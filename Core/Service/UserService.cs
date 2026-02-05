@@ -56,6 +56,7 @@ namespace Service
                 ProfileImage = user.ProfileImage,
                 Bio = user.Bio,
                 Specialization = user.Specialization,
+                YearOfExperience=user.YearsOfExperience,
 
                 // ⭐ تحويل role إلى enum
                 roleType = roles.Any()

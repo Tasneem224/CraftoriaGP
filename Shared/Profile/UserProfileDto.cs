@@ -15,7 +15,7 @@ namespace Shared.Profile
         public string SecondName { get; set; } = default!;
         public string UserName { get; set; } = default!;
         public string Email { get; set; } = default!;
-
+        public int? YearOfExperience { get; set; } = default!;
         public string? ProfileImage { get; set; } = default!;
         public RoleType roleType { get; set; }
         public string? Bio { get; set; } = default!;
