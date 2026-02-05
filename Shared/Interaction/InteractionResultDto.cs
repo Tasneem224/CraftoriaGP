@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Shared.Interaction
 {
-    public class ReturnInteractionDto<T>
+    public class InteractionResultDto
     {
         public string USerId { get; set; } = default!;
-        public T ItemOrUserId { get; set; } = default!;
+        public string ItemOrUserId { get; set; } = default!;
         public string NameUser { get; set; } = default!;
         public string NameProduct { get; set; } = default!;
         public string Review { get; set; } = default!;

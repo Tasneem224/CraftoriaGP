@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainLayer.Models.Interaction;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,11 +8,13 @@ using System.Threading.Tasks;
 namespace Shared.Interaction
 {
 
-    public class InteractionDto<T>
+    public class InteractionDto
     {
         public string UserId { get; set; } = default!;
-        public T ItemOrUserId { get; set; } = default!;
-        public short? Range { get; set; }
+        public string TargetId { get; set; } = default!;
+        public InteractionTargetType TargetType { get; set; }
+        public short? Rating { get; set; }
         public string? Review { get; set; }
+        public bool IsFavourite { get; set; }
     }
 }
