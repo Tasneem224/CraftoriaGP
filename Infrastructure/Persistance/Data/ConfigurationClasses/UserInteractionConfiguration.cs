@@ -9,32 +9,33 @@ using System.Threading.Tasks;
 
 namespace Persistance.Data.ConfigurationClasses
 {
-    internal class UserInteractionConfiguration 
+    internal class UserInteractionConfiguration : IEntityTypeConfiguration<UserInteraction>
     {
-        //public void Configure(EntityTypeBuilder<UserInteraction> builder)
-        //{
-        //    builder.HasKey(x => x.Id);
+        public void Configure(EntityTypeBuilder<UserInteraction> builder)
+        {
+            builder.HasIndex(u => new { u.UserId, u.ProductId })
+                   .IsUnique()
+                   .HasFilter("[ProductId] IS NOT NULL");
 
-        //    builder.Property(x => x.UserId)
-        //           .IsRequired();
-            
 
-        //    builder.Property(x => x.TargetId)
-        //           .IsRequired();
 
-        //    builder.Property(x => x.TargetType)
-        //           .IsRequired();
+           builder.HasIndex(u => new { u.UserId, u.RawMaterialId })
+                   .IsUnique()
+                   .HasFilter("[RawMaterialId] IS NOT NULL");
 
-        //    builder.HasIndex(x => new
-        //    {
-        //        x.UserId,
-        //        x.TargetId,
-        //        x.TargetType
-        //    })
-        //    .IsUnique();
+            builder.HasIndex(u => new { u.UserId, u.TargetUserId })
+                      .IsUnique()
+                      .HasFilter("[TargetUserId] IS NOT NULL");
+            builder.HasOne(u => u.Product)
+                   .WithMany(p => p.Interactions)
+                   .HasForeignKey(u => u.ProductId);
 
-        //    builder.Property(x => x.InteractionDate)
-        //           .HasDefaultValueSql("GETUTCDATE()");
-        //}
+            builder.HasOne(u => u.RawMaterial)
+                   .WithMany(r => r.Interactions)
+                   .HasForeignKey(u => u.RawMaterialId);
+
+
+
+        }
     }
 }
