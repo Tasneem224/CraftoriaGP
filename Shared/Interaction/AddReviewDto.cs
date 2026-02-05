@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Shared.Interaction
         public string? TargetUserId { get; set; }
 
         [Range(1, 5)]
-        public short Rating { get; set; }
+        public short? Rating { get; set; } = default!;
         public string? Review { get; set; }
     }
 }

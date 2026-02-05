@@ -23,7 +23,7 @@ namespace Presentation
 
         [Authorize]
         [HttpPost("AddOrUpdateReview")]
-        public async Task<IActionResult> AddOrUpdateReview([FromBody] AddReviewDto dto)
+        public async Task<IActionResult> AddOrUpdateReview( AddReviewDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

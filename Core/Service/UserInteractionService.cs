@@ -51,8 +51,9 @@ namespace Service
                 };
 
                 await _unitOfWork.UserInteractions.AddAsync(interaction);
-                
+                 
             }
+            await _unitOfWork.SaveChanges();
             var user = await _userManager.FindByIdAsync(userId);
             string reviewerName = user?.UserName ?? "Unknown User";
             return new ReviewDto
@@ -149,7 +150,7 @@ namespace Service
             return new ReviewStatsDto
             {
                 TotalReviews = count,
-                AverageRating = Math.Round(average, 1)
+                AverageRating = average
             };
         }
         public async Task<ReviewStatsDto> GetRawMaterialStatsAsync(int rawMaterialId)

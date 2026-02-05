@@ -65,7 +65,7 @@ namespace Persistance.Repositories
         {
             var query = _context.UserInteractions.Where(x => x.ProductId == productId);
 
-            if (!await query.AnyAsync()) return 0.0; // لو مفيش تقييمات رجع صفر
+            if (!await query.AnyAsync()) return 0.0;
 
             return await query.AverageAsync(x => (double)x.Rating);
 
