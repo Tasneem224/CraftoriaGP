@@ -9,7 +9,7 @@ namespace ServiceAbstraction
 {
     public interface IUserInteractionService
     {
-        Task AddOrUpdateReviewAsync(string userId, AddReviewDto dto);
+        Task<ReviewDto> AddOrUpdateReviewAsync(string userId, AddReviewDto dto);
         Task DeleteReviewAsync(int reviewId, string userId);
         Task<List<ReviewDto>> GetProductReviewsAsync(int productId);
         Task<List<ReviewDto>> GetRawMaterialReviewsAsync(int rawMaterialId);

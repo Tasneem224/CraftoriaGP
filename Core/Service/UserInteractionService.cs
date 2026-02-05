@@ -1,5 +1,7 @@
 ﻿using DomainLayer.Contracts;
+using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
+using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
 using Shared.Interaction;
 using System;
@@ -13,13 +15,15 @@ namespace Service
     public class UserInteractionService : IUserInteractionService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserInteractionService(IUnitOfWork unitOfWork)
+        public UserInteractionService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
-        public async Task AddOrUpdateReviewAsync(string userId, AddReviewDto dto)
+        public async Task<ReviewDto> AddOrUpdateReviewAsync(string userId, AddReviewDto dto)
         {
             UserInteraction? interaction = null;
 
@@ -47,7 +51,21 @@ namespace Service
                 };
 
                 await _unitOfWork.UserInteractions.AddAsync(interaction);
+                
             }
+            var user = await _userManager.FindByIdAsync(userId);
+            string reviewerName = user?.UserName ?? "Unknown User";
+            return new ReviewDto
+            {
+                InteractionId = interaction.Id, 
+                ReviewerId = userId,
+                ReviewerName = reviewerName,
+                Rating = interaction.Rating ?? 0,
+                ReviewComment = interaction.Review,
+                CreatedAt = interaction.InteractionDate
+
+
+            };
         }
 
         private async Task<UserInteraction?> checkIfThereIsAnyReviewBefore(string userId, AddReviewDto dto, UserInteraction? interaction)
