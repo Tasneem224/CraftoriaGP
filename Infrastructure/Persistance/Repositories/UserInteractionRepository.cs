@@ -1,0 +1,52 @@
+﻿using DomainLayer.Contracts;
+using DomainLayer.Models.Interaction;
+using Microsoft.EntityFrameworkCore;
+using Persistance.Data.Contexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Persistance.Repositories
+{
+    internal class UserInteractionRepository : IUserInteractionRepository
+    {
+        private readonly StoreDbContext _DbContext;
+        public UserInteractionRepository(StoreDbContext storeDbContext)
+        {
+            _DbContext = storeDbContext;
+        }
+        public async Task AddAsync(UserInteraction interaction)
+        {
+           await _DbContext.UserInteractions.AddAsync(interaction);
+        }
+
+        public async Task<UserInteraction?> GetAsync(string userId, string targetId, InteractionTargetType targetType)
+        {
+            return await _DbContext.UserInteractions.
+                 FirstOrDefaultAsync(x =>
+                 x.UserId == userId &&
+                 x.TargetId == targetId &&
+                 x.TargetType == targetType
+
+         
+                );
+        }
+
+        public async Task<IEnumerable<UserInteraction>> GetReviewsAsync(string targetId, InteractionTargetType targetType)
+        {
+            return await _DbContext.UserInteractions.
+                           Where(x =>
+                           x.TargetId == targetId
+                           && x.TargetType == targetType
+                           && x.Review != null
+                           ).ToListAsync();
+        }
+
+        public void Remove(UserInteraction interaction)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

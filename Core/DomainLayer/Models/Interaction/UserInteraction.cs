@@ -15,7 +15,7 @@ namespace DomainLayer.Models.Interaction
         public string UserId { get; set; } = default!;
         public ApplicationUser User { get; set; } = default!;
 
-        public int TargetId { get; set; }
+        public string TargetId { get; set; }= default!;
         public InteractionTargetType TargetType { get; set; }
 
         public bool? IsFavourite { get; set; }
