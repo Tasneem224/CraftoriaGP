@@ -8,7 +8,7 @@ namespace DomainLayer.Models.Interaction
 {
     public enum InteractionTargetType2
     {
-        Product = 1,
+        ITem = 1,
         User = 2
     }
 }

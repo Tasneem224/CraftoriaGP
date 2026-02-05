@@ -51,9 +51,9 @@ namespace Persistance.Identity.Migrations
                 column: "CategoryId",
                 principalTable: "ProductCategories",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
-
+            
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {

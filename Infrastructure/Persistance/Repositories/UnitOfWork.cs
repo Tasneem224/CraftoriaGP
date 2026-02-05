@@ -12,13 +12,11 @@ namespace Persistance.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly StoreDbContext _context;
-        public IUserInteractionRepository UserInteractions { get; }
+        private readonly StoreDbContext _dbContext;
 
         public UnitOfWork(StoreDbContext context)
         {
-            _context = context;
-            UserInteractions = new UserInteractionRepository(context);
+            _dbContext = context;
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
 
@@ -29,9 +27,7 @@ namespace Persistance.Repositories
             var typeName = typeof(TEntity).Name;
             if (_repositories.ContainsKey(typeName))
                 return (IGenericRepository<TEntity, TKey>)_repositories[typeName];
-            //create repo object
             var repo = new GenericRepository<TEntity, TKey>(_dbContext);
-            //store Refernce from Repo object
             _repositories[typeName] = repo;
             return (repo);
         }

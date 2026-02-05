@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Items;
+﻿using DomainLayer.Models.Interaction;
+using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -36,13 +37,20 @@ namespace DomainLayer.Models.Identity
         #endregion
 
         // virtual for lazy loading
+
         [InverseProperty(nameof(Product.Seller))]
         public virtual ICollection<Product>? Products { get; set; }
 
         [InverseProperty(nameof(RawMaterial.supplier))]
         public virtual ICollection<RawMaterial>? rawMaterials { get; set; }
 
+        //(Reviewer)
+        [InverseProperty(nameof(UserInteraction.User))]
+        public ICollection<UserInteraction> WrittenReviews { get; set; }
 
+        // 2. (Seller Reviews)
+        [InverseProperty(nameof(UserInteraction.TargetUser))]
+        public ICollection<UserInteraction> ReceivedReviews { get; set; }   
 
     }
 }

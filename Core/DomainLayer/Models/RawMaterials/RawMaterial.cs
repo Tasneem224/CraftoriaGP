@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
+using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace DomainLayer.Models.RawMaterials
         public int CategoryId { get; set; }
         [ForeignKey(nameof(CategoryId))]
         public Raw_Category_Material Category { get; set; } = default!;
+
+        public ICollection<UserInteraction> Interactions { get; set; } = new List<UserInteraction>();
 
     }
 }

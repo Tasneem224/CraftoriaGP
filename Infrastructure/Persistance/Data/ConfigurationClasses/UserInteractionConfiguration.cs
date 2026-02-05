@@ -9,32 +9,32 @@ using System.Threading.Tasks;
 
 namespace Persistance.Data.ConfigurationClasses
 {
-    internal class UserInteractionConfiguration : IEntityTypeConfiguration<UserInteraction>
+    internal class UserInteractionConfiguration 
     {
-        public void Configure(EntityTypeBuilder<UserInteraction> builder)
-        {
-            builder.HasKey(x => x.Id);
+        //public void Configure(EntityTypeBuilder<UserInteraction> builder)
+        //{
+        //    builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.UserId)
-                   .IsRequired();
+        //    builder.Property(x => x.UserId)
+        //           .IsRequired();
             
 
-            builder.Property(x => x.TargetId)
-                   .IsRequired();
+        //    builder.Property(x => x.TargetId)
+        //           .IsRequired();
 
-            builder.Property(x => x.TargetType)
-                   .IsRequired();
+        //    builder.Property(x => x.TargetType)
+        //           .IsRequired();
 
-            builder.HasIndex(x => new
-            {
-                x.UserId,
-                x.TargetId,
-                x.TargetType
-            })
-            .IsUnique();
+        //    builder.HasIndex(x => new
+        //    {
+        //        x.UserId,
+        //        x.TargetId,
+        //        x.TargetType
+        //    })
+        //    .IsUnique();
 
-            builder.Property(x => x.InteractionDate)
-                   .HasDefaultValueSql("GETUTCDATE()");
-        }
+        //    builder.Property(x => x.InteractionDate)
+        //           .HasDefaultValueSql("GETUTCDATE()");
+        //}
     }
 }

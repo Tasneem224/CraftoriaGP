@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
+using DomainLayer.Models.Interaction;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,6 +32,8 @@ namespace DomainLayer.Models.Items
 
         public ProductCategory Category { get; set; } = default!;
 
+
+        public ICollection<UserInteraction> Interactions { get; set; } = new List<UserInteraction>();
 
 
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainLayer.Models.Interaction;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,9 +21,9 @@ namespace DomainLayer.Models.Items
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price {  get; set; }  =default!;
         public string? Description { get; set; } = default!;
-        
+    
 
 
-        
+
     }
 }

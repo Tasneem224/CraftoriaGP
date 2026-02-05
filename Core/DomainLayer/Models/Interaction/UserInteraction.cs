@@ -1,4 +1,6 @@
 ﻿using DomainLayer.Models.Identity;
+using DomainLayer.Models.Items;
+using DomainLayer.Models.RawMaterials;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,8 +19,19 @@ namespace DomainLayer.Models.Interaction
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; } = default!;
 
-        public string TargetId { get; set; }= default!;
-        public InteractionTargetType TargetType { get; set; }
+        public int? ProductId { get; set; }
+        [ForeignKey(nameof(ProductId))]
+        public Product? Product { get; set; }
+
+
+        public int? RawMaterialId { get; set; }
+        [ForeignKey(nameof(RawMaterialId))]
+        public RawMaterial? RawMaterial { get; set; }
+
+        public string? TargetUserId { get; set; } 
+
+        [ForeignKey(nameof(TargetUserId))]
+        public ApplicationUser? TargetUser { get; set; }
 
         public bool? IsFavourite { get; set; }
 
