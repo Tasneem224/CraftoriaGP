@@ -11,9 +11,8 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Models.Interaction
 {
-    public class UserInteraction
+    public class UserInteraction:BaseEntity<int>
     {
-        public int Id { get; set; }
 
         public string UserId { get; set; } = default!;
         [ForeignKey(nameof(UserId))]
