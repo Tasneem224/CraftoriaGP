@@ -66,6 +66,8 @@ namespace CraftoriaApp
             builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserInteractionRepository, UserInteractionRepository>();
+            builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

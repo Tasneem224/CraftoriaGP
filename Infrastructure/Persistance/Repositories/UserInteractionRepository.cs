@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Persistance.Repositories
 {
-    internal class UserInteractionRepository : GenericRepository<UserInteraction, int>, IUserInteractionRepository
+    public class UserInteractionRepository : GenericRepository<UserInteraction, int>, IUserInteractionRepository
     {
         private readonly StoreDbContext _context;
 
