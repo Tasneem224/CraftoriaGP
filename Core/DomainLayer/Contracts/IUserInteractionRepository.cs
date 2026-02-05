@@ -9,16 +9,13 @@ namespace DomainLayer.Contracts
 {
     public interface IUserInteractionRepository
     {
-        Task<UserInteraction?> GetAsync(
-        string userId,
-        string targetId,
-        InteractionTargetType targetType);
+        Task<UserInteraction?> GetAsync(string userId,string targetId,InteractionTargetType targetType);
 
-        Task<IEnumerable<UserInteraction>> GetReviewsAsync(
-            string targetId,
-            InteractionTargetType targetType);
+        Task<IEnumerable<UserInteraction>> GetAllForTargetAsync(string targetId, InteractionTargetType targetType);
+
 
         Task AddAsync(UserInteraction interaction);
+        void Update(UserInteraction interaction);
 
         void Remove(UserInteraction interaction);
 

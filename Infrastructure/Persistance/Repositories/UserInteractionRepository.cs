@@ -22,31 +22,39 @@ namespace Persistance.Repositories
            await _DbContext.UserInteractions.AddAsync(interaction);
         }
 
+        public async Task<IEnumerable<UserInteraction>> GetAllForTargetAsync(string targetId, InteractionTargetType targetType)
+        {
+            return await _DbContext.UserInteractions.
+                                    Where(x =>
+                                    x.TargetId == targetId
+                                    && x.TargetType == targetType
+                                    && x.Review != null
+                                    ).ToListAsync();
+        }
+
         public async Task<UserInteraction?> GetAsync(string userId, string targetId, InteractionTargetType targetType)
         {
             return await _DbContext.UserInteractions.
                  FirstOrDefaultAsync(x =>
                  x.UserId == userId &&
                  x.TargetId == targetId &&
-                 x.TargetType == targetType
+                 x.TargetType == targetType&&
+                 x.Review != null
 
          
                 );
         }
 
-        public async Task<IEnumerable<UserInteraction>> GetReviewsAsync(string targetId, InteractionTargetType targetType)
-        {
-            return await _DbContext.UserInteractions.
-                           Where(x =>
-                           x.TargetId == targetId
-                           && x.TargetType == targetType
-                           && x.Review != null
-                           ).ToListAsync();
-        }
-
         public void Remove(UserInteraction interaction)
         {
-            throw new NotImplementedException();
+
+            _DbContext.UserInteractions.Remove(interaction);
+        }
+
+        public void Update(UserInteraction interaction)
+        {
+
+            _DbContext.UserInteractions.Update(interaction);
         }
     }
 }

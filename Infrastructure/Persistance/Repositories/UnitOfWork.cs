@@ -10,9 +10,19 @@ using System.Threading.Tasks;
 
 namespace Persistance.Repositories
 {
-    public class UnitOfWork(StoreDbContext _dbContext) : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
+        private readonly StoreDbContext _context;
+        public IUserInteractionRepository UserInteractions { get; }
+
+        public UnitOfWork(StoreDbContext context)
+        {
+            _context = context;
+            UserInteractions = new UserInteractionRepository(context);
+        }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
+
+
         public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>
         {
 

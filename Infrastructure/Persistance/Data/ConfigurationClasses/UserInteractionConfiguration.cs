@@ -17,6 +17,7 @@ namespace Persistance.Data.ConfigurationClasses
 
             builder.Property(x => x.UserId)
                    .IsRequired();
+            
 
             builder.Property(x => x.TargetId)
                    .IsRequired();
