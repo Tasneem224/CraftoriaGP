@@ -213,6 +213,20 @@ namespace Service
             };
         }
 
+        public async Task<int> GetMaterialsCountByUserIdAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new UserNotFoundException("this user is not found");
+            }
+
+            // 2. الحصول على الـ Repository وعمل Count للمنتجات الخاصة بهذا المستخدم
+            var repo = _unitOfWork.GetRepository<RawMaterial, int>();
+            var query = await repo.GetAllAsync();
+
+            return query.Count(p => p.supplierId == userId);
+        }
         public async Task<ReturnProductDto> UpdateMaterialsAsync(int id, UpdateProductDto dataFromRequest)
         {
             var MaterialsRepo = _unitOfWork.GetRepository<RawMaterial, int>();
@@ -266,8 +280,6 @@ namespace Service
                 CategoryName = category != null ? category.Name : "Unknown"
             };
         }
-
-   
         private string GetPublicIdFromUrl(string url)
         {
             try

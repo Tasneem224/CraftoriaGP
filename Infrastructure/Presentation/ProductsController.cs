@@ -55,6 +55,7 @@ namespace Presentation.Controllers
             var count = await _productService.GetProductsCountByUserIdAsync(userId);
             return Ok(new { totalProducts = count });
         }
+
         [HttpPut("UpdateProduct")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
         {

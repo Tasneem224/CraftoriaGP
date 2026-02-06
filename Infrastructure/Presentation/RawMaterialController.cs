@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using Service;
 using ServiceAbstraction;
@@ -7,6 +8,7 @@ using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +16,18 @@ namespace Presentation
 {
     public class RawMaterialController(IRawMaterialServices _materialService, ICategoryService _categoryService):BaseApiController
     {
+        [HttpGet("my-Material-count")]
+        [Authorize]
+        public async Task<IActionResult> GetMyMAterialsCount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var count = await _materialService.GetMaterialsCountByUserIdAsync(userId);
+            return Ok(new { totalRawMaterial = count });
+        }
+
         [HttpGet("GetAllMaterials")]
         public async Task<IActionResult> GetAllMaterials()
         {

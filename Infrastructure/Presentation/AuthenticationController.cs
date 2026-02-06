@@ -9,13 +9,13 @@ namespace Presentation
     public class AuthenticationController(IServiceManager _serviceManager, IAuthenticationService _authenticationService) : BaseApiController
     {
         [HttpPost("Register")]
-        public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
-        {
+                public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
+                {
 
             
-                var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
-                return SendSuccessResponse(user, "Registration successful");
-        }
+                        var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
+                        return SendSuccessResponse(user, "Registration successful");
+                }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)

@@ -12,7 +12,7 @@ namespace Shared.IdentityModule
 
     public enum RoleType
     {
-        [EnumMember(Value = "Beginner")]
+        [EnumMember(Value = "   ")]
         Beginner = 1,
         [EnumMember(Value = "Customer")]
         Customer = 2,
