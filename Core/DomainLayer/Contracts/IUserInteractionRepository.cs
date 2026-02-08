@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Models.Interaction;
+using DomainLayer.Models.TopRated;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,5 +29,8 @@ namespace DomainLayer.Contracts
 
         Task<int> GetTotalInteractionsCountForUserAsync(string userId);
         Task<double> GetAverageRatingForUserAsync(string userId);
+        // الدوال الجديدة بترجع Stat مش Dto
+        Task<List<TopRatedStat>> GetTopProductStatsAsync(int count);
+        Task<List<TopRatedStat>> GetTopSellerStatsAsync(int count);
     }
 }

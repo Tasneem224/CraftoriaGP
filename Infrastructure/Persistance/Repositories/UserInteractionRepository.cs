@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Models.Interaction;
+using DomainLayer.Models.TopRated;
 using Google;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data.Contexts;
@@ -101,6 +102,38 @@ namespace Persistance.Repositories
 
             if (!await query.AnyAsync()) return 0.0;
             return await query.AverageAsync(x => (double)x.Rating);
+        }
+
+        public async Task<List<TopRatedStat>> GetTopProductStatsAsync(int count)
+        {
+            return await _context.UserInteractions
+                .Where(x => x.ProductId != null && x.Rating.HasValue)
+                .GroupBy(x => x.ProductId)
+                .Select(g => new TopRatedStat
+                {
+                    ProductId = g.Key.Value, // Product Id
+                    AverageRating = g.Average(x => x.Rating.Value),
+                    ReviewCount = g.Count()
+                })
+                .OrderByDescending(x => x.AverageRating)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<List<TopRatedStat>> GetTopSellerStatsAsync(int count)
+        {
+            return await _context.UserInteractions
+                .Where(x => x.TargetUserId != null && x.Rating.HasValue)
+                .GroupBy(x => x.TargetUserId)
+                .Select(g => new TopRatedStat
+                {
+                    SellerId = g.Key, // Seller Id
+                    AverageRating = g.Average(x => x.Rating.Value),
+                    ReviewCount = g.Count()
+                })
+                .OrderByDescending(x => x.AverageRating)
+                .Take(count)
+                .ToListAsync();
         }
 
     }
