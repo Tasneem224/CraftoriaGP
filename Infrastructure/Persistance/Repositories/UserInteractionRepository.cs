@@ -136,5 +136,25 @@ namespace Persistance.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<TopRatedStat>> GetTopRawMaterialStatsAsync(int count)
+        {
+            return await _context.UserInteractions
+                .Where(x => x.RawMaterialId != null && x.Rating.HasValue) // هات اللي تبع المواد الخام بس
+                .GroupBy(x => x.RawMaterialId)
+                .Select(g => new TopRatedStat
+                {
+                    RawMaterialId = g.Key.Value,      // خزن الـ ID هنا
+                    AverageRating = g.Average(x => x.Rating.Value),
+                    ReviewCount = g.Count(),
+
+                    // الباقي بيبقى null اوتوماتيك
+                })
+                .OrderByDescending(x => x.AverageRating)
+                .Take(count)
+                .ToListAsync();
+        }
+
+
+
     }
 }

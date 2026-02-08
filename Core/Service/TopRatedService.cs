@@ -1,6 +1,7 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.RawMaterials;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
 using Shared.TopRated;
@@ -36,7 +37,7 @@ namespace Service
 
             foreach (var stat in stats)
             {
-                var product = await productRepo.GetByIdAsync(stat.ProductId);
+                var product = await productRepo.GetByIdAsync(stat.ProductId.Value);
 
                 if (product != null)
                 {
@@ -89,5 +90,42 @@ namespace Service
             }
             return result;
         }
+
+        public async Task<List<TopRawMaterialsDto>> GetTopRawMaterialsAsync(int count = 5)
+        {
+            // 1. نجيب الإحصائيات الخاصة بالمواد الخام
+            var stats = await _unitOfWork.UserInteractions.GetTopRawMaterialStatsAsync(count);
+
+            var result = new List<TopRawMaterialsDto>();
+
+            // 2. نجيب Repository المواد الخام
+            var materialRepo = _unitOfWork.GetRepository<RawMaterial, int>();
+
+            foreach (var stat in stats)
+            {
+                // نتأكد إن الـ ID مش بـ null قبل ما ندور
+                if (stat.RawMaterialId.HasValue)
+                {
+                    var material = await materialRepo.GetByIdAsync(stat.RawMaterialId.Value);
+
+                    if (material != null)
+                    {
+                        result.Add(new TopRawMaterialsDto
+                        {
+                            Id = material.Id,
+                            Name = material.Name,
+                            ImageUrl = material.ImageUrl,
+                            Price = material.Price,
+                            AverageRating = Math.Round(stat.AverageRating, 1),
+                            ReviewCount = stat.ReviewCount
+                        });
+                    }
+                }
+            }
+            return result;
+        }
+
+
     }
+
 }

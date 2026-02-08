@@ -38,6 +38,12 @@ namespace Presentation
             var result = await _topRatedService.GetTopSellersAsync(count);
             return Ok(result);
         }
+        [HttpGet("top-raw-materials")]
+        public async Task<IActionResult> GetTopRawMaterials([FromQuery] int count = 5)
+        {
+            var result = await _topRatedService.GetTopRawMaterialsAsync(count);
+            return Ok(result);
+        }
 
     }
 }

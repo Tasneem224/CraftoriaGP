@@ -11,5 +11,6 @@ namespace ServiceAbstraction
     {
         Task<List<TopProductsDto>> GetTopProductsAsync(int count = 5);
         Task<List<TopSellersDto>> GetTopSellersAsync(int count = 5);
+        Task<List<TopRawMaterialsDto>> GetTopRawMaterialsAsync(int count);
     }
 }

@@ -32,5 +32,6 @@ namespace DomainLayer.Contracts
         // الدوال الجديدة بترجع Stat مش Dto
         Task<List<TopRatedStat>> GetTopProductStatsAsync(int count);
         Task<List<TopRatedStat>> GetTopSellerStatsAsync(int count);
+        Task<List<TopRatedStat>> GetTopRawMaterialStatsAsync(int count);
     }
 }
