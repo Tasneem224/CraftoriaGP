@@ -53,6 +53,8 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IRawMaterialServices, RawMaterialServices>();
+            builder.Services.AddScoped<IFavouriteService, FavouriteService>();
+
 
 
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
