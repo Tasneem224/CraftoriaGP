@@ -274,23 +274,59 @@ namespace Service
 
 
             }
-            private string BuildOtpEmailBody(   string otp)
-                                {
-                                    return $@"
-                        Hello,
+            private string BuildOtpEmailBody(string otp)
+        {
+            return $@"
+    <div style='background-color:#f5efe6; padding:40px 0; font-family:Arial, sans-serif;'>
+        <div style='max-width:500px; margin:auto; background:#ffffff; 
+                    padding:30px; border-radius:12px; 
+                    box-shadow:0 4px 15px rgba(0,0,0,0.05);'>
 
-                        You requested to verify your email address for Craftoria App.
+            <h2 style='color:#8b5e3c; text-align:center; margin-bottom:5px;'>
+                Craftoria
+            </h2>
+            <p style='text-align:center; color:#a67c52; margin-top:0;'>
+                Email Verification
+            </p>
 
-                        Your One-Time Password (OTP) is: **{otp}**
+            <p style='color:#5c4033;'>Hello,</p>
 
-                        This OTP is valid for 10 minutes. Please do not share it with anyone.
+            <p style='color:#5c4033; line-height:1.6;'>
+                You requested to verify your email address for 
+                <strong>Craftoria App</strong>.
+            </p>
 
-                        If you did not request this code, please ignore this email.
+            <div style='text-align:center; margin:30px 0;'>
+                <span style='display:inline-block; 
+                             background-color:#d2b48c; 
+                             color:#ffffff; 
+                             font-size:26px; 
+                             letter-spacing:4px; 
+                             padding:14px 30px; 
+                             border-radius:8px; 
+                             font-weight:bold;'>
+                    {otp}
+                </span>
+            </div>
 
-                        Thank you,
-                        Craftoria Team
-                        ";
-                                }
+            <p style='color:#5c4033; line-height:1.6;'>
+                This OTP is valid for <strong>10 minutes</strong>. 
+                Please do not share it with anyone.
+            </p>
+
+            <p style='color:#5c4033; line-height:1.6;'>
+                If you did not request this code, you can safely ignore this email.
+            </p>
+
+            <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
+
+            <p style='color:#8b5e3c; font-weight:bold; margin:0;'>
+                Craftoria Team
+            </p>
+
+        </div>
+    </div>";
+        }
             private static string GenerateOTP()=> new Random().Next(100000, 999999).ToString();
             private async Task SendOtpEmailAsync(string email, string otp)
         {
@@ -299,7 +335,7 @@ namespace Service
         }
             public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
 
-        public async Task<ReturnUserDTO> GoogleLoginAsync(GoogleLoginDto googleLoginDto)
+            public async Task<ReturnUserDTO> GoogleLoginAsync(GoogleLoginDto googleLoginDto)
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings()
             {
@@ -354,7 +390,7 @@ namespace Service
             };
         }
 
-        public async Task ExpertWithGoolgeService(ExpertWithGoolgeDto infos)
+            public async Task ExpertWithGoolgeService(ExpertWithGoolgeDto infos)
         {
             var user = await _userManager.FindByEmailAsync(infos.Email);
             if (user == null)
