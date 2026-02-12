@@ -132,8 +132,8 @@ namespace Service
             }
 
             // Send Email
-            await _emailService.SendEmailAsync(email, "Reset Password OTP", $"Your OTP is: {otp}");
-
+            var body = BuildResetPasswordEmailBody(otp);
+            await _emailService.SendEmailAsync(email, "Reset Password - Craftoria", body);
             return "OTP sent successfully.";
         }
             public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
@@ -279,6 +279,68 @@ namespace Service
             return $@"
     <div style='background-color:#f5efe6; padding:40px 0; font-family:Arial, sans-serif;'>
         <div style='max-width:500px; margin:auto; background:#ffffff; 
+                    padding:35px; border-radius:12px; 
+                    box-shadow:0 4px 15px rgba(0,0,0,0.05);'>
+
+            <h2 style='color:#8b5e3c; text-align:center; margin-bottom:5px;'>
+                Craftoria
+            </h2>
+
+            <p style='text-align:center; color:#a67c52; margin-top:0; font-size:14px;'>
+                Account Verification
+            </p>
+
+            <p style='color:#5c4033; font-size:15px; line-height:1.6;'>
+                Hello,
+            </p>
+
+            <p style='color:#5c4033; font-size:15px; line-height:1.6;'>
+                Someone is trying to create a <strong>Craftoria</strong> account using this email address.
+            </p>
+
+            <p style='color:#5c4033; font-size:15px; line-height:1.6;'>
+                Please use the verification code below to continue the signup process:
+            </p>
+
+            <div style='text-align:center; margin:30px 0;'>
+                <span style='display:inline-block;
+                             background-color:#d2b48c;
+                             color:#ffffff;
+                             font-size:26px;
+                             letter-spacing:5px;
+                             padding:14px 35px;
+                             border-radius:8px;
+                             font-weight:bold;'>
+                    {otp}
+                </span>
+            </div>
+
+            <p style='color:#5c4033; font-size:14px; line-height:1.6;'>
+                This code will expire in <strong>10 minutes</strong>.
+            </p>
+
+            <p style='color:#7a5c4d; font-size:13px; line-height:1.6;'>
+                If this wasn’t you, you can safely ignore this email.
+            </p>
+
+            <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
+
+            <p style='color:#8b5e3c; font-weight:bold; margin:0; font-size:14px;'>
+                Craftoria Team
+            </p>
+
+        </div>
+
+        <p style='text-align:center; font-size:12px; color:#b89b84; margin-top:20px;'>
+            © 2026 Craftoria. All rights reserved.
+        </p>
+    </div>";
+        }
+            private string BuildResetPasswordEmailBody(string otp)
+        {
+            return $@"
+    <div style='background-color:#f5efe6; padding:40px 0; font-family:Arial, sans-serif;'>
+        <div style='max-width:500px; margin:auto; background:#ffffff; 
                     padding:30px; border-radius:12px; 
                     box-shadow:0 4px 15px rgba(0,0,0,0.05);'>
 
@@ -286,13 +348,13 @@ namespace Service
                 Craftoria
             </h2>
             <p style='text-align:center; color:#a67c52; margin-top:0;'>
-                Email Verification
+                Password Reset
             </p>
 
             <p style='color:#5c4033;'>Hello,</p>
 
             <p style='color:#5c4033; line-height:1.6;'>
-                You requested to verify your email address for 
+                We received a request to reset your password for 
                 <strong>Craftoria App</strong>.
             </p>
 
@@ -310,12 +372,11 @@ namespace Service
             </div>
 
             <p style='color:#5c4033; line-height:1.6;'>
-                This OTP is valid for <strong>10 minutes</strong>. 
-                Please do not share it with anyone.
+                This code is valid for <strong>10 minutes</strong>.
             </p>
 
             <p style='color:#5c4033; line-height:1.6;'>
-                If you did not request this code, you can safely ignore this email.
+                If you did not request a password reset, please ignore this email.
             </p>
 
             <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
@@ -327,6 +388,7 @@ namespace Service
         </div>
     </div>";
         }
+
             private static string GenerateOTP()=> new Random().Next(100000, 999999).ToString();
             private async Task SendOtpEmailAsync(string email, string otp)
         {
