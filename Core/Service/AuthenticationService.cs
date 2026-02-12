@@ -185,7 +185,12 @@ namespace Service
                 if (email is null)
                     throw new InvalidException("Email cannot be null.");
 
-                await _emailVerificationRepo.MarkOldOtpsAsync(email.Email);
+                var  emailExists = await _userManager.FindByEmailAsync(email.Email);
+
+                if (emailExists is not null)
+                 throw new UserAlreadyExistsException("This email is already registered. Please use another email.");
+
+                  await _emailVerificationRepo.MarkOldOtpsAsync(email.Email);
 
                 var otpGenerated = GenerateOTP();
 
@@ -210,6 +215,8 @@ namespace Service
 
                             return await _emailVerificationRepo.VerifyOtpAsync(emailOTP.Email, emailOTP.OtpCode);
             }
+
+
 
 
             private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)

@@ -28,7 +28,7 @@ namespace Service
             UserInteraction? interaction = null;
 
             interaction = await checkIfThereIsAnyReviewBefore(userId, dto, interaction);
-
+                
             if (interaction != null)
             {
                 interaction.Rating = dto.Rating;
