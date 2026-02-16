@@ -20,6 +20,8 @@ namespace Shared.ProductModule
         public string CategoryName { get; set; } // 👈 ده اللي الـ Flutter محتاجه
 
         public string SellerId { get; set; }
+        public string SellerName { get; set; }
+
     }
-    }
+}
 

@@ -48,7 +48,8 @@ namespace Service
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
-
+            var user = _userManager.FindByIdAsync(product.SellerId).Result;
+            var userName = user.FirstName + " " + user.SecondName;
             return new ReturnProductDto
             {
                 Id = product.Id,
@@ -59,7 +60,8 @@ namespace Service
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
                 SellerId = product.SellerId,
-                CategoryName = category != null ? category.Name : "Unknown"
+                CategoryName = category != null ? category.Name : "Unknown",
+                SellerName = userName
             };
         }
 

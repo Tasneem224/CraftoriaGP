@@ -28,7 +28,7 @@ namespace Presentation.Controllers
             return Ok(products);
         }
 
-        [HttpGet("GetProductById")]
+        [HttpGet("GetProductDetailsById")]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _productService.GetProductByIdAsync(id);
