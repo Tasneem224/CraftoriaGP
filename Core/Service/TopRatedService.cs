@@ -44,7 +44,7 @@ namespace Service
                     result.Add(new TopProductsDto
                     {
                         Id = product.Id,
-                        Name = product.Name,
+                        Name = product.NameEn,
                         ImageUrl = product.ImageUrl,
                         Price = product.Price,
                         AverageRating = Math.Round(stat.AverageRating, 1),
@@ -113,7 +113,7 @@ namespace Service
                         result.Add(new TopRawMaterialsDto
                         {
                             Id = material.Id,
-                            Name = material.Name,
+                            Name = material.NameEn,
                             ImageUrl = material.ImageUrl,
                             Price = material.Price,
                             AverageRating = Math.Round(stat.AverageRating, 1),

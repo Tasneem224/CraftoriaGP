@@ -26,7 +26,7 @@ namespace Service
             return products.Select(p => new ReturnProductDto
             {
                 Id = p.Id,
-                Name = p.Name,
+                Name = p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
                 Description = p.Description,
@@ -53,7 +53,7 @@ namespace Service
             return new ReturnProductDto
             {
                 Id = product.Id,
-                Name = product.Name,
+                Name = product.NameEn,
                 Price = product.Price,
                 Quantity = product.Quantity ?? 0,
                 Description = product.Description,
@@ -99,7 +99,7 @@ namespace Service
 
                 var product = new Product
                 {
-                    Name = dto.Name,
+                    NameEn = dto.Name,
                     Price = dto.Price,
                     Quantity = dto.Quantity ?? 0,
                     Description = dto.Description,
@@ -119,7 +119,7 @@ namespace Service
             return new ReturnProductDto
             {
                 Id = product.Id,
-                Name = product.Name,
+                Name = product.NameEn,
                 Price = product.Price,
                 Quantity = product.Quantity ?? 0,
                 Description = product.Description,
@@ -146,7 +146,7 @@ namespace Service
             
 
             
-            product.Name = dataFromRequest.Name==null?product.Name: dataFromRequest.Name;
+            product.NameEn = dataFromRequest.Name==null?product.NameEn : dataFromRequest.Name;
             product.Price = dataFromRequest.Price==0.0m?product.Price: dataFromRequest.Price;
             product.Description = dataFromRequest.Description==null?product.Description: dataFromRequest.Description;
             product.CategoryId = dataFromRequest.CategoryId==0?product.CategoryId: dataFromRequest.CategoryId;
@@ -178,7 +178,7 @@ namespace Service
             return new ReturnProductDto
             {
                 Id = product.Id,
-                Name = product.Name,
+                Name = product.NameEn,
                 Price = product.Price,
                 Quantity = product.Quantity ?? 0,
                 Description = product.Description,
@@ -259,7 +259,7 @@ namespace Service
             return products.Select(p => new ReturnProductDto
             {
                 Id = p.Id,
-                Name = p.Name,
+                Name = p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
                 Description = p.Description,

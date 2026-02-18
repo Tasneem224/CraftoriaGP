@@ -53,7 +53,7 @@ namespace Service
             return favs.Select(f => new FavouriteItemDto
             {
                 Id = f.Product.Id,
-                Name = f.Product.Name,
+                Name = f.Product.NameEn,
                 ImageUrl = f.Product.ImageUrl,
                 Price = f.Product.Price
             }).ToList();

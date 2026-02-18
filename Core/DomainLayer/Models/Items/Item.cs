@@ -11,7 +11,8 @@ namespace DomainLayer.Models.Items
 {
     public abstract class Item:BaseEntity<int>
     {
-        public string Name { get; set; } = default!;
+        public string NameEn { get; set; } = default!;
+        public string NameAr { get; set; } = default!;
         public string ImageUrl { get; set; } = default!;
 
         [Range(0, int.MaxValue)]
@@ -22,8 +23,7 @@ namespace DomainLayer.Models.Items
         public decimal Price {  get; set; }  =default!;
         public string? Description { get; set; } = default!;
     
-
-
+        public virtual ICollection<Tag> tags { get; set; } = new HashSet<Tag>();
 
     }
 }
