@@ -11,7 +11,7 @@ namespace DomainLayer.Models.Items
         public TKey Id { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public string CreatedBy { get; set; } = default!;
+        public string? CreatedBy { get; set; } = default!;
         public bool IsDeleted { get; set; }
 
 

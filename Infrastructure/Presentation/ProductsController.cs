@@ -41,7 +41,7 @@ namespace Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await _productService.AddProductAsync(dto, dto.SellerId);
+            var result = await _productService.AddProductAsync(dto);
             return Ok(new { message = "Created Successfully", data = result });
         }
         [HttpGet("my-products-count")]

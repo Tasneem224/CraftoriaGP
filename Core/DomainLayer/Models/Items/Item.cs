@@ -21,7 +21,8 @@ namespace DomainLayer.Models.Items
         [Range(0, float.MaxValue)]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price {  get; set; }  =default!;
-        public string? Description { get; set; } = default!;
+        public string? DescriptionEn { get; set; } = default!;
+        public string? DescriptionAr { get; set; } = default!;
     
         public virtual ICollection<Tag> tags { get; set; } = new HashSet<Tag>();
 

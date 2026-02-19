@@ -14,7 +14,7 @@ namespace ServiceAbstraction
         Task<IEnumerable<ReturnProductDto>> GetAllMaterialsOfSpecifiUserAsync(string id);
 
         Task<ReturnProductDto> GetMaterialsByIdAsync(int id);
-        Task<ReturnProductDto> AddMaterialsAsync(CreateProductDto dto, string sellerId);
+        Task<ReturnProductDto> AddMaterialsAsync(CreateProductDto dto);
         Task<ReturnProductDto> UpdateMaterialsAsync(int id, UpdateProductDto dto);
         Task<bool> DeleteMaterialsAsync(int id);
         Task<int> GetMaterialsCountByUserIdAsync(string userId);

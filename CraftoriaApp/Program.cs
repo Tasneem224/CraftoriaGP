@@ -91,6 +91,8 @@ namespace CraftoriaApp
                };
             });
 
+
+
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
 
             if (string.IsNullOrWhiteSpace(cloudinaryUrl))
@@ -111,6 +113,13 @@ namespace CraftoriaApp
             }
 
             app.UseMiddleware<CustomeExceptionHandlerMiddleWare>();
+            var supportedCultures = new[] { "en", "ar" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture("en")
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+
+            app.UseRequestLocalization(localizationOptions); // ???? ????? ?? ???? ??? app.UseAuthorization
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

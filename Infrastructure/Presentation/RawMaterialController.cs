@@ -54,7 +54,7 @@ namespace Presentation
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await _materialService.AddMaterialsAsync(dto, dto.SellerId);
+            var result = await _materialService.AddMaterialsAsync(dto);
             return Ok(new { message = "Created Successfully", data = result });
         }
 

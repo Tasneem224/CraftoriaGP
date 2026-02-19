@@ -3,18 +3,22 @@ using DomainLayer.Exceptions;
 using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
 using Shared.IdentityModule;
 using Shared.ProductModule;
+using System.Security.Claims;
 
 namespace Service
 {
-    public class ProductService(UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
+    public class ProductService(IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
     {
-    
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
         {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
             var productRepo = _unitOfWork.GetRepository<Product, int>();
             var products = await productRepo.GetAllAsync();
 
@@ -26,10 +30,10 @@ namespace Service
             return products.Select(p => new ReturnProductDto
             {
                 Id = p.Id,
-                Name = p.NameEn,
+                Name = isArabic ? p.NameAr : p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
-                Description = p.Description,
+                Description = p.DescriptionEn,
                 ImageUrl = p.ImageUrl, 
                 CategoryId = p.CategoryId,
                 SellerId = p.SellerId,
@@ -41,6 +45,8 @@ namespace Service
 
         public async Task<ReturnProductDto> GetProductByIdAsync(int id)
         {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
             var productRepo = _unitOfWork.GetRepository<Product, int>();
             var product = await productRepo.GetByIdAsync(id);
 
@@ -50,45 +56,43 @@ namespace Service
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
             var user = _userManager.FindByIdAsync(product.SellerId).Result;
             var userName = user.FirstName + " " + user.SecondName;
-            return new ReturnProductDto
-            {
-                Id = product.Id,
-                Name = product.NameEn,
-                Price = product.Price,
-                Quantity = product.Quantity ?? 0,
-                Description = product.Description,
-                ImageUrl = product.ImageUrl,
-                CategoryId = product.CategoryId,
-                SellerId = product.SellerId,
-                CategoryName = category != null ? category.Name : "Unknown",
-                SellerName = userName
-            };
+            return ReturnDto(isArabic, product, category);
+
         }
-
-        public async Task<ReturnProductDto> AddProductAsync(CreateProductDto dto, string sellerId)
+        public async Task<ReturnProductDto> AddProductAsync(CreateProductDto dto)
         {
-            var checkUser = await _userManager.FindByIdAsync(sellerId);
-            if (checkUser is null)
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var sellerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(sellerId))
+                throw new UnauthorizedAccessException(isArabic ? "يجب تسجيل الدخول أولاً" : "Unauthorized: Please login");
+
+            var user = _httpContextAccessor?.HttpContext?.User;
+
+            bool isAuthorizedRole = user!.IsInRole(RoleType.Beginner.ToString()) ||
+                                     user.IsInRole(RoleType.Expert.ToString());
+
+            if (!isAuthorizedRole)
             {
-                throw new UserNotFoundException("this user is not found");
-
-            }
-            var user =await  _userManager.FindByIdAsync(sellerId);
-            var roles =await  _userManager.GetRolesAsync(user);
-            foreach(var  role in roles)
-            {
-                if (role != RoleType.Beginner.ToString() && role != RoleType.Expert.ToString())
-                {
-                    throw new InvalidOperationException("role is not valid to do this operation");
-                }
+                throw new InvalidOperationException(isArabic
+                    ? "غير مسموح لك بإضافة منتجات، يجب أن تكون مبتدئ أو خبير"
+                    : "Role is not valid to do this operation");
             }
 
 
-                string imageUrl = null;
+            string imageUrl = null;
             if (dto.ImageFile != null)
             {
+                try
+                {
+                    imageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
 
-                imageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
 
             else
@@ -97,32 +101,54 @@ namespace Service
             }
 
 
-                var product = new Product
+            var product = new Product
+            {
+                NameEn = dto.NameEn,
+                NameAr = dto.NameAr,
+                Price = dto.Price,
+                Quantity = dto.Quantity ?? 0,
+                DescriptionEn = dto.Description,
+                CategoryId = dto.CategoryId,
+                SellerId = sellerId,
+                ImageUrl = imageUrl
+            };
+            if (dto.Tags != null && dto.Tags.Any())
+            {
+                var tagRepo = _unitOfWork.GetRepository<Tag, int>();
+                var existingTags = await tagRepo.GetAllAsync();
+
+                foreach (var tagName in dto.Tags)
                 {
-                    NameEn = dto.Name,
-                    Price = dto.Price,
-                    Quantity = dto.Quantity ?? 0,
-                    Description = dto.Description,
-                    CategoryId = dto.CategoryId,
-                    SellerId = sellerId,
-                    ImageUrl = imageUrl
-                };
+                    var cleanTagName = tagName.Trim();
 
+                    var tag = existingTags.FirstOrDefault(t => t.Name.Equals(cleanTagName, StringComparison.OrdinalIgnoreCase));
 
+                    if (tag != null)product.tags.Add(tag);
+                    else
+                    {
+                        var newTag = new Tag { Name = cleanTagName };
+                        product.tags.Add(newTag);
+                    }
+                }
+            }
             await _unitOfWork.GetRepository<Product, int>().AddAsync(product);
             await _unitOfWork.SaveChanges();
 
-            // 4. Get Category Name for response
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
 
+            return ReturnDto(isArabic, product, category);
+        }
+
+        private static ReturnProductDto ReturnDto(bool isArabic, Product product, ProductCategory category)
+        {
             return new ReturnProductDto
             {
                 Id = product.Id,
-                Name = product.NameEn,
+                Name = isArabic ? product.NameAr : product.NameEn,
                 Price = product.Price,
                 Quantity = product.Quantity ?? 0,
-                Description = product.Description,
+                Description = product.DescriptionEn,
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
                 SellerId = product.SellerId,
@@ -139,16 +165,10 @@ namespace Service
             {
                 throw new ItemNotFound("this product not found");
             }
-            ;
 
-            //if (product.SellerId != sellerId)
-            //    throw new Exception("Unauthorized: You can only update your own products.");
-            
-
-            
-            product.NameEn = dataFromRequest.Name==null?product.NameEn : dataFromRequest.Name;
+            product.NameEn = dataFromRequest.NameEn==null?product.NameEn : dataFromRequest.NameEn;
             product.Price = dataFromRequest.Price==0.0m?product.Price: dataFromRequest.Price;
-            product.Description = dataFromRequest.Description==null?product.Description: dataFromRequest.Description;
+            product.DescriptionEn = dataFromRequest.Description==null?product.DescriptionEn: dataFromRequest.Description;
             product.CategoryId = dataFromRequest.CategoryId==0?product.CategoryId: dataFromRequest.CategoryId;
             product.Quantity = dataFromRequest.Quantity==null?product.Quantity: dataFromRequest.Quantity;
             //if (dataFromRequest.Quantity.HasValue) product.Quantity = dataFromRequest.Quantity.Value;
@@ -181,13 +201,14 @@ namespace Service
                 Name = product.NameEn,
                 Price = product.Price,
                 Quantity = product.Quantity ?? 0,
-                Description = product.Description,
+                Description = product.DescriptionEn,
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
                 SellerId = product.SellerId,
                 CategoryName = category != null ? category.Name : "Unknown"
             };
         }
+        [Authorize]
 
         public async Task<bool> DeleteProductAsync(int id)
         {
@@ -262,7 +283,7 @@ namespace Service
                 Name = p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
-                Description = p.Description,
+                Description = p.DescriptionEn,
                 ImageUrl = p.ImageUrl,
                 CategoryId = p.CategoryId,
                 SellerId = p.SellerId,

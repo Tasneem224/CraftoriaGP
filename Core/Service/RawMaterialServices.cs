@@ -4,6 +4,7 @@ using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
 using Shared.IdentityModule;
@@ -11,6 +12,7 @@ using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,32 +23,36 @@ namespace Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICloudinaryService _cloudinary;
-        public RawMaterialServices(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager , ICloudinaryService cloudinary) 
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public RawMaterialServices(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager , ICloudinaryService cloudinary,IHttpContextAccessor httpContextAccessor) 
         { 
             _userManager = userManager;
 
             _unitOfWork = unitOfWork;
             _cloudinary = cloudinary;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ReturnProductDto> AddMaterialsAsync(CreateProductDto dto, string sellerId)
+        public async Task<ReturnProductDto> AddMaterialsAsync(CreateProductDto dto)
         {
-            var checkUser = await _userManager.FindByIdAsync(sellerId);
-            if (checkUser is null)
-            {
-                throw new UserNotFoundException("this user is not found");
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
-            }
-            var user = await _userManager.FindByIdAsync(sellerId);
-            var roles = await _userManager.GetRolesAsync(user);
-            foreach (var role in roles)
-            {
-                if (role != RoleType.Supplier.ToString() )
-                {
-                    throw new InvalidOperationException("role is not valid to do this operation");
-                }
-            }
+            var sellerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrEmpty(sellerId))
+                throw new UnauthorizedAccessException(isArabic ? "يجب تسجيل الدخول أولاً" : "Unauthorized: Please login");
+
+            var user = _httpContextAccessor?.HttpContext?.User;
+
+            bool isAuthorizedRole = user!.IsInRole(RoleType.Supplier.ToString());
+
+
+            if (!isAuthorizedRole)
+            {
+                throw new InvalidOperationException(isArabic
+                    ? "غير مسموح لك بإضافة منتجات، يجب أن تكون مبتدئ أو خبير"
+                    : "Role is not valid to do this operation");
+            }
 
             string imageUrl = null;
             if (dto.ImageFile != null)
@@ -63,14 +69,33 @@ namespace Service
 
             var product = new RawMaterial
             {
-                NameEn = dto.Name,
+                NameEn = dto.NameEn,
                 Price = dto.Price,
                 Quantity = dto.Quantity ?? 0,
-                Description = dto.Description,
+                DescriptionEn = dto.Description,
                 CategoryId = dto.CategoryId,
                 supplierId = sellerId,
                 ImageUrl = imageUrl
             };
+            if (dto.Tags != null && dto.Tags.Any())
+            {
+                var tagRepo = _unitOfWork.GetRepository<Tag, int>();
+                var existingTags = await tagRepo.GetAllAsync();
+
+                foreach (var tagName in dto.Tags)
+                {
+                    var cleanTagName = tagName.Trim();
+
+                    var tag = existingTags.FirstOrDefault(t => t.Name.Equals(cleanTagName, StringComparison.OrdinalIgnoreCase));
+
+                    if (tag != null) product.tags.Add(tag);
+                    else
+                    {
+                        var newTag = new Tag { Name = cleanTagName };
+                        product.tags.Add(newTag);
+                    }
+                }
+            }
 
 
             await _unitOfWork.GetRepository<RawMaterial, int>().AddAsync(product);
@@ -87,7 +112,7 @@ namespace Service
                 Name = product.NameEn,
                 Price = product.Price,
                 Quantity = product.Quantity ?? 0,
-                Description = product.Description,
+                Description = product.DescriptionEn,
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
                 SellerId = product.supplierId,
@@ -136,7 +161,7 @@ namespace Service
                 Name = p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
-                Description = p.Description,
+                Description = p.DescriptionEn,
                 ImageUrl = p.ImageUrl,
                 CategoryId = p.CategoryId,
                 SellerId = p.supplierId,
@@ -178,7 +203,7 @@ namespace Service
                 Name = p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
-                Description = p.Description,
+                Description = p.DescriptionEn,
                 ImageUrl = p.ImageUrl,
                 CategoryId = p.CategoryId,
                 SellerId = p.supplierId,
@@ -205,7 +230,7 @@ namespace Service
                 Name = Materials.NameEn,
                 Price = Materials.Price,
                 Quantity = Materials.Quantity ?? 0,
-                Description = Materials.Description,
+                Description = Materials.DescriptionEn,
                 ImageUrl = Materials.ImageUrl,
                 CategoryId = Materials.CategoryId,
                 SellerId = Materials.supplierId,
@@ -238,9 +263,9 @@ namespace Service
             }
             ;
 
-            Materials.NameEn = dataFromRequest.Name == null ? Materials.NameEn : dataFromRequest.Name;
+            Materials.NameEn = dataFromRequest.NameEn == null ? Materials.NameEn : dataFromRequest.NameEn;
             Materials.Price = dataFromRequest.Price == 0.0m ? Materials.Price : dataFromRequest.Price;
-            Materials.Description = dataFromRequest.Description == null ? Materials.Description : dataFromRequest.Description;
+            Materials.DescriptionEn = dataFromRequest.Description == null ? Materials.DescriptionEn : dataFromRequest.Description;
             Materials.CategoryId = dataFromRequest.CategoryId == 0 ? Materials.CategoryId : dataFromRequest.CategoryId;
             Materials.Quantity = dataFromRequest.Quantity == null ? Materials.Quantity : dataFromRequest.Quantity;
             //if (dataFromRequest.Quantity.HasValue) product.Quantity = dataFromRequest.Quantity.Value;
@@ -273,7 +298,7 @@ namespace Service
                 Name = Materials.NameEn,
                 Price = Materials.Price,
                 Quantity = Materials.Quantity ?? 0,
-                Description = Materials.Description,
+                Description = Materials.DescriptionEn,
                 ImageUrl = Materials.ImageUrl,
                 CategoryId = Materials.CategoryId,
                 SellerId = Materials.supplierId,
