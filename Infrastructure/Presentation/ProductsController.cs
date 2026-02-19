@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DomainLayer.Models.Items;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service;
 using ServiceAbstraction;
@@ -35,7 +36,7 @@ namespace Presentation.Controllers
             if (product == null) return NotFound(new { message = "Product not found" });
             return Ok(product);
         }
-
+        [Authorize]
         [HttpPost("CreateProduct")]
         public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
@@ -45,17 +46,13 @@ namespace Presentation.Controllers
             return Ok(new { message = "Created Successfully", data = result });
         }
         [HttpGet("my-products-count")]
-        [Authorize] 
-        public async Task<IActionResult> GetMyProductsCount()
+        public async Task<IActionResult> GetMyProductsCount(string userId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var count = await _productService.GetProductsCountByUserIdAsync(userId);
             return Ok(new { totalProducts = count });
         }
-
+        [Authorize]
         [HttpPut("UpdateProduct")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
         {
@@ -74,7 +71,7 @@ namespace Presentation.Controllers
                 return Unauthorized(new { message = ex.Message });
             }
         }
-
+        [Authorize]
         [HttpDelete("DeleteProduct")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -91,11 +88,11 @@ namespace Presentation.Controllers
         }
 
       
-        [HttpGet("GetAllProductCategoriesById")]
+        [HttpGet("GetAllProductsOfSpecificCategory")]
         public async Task<IActionResult> GetAllProductCategoriesById(int id)
         {
-            var result = await _categoryService.GetAllProductCategoriesByIdAsync(id);
-            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+            var result = await _productService.GetAllProductsOfSpecificCategory(id);
+            return SendSuccessResponse<IEnumerable<ReturnProductsOfCategory>>(result, "Categories are returned successfully");
 
         }
        

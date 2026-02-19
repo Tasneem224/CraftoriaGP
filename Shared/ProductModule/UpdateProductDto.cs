@@ -7,9 +7,16 @@ using System.Threading.Tasks;
 
 namespace Shared.ProductModule
 {
-    public class UpdateProductDto : CreateProductDto
+    public class UpdateProductDto 
     {
-        // بنخلي الصورة اختيارية في التعديل
-        public new IFormFile? ImageFile { get; set; }
+        public string? NameEn { get; set; }
+        public string? NameAr { get; set; }
+        public decimal? Price { get; set; } // لاحظي الـ ? هنا
+        public string? Description { get; set; }
+        public int? CategoryId { get; set; }
+        public int? Quantity { get; set; }
+        public IFormFile? ImageFile { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
+
     }
 }

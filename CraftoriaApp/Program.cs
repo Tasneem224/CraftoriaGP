@@ -38,7 +38,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("LocalConnection"),
+                    builder.Configuration.GetConnectionString("Connection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -90,7 +90,7 @@ namespace CraftoriaApp
                        Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
                };
             });
-
+            builder.Services.AddScoped<ITranslationService, TranslationService>();
 
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];

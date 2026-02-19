@@ -7,19 +7,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
+using Shared.ErrorModels;
 using Shared.IdentityModule;
 using Shared.ProductModule;
+using System.Globalization;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace Service
 {
-    public class ProductService(IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
+    public class ProductService(ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
     {
+
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
-
-            var productRepo = _unitOfWork.GetRepository<Product, int>();
+            var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
+            var productRepo =  _unitOfWork.GetRepository<Product, int>();
+                
             var products = await productRepo.GetAllAsync();
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
@@ -27,22 +32,8 @@ namespace Service
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            return products.Select(p => new ReturnProductDto
-            {
-                Id = p.Id,
-                Name = isArabic ? p.NameAr : p.NameEn,
-                Price = p.Price,
-                Quantity = p.Quantity ?? 0,
-                Description = p.DescriptionEn,
-                ImageUrl = p.ImageUrl, 
-                CategoryId = p.CategoryId,
-                SellerId = p.SellerId,
-                CategoryName = categoriesDict.ContainsKey(p.CategoryId)
-                               ? categoriesDict[p.CategoryId]
-                               : "Unknown"
-            }).ToList();
+            return ReturnListDto(isArabic, products, categoriesDict);
         }
-
         public async Task<ReturnProductDto> GetProductByIdAsync(int id)
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
@@ -63,43 +54,29 @@ namespace Service
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
-            var sellerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(sellerId))
-                throw new UnauthorizedAccessException(isArabic ? "يجب تسجيل الدخول أولاً" : "Unauthorized: Please login");
-
-            var user = _httpContextAccessor?.HttpContext?.User;
-
-            bool isAuthorizedRole = user!.IsInRole(RoleType.Beginner.ToString()) ||
-                                     user.IsInRole(RoleType.Expert.ToString());
-
-            if (!isAuthorizedRole)
-            {
-                throw new InvalidOperationException(isArabic
-                    ? "غير مسموح لك بإضافة منتجات، يجب أن تكون مبتدئ أو خبير"
-                    : "Role is not valid to do this operation");
-            }
-
+           var sellerId= AuthFun(isArabic);
 
             string imageUrl = null;
             if (dto.ImageFile != null)
-            {
-                try
-                {
                     imageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
-
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-            }
+            
 
             else
             {
                 throw new Exception("you should upload image");
             }
-
+            string DescAr;
+            string DescEn;
+            if (isArabic)
+            {
+                DescAr = dto.Description;
+                DescEn = await _translationService.TranslateAsync(dto.Description, "en");
+            }
+            else
+            {
+                DescEn = dto.Description;
+                DescAr = await _translationService.TranslateAsync(dto.Description, "ar");
+            }
 
             var product = new Product
             {
@@ -107,7 +84,8 @@ namespace Service
                 NameAr = dto.NameAr,
                 Price = dto.Price,
                 Quantity = dto.Quantity ?? 0,
-                DescriptionEn = dto.Description,
+                DescriptionAr = DescAr,
+                DescriptionEn = DescEn,
                 CategoryId = dto.CategoryId,
                 SellerId = sellerId,
                 ImageUrl = imageUrl
@@ -139,25 +117,13 @@ namespace Service
 
             return ReturnDto(isArabic, product, category);
         }
-
-        private static ReturnProductDto ReturnDto(bool isArabic, Product product, ProductCategory category)
-        {
-            return new ReturnProductDto
-            {
-                Id = product.Id,
-                Name = isArabic ? product.NameAr : product.NameEn,
-                Price = product.Price,
-                Quantity = product.Quantity ?? 0,
-                Description = product.DescriptionEn,
-                ImageUrl = product.ImageUrl,
-                CategoryId = product.CategoryId,
-                SellerId = product.SellerId,
-                CategoryName = category != null ? category.Name : ""
-            };
-        }
-
         public async Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dataFromRequest)
         {
+
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            AuthFun(isArabic);
+
             var repo = _unitOfWork.GetRepository<Product, int>();
             var product = await repo.GetByIdAsync(id);
 
@@ -165,18 +131,26 @@ namespace Service
             {
                 throw new ItemNotFound("this product not found");
             }
+            (string DescAr, string DescEn) = await TranslateDescription(dataFromRequest, isArabic);
 
-            product.NameEn = dataFromRequest.NameEn==null?product.NameEn : dataFromRequest.NameEn;
-            product.Price = dataFromRequest.Price==0.0m?product.Price: dataFromRequest.Price;
-            product.DescriptionEn = dataFromRequest.Description==null?product.DescriptionEn: dataFromRequest.Description;
-            product.CategoryId = dataFromRequest.CategoryId==0?product.CategoryId: dataFromRequest.CategoryId;
-            product.Quantity = dataFromRequest.Quantity==null?product.Quantity: dataFromRequest.Quantity;
-            //if (dataFromRequest.Quantity.HasValue) product.Quantity = dataFromRequest.Quantity.Value;
+            product.NameEn = dataFromRequest.NameEn ?? product.NameEn;
+            product.NameAr = dataFromRequest.NameAr ?? product.NameAr;
 
-            
+            if (dataFromRequest.Price.HasValue && dataFromRequest.Price > 0)
+                product.Price = dataFromRequest.Price.Value;
+
+            if (dataFromRequest.CategoryId.HasValue && dataFromRequest.CategoryId > 0)
+                product.CategoryId = dataFromRequest.CategoryId.Value;
+            if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
+            {
+                (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
+                product.DescriptionAr = descAr;
+                product.DescriptionEn = descEn;
+            }
+
             if (dataFromRequest.ImageFile != null)
             {
-                
+
                 if (!string.IsNullOrEmpty(product.ImageUrl))
                 {
                     string publicId = GetPublicIdFromUrl(product.ImageUrl);
@@ -195,23 +169,14 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
 
-            return new ReturnProductDto
-            {
-                Id = product.Id,
-                Name = product.NameEn,
-                Price = product.Price,
-                Quantity = product.Quantity ?? 0,
-                Description = product.DescriptionEn,
-                ImageUrl = product.ImageUrl,
-                CategoryId = product.CategoryId,
-                SellerId = product.SellerId,
-                CategoryName = category != null ? category.Name : "Unknown"
-            };
-        }
-        [Authorize]
 
+            return ReturnDto(isArabic, product, category);
+        }
         public async Task<bool> DeleteProductAsync(int id)
         {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            AuthFun(isArabic);
             var repo = _unitOfWork.GetRepository<Product, int>();
             var product = await repo.GetByIdAsync(id);
             if (product == null)
@@ -234,25 +199,10 @@ namespace Service
             await _unitOfWork.SaveChanges();
             return true;
         }
-
- 
-        private string GetPublicIdFromUrl(string url)
-        {
-            try
-            {
-                var uri = new Uri(url);
-                var segments = uri.Segments; 
-                var imageName = Path.GetFileNameWithoutExtension(url);
-                return $"images/{imageName}";
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsOfSpecifiUserAsync(string id)
         {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
             var checkUser = await _userManager.FindByIdAsync(id);
             if (checkUser is null)
             {
@@ -269,21 +219,124 @@ namespace Service
                 }
             }
             var repo = _unitOfWork.GetRepository<Product, int>();
-            var query =await repo.GetAllAsync();
+            var query = await repo.GetAllAsync();
             var products = query.Where(p => p.SellerId == id);
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var categories = await categoryRepo.GetAllAsync();
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
+            return ReturnListDto(isArabic, products, categoriesDict);
 
+        }
+            public async Task<int> GetProductsCountByUserIdAsync(string userId)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    throw new UserNotFoundException("this user is not found");
+                }
+
+                var repo = _unitOfWork.GetRepository<Product, int>();
+                var query = await repo.GetAllAsync();
+
+                return query.Count(p => p.SellerId == userId);
+            }
+        public async Task<IEnumerable<ReturnProductsOfCategory>> GetAllProductsOfSpecificCategory(int id)
+        {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var repo = _unitOfWork.GetRepository<Product, int>();
+            var query = await repo.GetAllAsync();
+            return query
+                    .Where(p => p.CategoryId == id)
+                    .Select(p => new ReturnProductsOfCategory
+                    {
+                        Id = p.Id,
+                        Image = p.ImageUrl ?? "",
+                        Name = isArabic ? p.NameAr : p.NameEn,
+                        Description = isArabic ? p.DescriptionAr : p.DescriptionEn,
+                        Price = p.Price
+                    }).ToList();
+        }        
+
+
+        private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
+        {
+            string DescAr;
+            string DescEn;
+            if (isArabic)
+            {
+                DescAr = dataFromRequest.Description;
+                DescEn = await _translationService.TranslateAsync(dataFromRequest!.Description, "en");
+            }
+            else
+            {
+                DescEn = dataFromRequest.Description;
+                DescAr = await _translationService.TranslateAsync(dataFromRequest?.Description, "ar");
+            }
+
+            return (DescAr, DescEn);
+        }
+        private static ReturnProductDto ReturnDto(bool isArabic, Product product, ProductCategory category)
+        {
+            return new ReturnProductDto
+            {
+                Id = product.Id,
+                Name = isArabic ? product.NameAr : product.NameEn,
+                Price = product.Price,
+                Quantity = product.Quantity ?? 0,
+                Description = isArabic?product.DescriptionAr: product.DescriptionEn,
+                ImageUrl = product.ImageUrl,
+                CategoryId = product.CategoryId,
+                SellerId = product.SellerId,
+                CategoryName = category != null ? category.Name : "",
+                SellerName = product.Seller?.FirstName+" "+ product.Seller?.SecondName ,
+            };
+        }
+        private string? AuthFun(bool isArabic)
+        {
+            var sellerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(sellerId))
+                throw new UnauthorizedAccessException(isArabic ? "يجب تسجيل الدخول أولاً" : "Unauthorized: Please login");
+
+            var user = _httpContextAccessor?.HttpContext?.User;
+
+            bool isAuthorizedRole = user!.IsInRole(RoleType.Beginner.ToString()) ||
+                                     user.IsInRole(RoleType.Expert.ToString());
+
+            if (!isAuthorizedRole)
+            {
+                throw new InvalidOperationException(isArabic
+                    ? "غير مسموح لك بإضافة منتجات، يجب أن تكون مبتدئ أو خبير"
+                    : "Role is not valid to do this operation");
+            }
+            return sellerId;
+        }
+        private string GetPublicIdFromUrl(string url)
+        {
+            try
+            {
+                var uri = new Uri(url);
+                var segments = uri.Segments; 
+                var imageName = Path.GetFileNameWithoutExtension(url);
+                return $"images/{imageName}";
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic, IEnumerable<Product> products, Dictionary<int, string> categoriesDict)
+        {
             return products.Select(p => new ReturnProductDto
             {
                 Id = p.Id,
-                Name = p.NameEn,
+                Name = isArabic ? p.NameAr : p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
-                Description = p.DescriptionEn,
+                Description = isArabic ? p.DescriptionAr : p.DescriptionEn,
                 ImageUrl = p.ImageUrl,
                 CategoryId = p.CategoryId,
                 SellerId = p.SellerId,
@@ -291,24 +344,7 @@ namespace Service
                                ? categoriesDict[p.CategoryId]
                                : "Unknown"
             }).ToList();
-
-
         }
 
-        public async Task<int> GetProductsCountByUserIdAsync(string userId)
-        {
-            // 1. التأكد من وجود المستخدم (اختياري حسب رغبتك)
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                throw new UserNotFoundException("this user is not found");
-            }
-
-            // 2. الحصول على الـ Repository وعمل Count للمنتجات الخاصة بهذا المستخدم
-            var repo = _unitOfWork.GetRepository<Product, int>();
-            var query = await repo.GetAllAsync();
-
-            return query.Count(p => p.SellerId == userId);
-        }
     }
 }

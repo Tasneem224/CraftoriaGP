@@ -4,6 +4,7 @@ using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
+using GTranslate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
@@ -24,6 +25,7 @@ namespace Service
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICloudinaryService _cloudinary;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITranslationService _translationServic;
         public RawMaterialServices(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager , ICloudinaryService cloudinary,IHttpContextAccessor httpContextAccessor) 
         { 
             _userManager = userManager;
@@ -254,6 +256,8 @@ namespace Service
         }
         public async Task<ReturnProductDto> UpdateMaterialsAsync(int id, UpdateProductDto dataFromRequest)
         {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
             var MaterialsRepo = _unitOfWork.GetRepository<RawMaterial, int>();
             var Materials = await MaterialsRepo.GetByIdAsync(id);
 
@@ -263,11 +267,24 @@ namespace Service
             }
             ;
 
-            Materials.NameEn = dataFromRequest.NameEn == null ? Materials.NameEn : dataFromRequest.NameEn;
-            Materials.Price = dataFromRequest.Price == 0.0m ? Materials.Price : dataFromRequest.Price;
-            Materials.DescriptionEn = dataFromRequest.Description == null ? Materials.DescriptionEn : dataFromRequest.Description;
-            Materials.CategoryId = dataFromRequest.CategoryId == 0 ? Materials.CategoryId : dataFromRequest.CategoryId;
-            Materials.Quantity = dataFromRequest.Quantity == null ? Materials.Quantity : dataFromRequest.Quantity;
+            Materials.NameEn = dataFromRequest.NameEn ?? Materials.NameEn ;
+            Materials.Price = dataFromRequest.Price ?? Materials.Price ;
+
+            if (dataFromRequest.Price.HasValue && dataFromRequest.Price > 0)
+                Materials.Price = dataFromRequest.Price.Value;
+
+
+            if (dataFromRequest.CategoryId.HasValue && dataFromRequest.CategoryId > 0)
+                Materials.CategoryId = dataFromRequest.CategoryId.Value;
+            if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
+            {
+                (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
+                Materials.DescriptionAr = descAr;
+                Materials.DescriptionEn = descEn;
+            }
+
+
+           
             //if (dataFromRequest.Quantity.HasValue) product.Quantity = dataFromRequest.Quantity.Value;
 
 
@@ -305,6 +322,24 @@ namespace Service
                 CategoryName = category != null ? category.NameEn : "Unknown"
             };
         }
+        private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
+        {
+            string DescAr;
+            string DescEn;
+            if (isArabic)
+            {
+                DescAr = dataFromRequest.Description;
+                DescEn = await _translationServic.TranslateAsync(dataFromRequest!.Description, "en");
+            }
+            else
+            {
+                DescEn = dataFromRequest.Description;
+                DescAr = await _translationServic.TranslateAsync(dataFromRequest?.Description, "ar");
+            }
+
+            return (DescAr, DescEn);
+        }
+
         private string GetPublicIdFromUrl(string url)
         {
             try

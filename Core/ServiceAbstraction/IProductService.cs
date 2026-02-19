@@ -10,6 +10,7 @@ namespace ServiceAbstraction
     public interface IProductService
     {
         Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync();
+        Task<IEnumerable<ReturnProductsOfCategory>> GetAllProductsOfSpecificCategory(int id);
         Task<IEnumerable<ReturnProductDto>> GetAllProductsOfSpecifiUserAsync(string id);
 
         Task<ReturnProductDto> GetProductByIdAsync(int id);

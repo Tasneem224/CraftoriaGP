@@ -15,9 +15,8 @@ namespace Shared.ProductModule
         public int Quantity { get; set; }
         public string? Description { get; set; }
         public string? ImageUrl { get; set; }
-
         public int CategoryId { get; set; }
-        public string CategoryName { get; set; } // 👈 ده اللي الـ Flutter محتاجه
+        public string CategoryName { get; set; }
 
         public string SellerId { get; set; }
         public string SellerName { get; set; }
