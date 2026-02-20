@@ -258,6 +258,57 @@ namespace Service
                         Price = p.Price
                     }).ToList();
         }
+        public async Task<List<ReturnProductDto>> SearchProductsAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<ReturnProductDto>();
+
+            var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
+            var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
+            var normalizedQuery = query.Trim().ToLower();
+
+            // 1. نجيب المنتجات مع الـ Category والـ Seller (لو هتعرضي اسم التاجر)
+            var allProducts = await _unitOfWork.GetRepository<Product, int>()
+                .GetAllQueryable()
+                .Include(p => p.Category)
+                .Include(p => p.Seller) // ضفنا التاجر عشان الموبايل بيحتاجه
+                .ToListAsync();
+
+            // 2. البحث الذكي (Fuzzy Search)
+            var searchResults = allProducts
+                .Select(p => new
+                {
+                    Product = p,
+                    // دمجنا الاسم والوصف (والتاجز لو عندك) عشان البحث يبقى أعمق
+                    SearchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn}".ToLower()
+                })
+                .Select(x => new
+                {
+                    x.Product,
+                    x.SearchableText,
+                    Score = Fuzz.WeightedRatio(normalizedQuery, x.SearchableText)
+                })
+                // نسبة 70% ممتازة كبداية، و Contains تضمن لو الكلمة جزء من نص كبير تيجي
+                .Where(x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
+                .OrderByDescending(x => x.Score) // ترتيب النتائج بالأدق
+                .Select(x => new ReturnProductDto
+                {
+                    Id = x.Product.Id,
+                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
+                    Price = x.Product.Price,
+                    Description = isArabic ? x.Product.DescriptionAr : x.Product.DescriptionEn, // ترجمة الوصف
+                    ImageUrl = x.Product.ImageUrl,
+                    CategoryId = x.Product.CategoryId,
+                    // ترجمة اسم القسم
+                    CategoryName = x.Product.Category != null
+                                   ? (isArabic ? x.Product.Category.NameAr : x.Product.Category.NameEn)
+                                   : "Unknown",
+                    SellerId = x.Product.SellerId,
+                    SellerName = x.Product.Seller?.DisplayName ?? "Unknown Seller"
+                })
+                .ToList();
+
+            return searchResults;
+        }
 
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
         {
