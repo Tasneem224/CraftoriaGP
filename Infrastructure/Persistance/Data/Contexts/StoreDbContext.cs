@@ -1,6 +1,5 @@
 ﻿using DomainLayer.Models;
 using DomainLayer.Models.Categories;
-using DomainLayer.Models.Categories;
 using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;

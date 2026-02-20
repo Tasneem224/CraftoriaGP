@@ -87,7 +87,7 @@ namespace CraftoriaApp
                    ValidAudience = builder.Configuration["JWTOptions:audience"],
 
                    IssuerSigningKey = new SymmetricSecurityKey(
-                       Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
+                       Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
                };
             });
             builder.Services.AddScoped<ITranslationService, TranslationService>();

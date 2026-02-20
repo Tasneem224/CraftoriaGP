@@ -17,6 +17,7 @@ namespace Shared.ProductModule
         public int? Quantity { get; set; }
         public IFormFile? ImageFile { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
+        public string SellerName { get; set; } = default!;
 
     }
 }

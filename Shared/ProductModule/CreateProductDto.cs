@@ -11,10 +11,10 @@ namespace Shared.ProductModule
     public class CreateProductDto
     {
         [Required]
-        public string NameEn{ get; set; }
+        public string NameEn { get; set; } = default!;
         [Required]
 
-        public string NameAr { get; set; }
+        public string NameAr { get; set; } = default!;
 
         [Required]
         public decimal Price { get; set; }

@@ -3,6 +3,7 @@ using DomainLayer.Exceptions;
 using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
+using FuzzySharp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +23,7 @@ namespace Service
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
-            var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
+
             var productRepo =  _unitOfWork.GetRepository<Product, int>();
                 
             var products = await productRepo.GetAllAsync();
@@ -41,12 +42,12 @@ namespace Service
             var productRepo = _unitOfWork.GetRepository<Product, int>();
             var product = await productRepo.GetByIdAsync(id);
 
-            if (product == null) return null;
+            if (product == null) throw new ItemNotFound("this product is not found");
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
-            var user = _userManager.FindByIdAsync(product.SellerId).Result;
-            var userName = user.FirstName + " " + user.SecondName;
+            var user =await _userManager.FindByIdAsync(product.SellerId);
+            var userName = user!.FirstName + " " + user.SecondName;
             return ReturnDto(isArabic, product, category);
 
         }
@@ -56,7 +57,7 @@ namespace Service
 
            var sellerId= AuthFun(isArabic);
 
-            string imageUrl = null;
+            string imageUrl;
             if (dto.ImageFile != null)
                     imageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
             
@@ -69,13 +70,13 @@ namespace Service
             string DescEn;
             if (isArabic)
             {
-                DescAr = dto.Description;
-                DescEn = await _translationService.TranslateAsync(dto.Description, "en");
+                DescAr = dto.Description!;
+                DescEn = await _translationService.TranslateAsync(dto.Description!, "en");
             }
             else
             {
-                DescEn = dto.Description;
-                DescAr = await _translationService.TranslateAsync(dto.Description, "ar");
+                DescEn = dto.Description!;
+                DescAr = await _translationService.TranslateAsync(dto.Description!, "ar");
             }
 
             var product = new Product
@@ -87,7 +88,7 @@ namespace Service
                 DescriptionAr = DescAr,
                 DescriptionEn = DescEn,
                 CategoryId = dto.CategoryId,
-                SellerId = sellerId,
+                SellerId = sellerId!,
                 ImageUrl = imageUrl
             };
             if (dto.Tags != null && dto.Tags.Any())
@@ -184,8 +185,6 @@ namespace Service
                 throw new ItemNotFound("this item is already not found");
             }
             
-
-            // Delete image from Cloudinary before deleting product
             if (!string.IsNullOrEmpty(product.ImageUrl))
             {
                 string publicId = GetPublicIdFromUrl(product.ImageUrl);
@@ -210,7 +209,7 @@ namespace Service
 
             }
             var user = await _userManager.FindByIdAsync(id);
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user!);
             foreach (var role in roles)
             {
                 if (role != RoleType.Beginner.ToString() && role != RoleType.Expert.ToString())
@@ -229,7 +228,7 @@ namespace Service
             return ReturnListDto(isArabic, products, categoriesDict);
 
         }
-            public async Task<int> GetProductsCountByUserIdAsync(string userId)
+        public async Task<int> GetProductsCountByUserIdAsync(string userId)
             {
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
@@ -255,11 +254,10 @@ namespace Service
                         Id = p.Id,
                         Image = p.ImageUrl ?? "",
                         Name = isArabic ? p.NameAr : p.NameEn,
-                        Description = isArabic ? p.DescriptionAr : p.DescriptionEn,
+                        Description = isArabic ? p.DescriptionAr! : p.DescriptionEn!,
                         Price = p.Price
                     }).ToList();
-        }        
-
+        }
 
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
         {
@@ -267,13 +265,13 @@ namespace Service
             string DescEn;
             if (isArabic)
             {
-                DescAr = dataFromRequest.Description;
-                DescEn = await _translationService.TranslateAsync(dataFromRequest!.Description, "en");
+                DescAr = dataFromRequest.Description!;
+                DescEn = await _translationService.TranslateAsync(dataFromRequest!.Description!, "en");
             }
             else
             {
-                DescEn = dataFromRequest.Description;
-                DescAr = await _translationService.TranslateAsync(dataFromRequest?.Description, "ar");
+                DescEn = dataFromRequest.Description!;
+                DescAr = await _translationService.TranslateAsync(dataFromRequest?.Description!, "ar");
             }
 
             return (DescAr, DescEn);
@@ -325,7 +323,7 @@ namespace Service
             }
             catch
             {
-                return null;
+                throw new Exception();
             }
         }
         private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic, IEnumerable<Product> products, Dictionary<int, string> categoriesDict)
