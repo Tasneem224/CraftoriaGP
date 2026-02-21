@@ -82,6 +82,13 @@ namespace Presentation.Controllers
             return SendSuccessResponse(result, "Categories are returned successfully");
 
         }
-       
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return BadRequest("Search query cannot be empty");
+
+            var results = await _productService.SearchProductsAsync(query);
+            return Ok(results);
+        }
     }
 }

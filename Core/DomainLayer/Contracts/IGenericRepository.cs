@@ -16,6 +16,8 @@ namespace DomainLayer.Contracts
         Task AddAsync(TEntity entity);
         void Update(TEntity entity);
         void Remove(TEntity entity);
+        IQueryable<TEntity> GetAllQueryable();
+
 
     }
 }

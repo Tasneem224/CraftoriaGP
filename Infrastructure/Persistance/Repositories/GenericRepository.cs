@@ -42,5 +42,9 @@ namespace Persistance.Repositories
 
         }
 
+        public IQueryable<TEntity> GetAllQueryable()
+        {
+            return _dbContext.Set<TEntity>().AsNoTracking();
+        }
     }
 }
