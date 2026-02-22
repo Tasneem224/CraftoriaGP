@@ -22,18 +22,19 @@ namespace Presentation
         }
 
         [HttpPost("Toggle")]
+        [Authorize]
         public async Task<IActionResult> Toggle([FromQuery] int productId)
         {
-            // بنجيب الـ ID من التوكن عشان الأمان
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _favService.ToggleFavouriteAsync(userId, productId);
+            var result = await _favService.ToggleFavouriteAsync( productId);
             return Ok(new { message = result });
         }
 
+        [Authorize]
         [HttpGet("MyFavourites")]
         public async Task<IActionResult> GetMyFavourites()
         {
@@ -42,7 +43,7 @@ namespace Presentation
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _favService.GetUserFavouritesAsync(userId);
+            var result = await _favService.GetUserFavouritesAsync();
             return Ok(result);
         }
 
