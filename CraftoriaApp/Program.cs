@@ -8,12 +8,15 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
 using Service;
 using ServiceAbstraction;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,19 +79,19 @@ namespace CraftoriaApp
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-               options.TokenValidationParameters = new TokenValidationParameters
-               {
-                   ValidateIssuer = true,
-                   ValidateAudience = true,
-                   ValidateLifetime = true,
-                   ValidateIssuerSigningKey = true,
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
 
-                   ValidIssuer = builder.Configuration["JWTOptions:issuer"],
-                   ValidAudience = builder.Configuration["JWTOptions:audience"],
+                    ValidIssuer = builder.Configuration["JWTOptions:issuer"],
+                    ValidAudience = builder.Configuration["JWTOptions:audience"],
 
-                   IssuerSigningKey = new SymmetricSecurityKey(
-                       Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
-               };
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
+                };
             });
             builder.Services.AddScoped<ITranslationService, TranslationService>();
 
@@ -99,6 +102,30 @@ namespace CraftoriaApp
                 throw new Exception("Cloudinary configuration is missing");
 
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+
+            #region system messages localization
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddLocalization(opt =>
+            {
+                opt.ResourcesPath = "";
+            });
+
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                List<CultureInfo> supportedCultures = new List<CultureInfo>
+                {
+                    new CultureInfo("en"),
+                    new CultureInfo("ar")
+                };
+
+                options.DefaultRequestCulture = new RequestCulture("ar");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+
+            });
+            #endregion
+
+
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
             {
@@ -137,7 +164,16 @@ namespace CraftoriaApp
                 });
 
             }
-                app.UseHttpsRedirection();
+
+            #region system messages localization middleware
+
+            var options = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
+            app.UseRequestLocalization(options.Value);
+
+
+            #endregion
+
+            app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseAuthorization();

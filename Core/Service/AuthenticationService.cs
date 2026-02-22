@@ -1,115 +1,117 @@
 ﻿using DomainLayer.Contracts;
-    using DomainLayer.Exceptions;
-    using DomainLayer.Exceptions.DomainLayer.Exceptions;
-    using DomainLayer.Models.Identity;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.IdentityModel.Tokens;
-    using ServiceAbstraction;
-    using Shared.IdentityModule;
-    using System;
-    using System.Collections.Generic;
-    using System.IdentityModel.Tokens.Jwt;
-    using System.Linq;
-    using System.Security.Claims;
-    using System.Text;
-    using System.Threading.Tasks;
+using DomainLayer.Exceptions;
+using DomainLayer.Exceptions.DomainLayer.Exceptions;
+using DomainLayer.Models.Identity;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
+using Microsoft.IdentityModel.Tokens;
+using ServiceAbstraction;
+using Shared.IdentityModule;
+using Shared.Resources;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
 
 namespace Service
+{
+    public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService, IEmailVerificationCodeRepository _emailVerificationRepo, IStringLocalizer<SharedResources> _stringLocalizer) : IAuthenticationService
     {
-        public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationRepo) : IAuthenticationService
+
+        public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
         {
-          
-            public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
+            string? profileImagePath = null;
+
+            string roleName = _registerDto.Role.ToString();
+            string gender = _registerDto.Gender.ToString();
+            string portfolioPath = null;
+
+            try
             {
-                string? profileImagePath = null;
 
-                string roleName = _registerDto.Role.ToString();
-                string gender = _registerDto.Gender.ToString();
-                string portfolioPath = null;
-
-                try
+                var existingUser = await _userManager.FindByEmailAsync(_registerDto.Email);
+                if (existingUser is not null)
                 {
-                   
-                    var existingUser = await _userManager.FindByEmailAsync(_registerDto.Email);
-                    if (existingUser is not null)
-                    {
-                        throw new UserAlreadyExistsException(_registerDto.Email);
-                    }
-
-                    profileImagePath = _registerDto.ProfileImage is not null ? await _cloudinary.UploadAsync(_registerDto.ProfileImage) : null;
-
-                    portfolioPath = await ExpertOption(_registerDto, portfolioPath);
-
-                    var user = CreatingUserName(_registerDto.Email);
-                    var newUser = new ApplicationUser
-                    {
-                        UserName = user,
-                        DisplayName = user,
-                        Email = _registerDto.Email,
-                        FirstName = _registerDto.FirstName,
-                        SecondName = _registerDto.LastName,
-                        NormalizedEmail = _registerDto.Email,
-                        ProfileImage = profileImagePath,
-                        Portfolio = portfolioPath,
-                        Gender = (Gender)Enum.Parse(typeof(Gender), gender),
-                        YearsOfExperience = _registerDto.YearsOfExperience,
-                  
-
-
-                    };
-
-                    var result = await _userManager.CreateAsync(newUser, _registerDto.Password);
-
-                    if (result.Succeeded)
-                    {
-                        await _userManager.AddToRoleAsync(newUser, roleName);
-                        return new ReturnUserDTO
-                        {
-                            Email = newUser.Email,
-                            UserName = newUser.UserName,
-                            Token = await CreateTokenAsync(newUser)
-                        };
-                    }
-                    else
-                    {
-                        throw new DomainLayer.Exceptions.InvalidOperationExceptionCustome(result.Errors.Select(e => e.Description).ToList());
-                    }
-
+                    throw new UserAlreadyExistsException(_registerDto.Email);
                 }
-                catch (Exception)
-                {
-                    exceptionConditionForProfileAndPortfolio(profileImagePath, portfolioPath);
 
-                    throw;
+                profileImagePath = _registerDto.ProfileImage is not null ? await _cloudinary.UploadAsync(_registerDto.ProfileImage) : null;
 
-                }
-            }
-            public async Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto)
-            {
-                var user = await _userManager.FindByEmailAsync(loginDto.Email);
-                if (user is null)
+                portfolioPath = await ExpertOption(_registerDto, portfolioPath);
+
+                var user = CreatingUserName(_registerDto.Email);
+                var newUser = new ApplicationUser
                 {
-                    throw new UserNotFoundException(loginDto.Email);
-                }
-                //Check passwords match
-                var checkPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-                if (checkPassword)
+                    UserName = user,
+                    DisplayName = user,
+                    Email = _registerDto.Email,
+                    FirstName = _registerDto.FirstName,
+                    SecondName = _registerDto.LastName,
+                    NormalizedEmail = _registerDto.Email,
+                    ProfileImage = profileImagePath,
+                    Portfolio = portfolioPath,
+                    Gender = (Gender)Enum.Parse(typeof(Gender), gender),
+                    YearsOfExperience = _registerDto.YearsOfExperience,
+
+
+
+                };
+
+                var result = await _userManager.CreateAsync(newUser, _registerDto.Password);
+
+                if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(newUser, roleName);
                     return new ReturnUserDTO
                     {
-                        Email = user.Email,
-                        UserName = user.DisplayName,
-                        Token = await CreateTokenAsync(user)
-
+                        Email = newUser.Email,
+                        UserName = newUser.UserName,
+                        Token = await CreateTokenAsync(newUser)
                     };
                 }
-                throw new UnauthorizedAException();
+                else
+                {
+                    throw new DomainLayer.Exceptions.InvalidOperationExceptionCustome(result.Errors.Select(e => e.Description).ToList());
+                }
+
             }
-            public async Task<string> ForgotPasswordAsync(string email)
+            catch (Exception)
+            {
+                exceptionConditionForProfileAndPortfolio(profileImagePath, portfolioPath);
+
+                throw;
+
+            }
+        }
+        public async Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto)
+        {
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            if (user is null)
+            {
+                throw new UserNotFoundException(loginDto.Email);
+            }
+            //Check passwords match
+            var checkPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+            if (checkPassword)
+            {
+                return new ReturnUserDTO
+                {
+                    Email = user.Email,
+                    UserName = user.DisplayName,
+                    Token = await CreateTokenAsync(user)
+
+                };
+            }
+            throw new UnauthorizedAException();
+        }
+        public async Task<string> ForgotPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -128,98 +130,109 @@ namespace Service
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                throw new Exception("Could not save OTP");
+                throw new Exception(_stringLocalizer[SharedResourcesKeys.NotSaveOtp]);
             }
 
             // Send Email
             var body = BuildResetPasswordEmailBody(otp);
             await _emailService.SendEmailAsync(email, "Reset Password - Craftoria", body);
-            return "OTP sent successfully.";
+            // return "OTP sent successfully.";
+            return _stringLocalizer[SharedResourcesKeys.SendOtpSuccessfully];
+
+
         }
-            public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
-        { 
+        public async Task<string> ResetPasswordAsync(ResetPasswordDto model)
+        {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) throw new UserNotFoundException(model.Email);
 
             if (user.OtpCode != model.OtpCode || user.OtpExpiration < DateTime.UtcNow)
             {
-                throw new InvalidException("Invalid or Expired OTP");
+                //throw new InvalidException("Invalid or Expired OTP");
+                throw new InvalidException(_stringLocalizer[SharedResourcesKeys.ExpiredOtp]);
+
             }
 
-            
-                if (await _userManager.HasPasswordAsync(user))
-                {
-                    await _userManager.RemovePasswordAsync(user);
-                }
 
-                var result = await _userManager.AddPasswordAsync(user, model.NewPassword);
-
-                if (!result.Succeeded)
-                {
-           
-                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    throw new InvalidOperationExceptionCustome($"Failed to reset password: {errors}");
-                }
-
-                user.OtpCode = null;
-                user.OtpExpiration = null;
-
-                await _userManager.UpdateAsync(user);
-
-                return "Password has been reset";
-            }
-            public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
-                 {
-                    var user = await _userManager.FindByEmailAsync(model.Email);
-                    if (user == null) return false;
-
-                    if (user.OtpCode == model.OtpCode && user.OtpExpiration > DateTime.UtcNow)
-                    {
-                        return true;
-                    }
-
-                    return false;
-                }
-            public async Task<ReturnEmailOTP> VerifyEmailAsync(VerifyEmailDTO email)
+            if (await _userManager.HasPasswordAsync(user))
             {
-                if (email is null)
-                    throw new InvalidException("Email cannot be null.");
-
-                var  emailExists = await _userManager.FindByEmailAsync(email.Email);
-
-                if (emailExists is not null)
-                 throw new UserAlreadyExistsException("This email is already registered. Please use another email.");
-
-                  await _emailVerificationRepo.MarkOldOtpsAsync(email.Email);
-
-                var otpGenerated = GenerateOTP();
-
-                await _emailVerificationRepo.CreateOtpAsync(email.Email, otpGenerated, DateTime.UtcNow.AddMinutes(5));
-
-                await SendOtpEmailAsync(email.Email, otpGenerated);
-
-                return new ReturnEmailOTP
-                {
-                    Email = email.Email,
-                    OtpCode = otpGenerated
-                };
-            }
-            public async Task<bool> CheckEmailOTPAsync(VerifyOtpDto emailOTP)
-                {
-                    if(emailOTP.Email is null || emailOTP.OtpCode is null)
-                        throw new InvalidException("Email and OTP code cannot be null.");
-
-                            var activeOtp = await _emailVerificationRepo.GetActiveOtpByEmailAsync(emailOTP.Email);
-                            if (activeOtp is null)
-                                throw new InvalidException("OTP expired, used, or invalid. Please request a new one.");
-
-                            return await _emailVerificationRepo.VerifyOtpAsync(emailOTP.Email, emailOTP.OtpCode);
+                await _userManager.RemovePasswordAsync(user);
             }
 
+            var result = await _userManager.AddPasswordAsync(user, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                //throw new InvalidOperationExceptionCustome($"Failed to reset password: {errors}");
+                throw new InvalidOperationExceptionCustome($"{_stringLocalizer[SharedResourcesKeys.FailedToResetPassword]}: {errors}");
+            }
+
+            user.OtpCode = null;
+            user.OtpExpiration = null;
+
+            await _userManager.UpdateAsync(user);
+
+            //return "Password has been reset Successfully";
+            return _stringLocalizer[SharedResourcesKeys.PasswordResetSuccessfully];
+        }
+
+        public async Task<bool> VerifyOtpAsync(VerifyOtpDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null) return false;
+
+            if (user.OtpCode == model.OtpCode && user.OtpExpiration > DateTime.UtcNow)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        public async Task<ReturnEmailOTP> VerifyEmailAsync(VerifyEmailDTO email)
+        {
+            if (email is null)
+                //throw new InvalidException("Email cannot be null.");
+                throw new InvalidException(_stringLocalizer[SharedResourcesKeys.EmailCannotBeNull]);
+
+            var emailExists = await _userManager.FindByEmailAsync(email.Email);
+
+            if (emailExists is not null)
+              //  throw new UserAlreadyExistsException("This email is already registered. Please use another email.");
+            throw new UserAlreadyExistsException(_stringLocalizer[SharedResourcesKeys.EmailAlreadyRegistered]);
+
+            await _emailVerificationRepo.MarkOldOtpsAsync(email.Email);
+
+            var otpGenerated = GenerateOTP();
+
+            await _emailVerificationRepo.CreateOtpAsync(email.Email, otpGenerated, DateTime.UtcNow.AddMinutes(5));
+
+            await SendOtpEmailAsync(email.Email, otpGenerated);
+
+            return new ReturnEmailOTP
+            {
+                Email = email.Email,
+                OtpCode = otpGenerated
+            };
+        }
+        public async Task<bool> CheckEmailOTPAsync(VerifyOtpDto emailOTP)
+        {
+            if (emailOTP.Email is null || emailOTP.OtpCode is null)
+               // throw new InvalidException("Email and OTP code cannot be null.");
+                throw new InvalidException(_stringLocalizer[SharedResourcesKeys.EmailAndOtpCannotBeNull]);
+
+            var activeOtp = await _emailVerificationRepo.GetActiveOtpByEmailAsync(emailOTP.Email);
+            if (activeOtp is null)
+                throw new InvalidException(_stringLocalizer[SharedResourcesKeys.ExpiredOtp]);
+
+            return await _emailVerificationRepo.VerifyOtpAsync(emailOTP.Email, emailOTP.OtpCode);
+        }
 
 
 
-            private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
+
+        private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
         {
             if (profileImagePath is not null)
             {
@@ -231,50 +244,51 @@ namespace Service
                 _cloudinary.DeleteAsync(portfolioPath);
             }
         }
-            private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
+        private async Task<string> ExpertOption(RegisterDto _registerDto, string portfolioPath)
+        {
+            if (_registerDto.Role == RoleType.Expert)
             {
-                if (_registerDto.Role == RoleType.Expert)
+
+                if (_registerDto.Portfolio is null)
                 {
-
-                    if (_registerDto.Portfolio is null)
-                    {
-                        throw new InvalidOperationExceptionCustome(new List<string> { "Expert registration requires Portfolio." });
-                    }
-
-                    portfolioPath = await _cloudinary.UploadAsync(_registerDto.Portfolio);
+                    //throw new InvalidOperationExceptionCustome(new List<string> { "Expert registration requires Portfolio." });
+                    throw new InvalidOperationExceptionCustome(new List<string> { _stringLocalizer[SharedResourcesKeys.PortfolioRequired] });
                 }
 
-                return (portfolioPath);
+                portfolioPath = await _cloudinary.UploadAsync(_registerDto.Portfolio);
             }
-            private async Task<string> CreateTokenAsync(ApplicationUser user)
-            {
-                var claims = new List<Claim>()
+
+            return (portfolioPath);
+        }
+        private async Task<string> CreateTokenAsync(ApplicationUser user)
+        {
+            var claims = new List<Claim>()
                 {
 
                     new Claim(ClaimTypes.Email, user.Email!),
                     new Claim(ClaimTypes.Name,user.UserName!),
                     new Claim(ClaimTypes.NameIdentifier,user.Id!),
                 };
-                var roles = await _userManager.GetRolesAsync(user);
-                    foreach (var role in roles)
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
 
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                var secretKey = _configuration.GetSection("JWTOptions")["secretKey"];
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            var secretKey = _configuration.GetSection("JWTOptions")["secretKey"];
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["JWTOptions:issuer"],
-                    audience: _configuration["JWTOptions:audience"],
-                    claims: claims,
-                    expires: DateTime.Now.AddHours(1),
-                    signingCredentials: creds
-                    );
-                return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWTOptions:issuer"],
+                audience: _configuration["JWTOptions:audience"],
+                claims: claims,
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials: creds
+                );
+            return new JwtSecurityTokenHandler().WriteToken(token);
 
 
-            }
-            private string BuildOtpEmailBody(string otp)
+        }
+        private string BuildOtpEmailBody(string otp)
         {
             return $@"
     <div style='background-color:#f5efe6; padding:40px 0; font-family:Arial, sans-serif;'>
@@ -287,19 +301,19 @@ namespace Service
             </h2>
 
             <p style='text-align:center; color:#a67c52; margin-top:0; font-size:14px;'>
-                Account Verification
+                {_stringLocalizer[SharedResourcesKeys.AccountVerification]}
             </p>
 
             <p style='color:#5c4033; font-size:15px; line-height:1.6;'>
-                Hello,
+                {_stringLocalizer[SharedResourcesKeys.Hello]},
             </p>
 
             <p style='color:#5c4033; font-size:15px; line-height:1.6;'>
-                Someone is trying to create a <strong>Craftoria</strong> account using this email address.
+                {_stringLocalizer[SharedResourcesKeys.TryingToCreateAccount1]} <strong>Craftoria</strong> {_stringLocalizer[SharedResourcesKeys.TryingToCreateAccount2]}.
             </p>
 
             <p style='color:#5c4033; font-size:15px; line-height:1.6;'>
-                Please use the verification code below to continue the signup process:
+                {_stringLocalizer[SharedResourcesKeys.UseTheVerificationCode]}:
             </p>
 
             <div style='text-align:center; margin:30px 0;'>
@@ -316,11 +330,11 @@ namespace Service
             </div>
 
             <p style='color:#5c4033; font-size:14px; line-height:1.6;'>
-                This code will expire in <strong>10 minutes</strong>.
+                {_stringLocalizer[SharedResourcesKeys.TheCodeWillExpireIn]} <strong>10 {_stringLocalizer[SharedResourcesKeys.Minutes]}</strong>.
             </p>
 
             <p style='color:#7a5c4d; font-size:13px; line-height:1.6;'>
-                If this wasn’t you, you can safely ignore this email.
+                {_stringLocalizer[SharedResourcesKeys.IgnoreIfNotYou]}
             </p>
 
             <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
@@ -336,7 +350,7 @@ namespace Service
         </p>
     </div>";
         }
-            private string BuildResetPasswordEmailBody(string otp)
+        private string BuildResetPasswordEmailBody(string otp)
         {
             return $@"
     <div style='background-color:#f5efe6; padding:40px 0; font-family:Arial, sans-serif;'>
@@ -348,13 +362,13 @@ namespace Service
                 Craftoria
             </h2>
             <p style='text-align:center; color:#a67c52; margin-top:0;'>
-                Password Reset
+                {_stringLocalizer[SharedResourcesKeys.PasswordReset]}
             </p>
 
             <p style='color:#5c4033;'>Hello,</p>
 
             <p style='color:#5c4033; line-height:1.6;'>
-                We received a request to reset your password for 
+                {_stringLocalizer[SharedResourcesKeys.ReceivedRequestToResetPassword]} 
                 <strong>Craftoria App</strong>.
             </p>
 
@@ -372,11 +386,11 @@ namespace Service
             </div>
 
             <p style='color:#5c4033; line-height:1.6;'>
-                This code is valid for <strong>10 minutes</strong>.
+                {_stringLocalizer[SharedResourcesKeys.CodeIsValidForMinutes]} <strong>10 {_stringLocalizer[SharedResourcesKeys.Minutes]}</strong>.
             </p>
 
             <p style='color:#5c4033; line-height:1.6;'>
-                If you did not request a password reset, please ignore this email.
+                {_stringLocalizer[SharedResourcesKeys.IgnoreEmailIfNotYou]}
             </p>
 
             <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
@@ -389,42 +403,42 @@ namespace Service
     </div>";
         }
 
-            private static string GenerateOTP()=> new Random().Next(100000, 999999).ToString();
-            private async Task SendOtpEmailAsync(string email, string otp)
+        private static string GenerateOTP() => new Random().Next(100000, 999999).ToString();
+        private async Task SendOtpEmailAsync(string email, string otp)
         {
             var body = BuildOtpEmailBody(otp);
             await _emailService.SendEmailAsync(email, "Email Verification OTP", body);
         }
-            public string CreatingUserName(string email)=> email.Split('@')[0].ToLower().Trim();
+        public string CreatingUserName(string email) => email.Split('@')[0].ToLower().Trim();
 
-            public async Task<ReturnUserDTO> GoogleLoginAsync(GoogleLoginDto googleLoginDto)
+        public async Task<ReturnUserDTO> GoogleLoginAsync(GoogleLoginDto googleLoginDto)
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings()
             {
                 Audience = new List<string> { _configuration["GoogleAuth:ClientId"] }
             };
 
-            
+
             var payload = await GoogleJsonWebSignature.ValidateAsync(googleLoginDto.IdToken, settings);
 
             var user = await _userManager.FindByEmailAsync(payload.Email);
 
             if (user == null)
             {
-               
+
                 var generatedUserName = CreatingUserName(payload.Email);
 
                 user = new ApplicationUser
                 {
 
                     Email = payload.Email,
-                    UserName = generatedUserName, 
-                    DisplayName = payload.Name,   
+                    UserName = generatedUserName,
+                    DisplayName = payload.Name,
                     FirstName = payload.GivenName,
                     SecondName = payload.FamilyName,
                     Gender = Gender.Male,
-                    EmailConfirmed = true, 
-                                           
+                    EmailConfirmed = true,
+
 
                 };
 
@@ -433,15 +447,15 @@ namespace Service
 
                 if (!createResult.Succeeded)
                 {
-                    throw new Exception("حصل مشكلة واحنا بنسجل اليوزر الجديد جاي من جوجل");
+                    throw new Exception($"{_stringLocalizer[SharedResourcesKeys.ProblemWhileSaveTheUserFromGoogle]}");
                 }
 
-                
+
                 string role = googleLoginDto.Role.ToString();
                 await _userManager.AddToRoleAsync(user, role);
             }
 
-            
+
             var jwtToken = await CreateTokenAsync(user);
 
             return new ReturnUserDTO
@@ -452,7 +466,7 @@ namespace Service
             };
         }
 
-            public async Task ExpertWithGoolgeService(ExpertWithGoolgeDto infos)
+        public async Task ExpertWithGoolgeService(ExpertWithGoolgeDto infos)
         {
             var user = await _userManager.FindByEmailAsync(infos.Email);
             if (user == null)
@@ -460,9 +474,9 @@ namespace Service
                 throw new UserNotFoundException(infos.Email);
 
             }
-            var portfolioPath =await  _cloudinary.UploadAsync(infos.portfolio);
-            
-               user.Portfolio= portfolioPath;
+            var portfolioPath = await _cloudinary.UploadAsync(infos.portfolio);
+
+            user.Portfolio = portfolioPath;
             user.YearsOfExperience = infos.YearsOfExp;
 
 

@@ -1,22 +1,27 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Models.Favourite;
+using Microsoft.Extensions.Localization;
 using ServiceAbstraction;
 using Shared.Favourites;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Service
 {
     public class FavouriteService : IFavouriteService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStringLocalizer<SharedResources> _stringLocalizer;
 
-        public FavouriteService(IUnitOfWork unitOfWork)
+        public FavouriteService(IUnitOfWork unitOfWork, IStringLocalizer<SharedResources> stringLocalizer)
         {
             _unitOfWork = unitOfWork;
+            _stringLocalizer = stringLocalizer;
         }
 
         public async Task<string> ToggleFavouriteAsync(string userId, int productId)
@@ -29,7 +34,8 @@ namespace Service
             {
                 _unitOfWork.Favourites.Remove(existingFav);
                 await _unitOfWork.SaveChanges();
-                return "Removed from favourites";
+                //return "Removed from favourites";
+                return _stringLocalizer[SharedResourcesKeys.RemoveFav];
             }
             else
             {
@@ -41,7 +47,8 @@ namespace Service
 
                 await _unitOfWork.Favourites.AddAsync(newFav);
                 await _unitOfWork.SaveChanges();
-                return "Added to favourites";
+                // return "Added to favourites";
+                return _stringLocalizer[SharedResourcesKeys.AddToFav];
             }
         }
 
