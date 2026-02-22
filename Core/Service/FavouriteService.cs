@@ -1,10 +1,14 @@
 ﻿using DomainLayer.Contracts;
+using DomainLayer.Models.Categories;
 using DomainLayer.Models.Favourite;
+using Microsoft.AspNetCore.Http;
 using ServiceAbstraction;
 using Shared.Favourites;
+using Shared.IdentityModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,16 +17,17 @@ namespace Service
     public class FavouriteService : IFavouriteService
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public FavouriteService(IUnitOfWork unitOfWork)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public FavouriteService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
         }
-
-        public async Task<string> ToggleFavouriteAsync(string userId, int productId)
+        public async Task<string> ToggleFavouriteAsync(int productId)
         {
-            // هنا كان بيضرب عشان مكانش عارف يعني إيه Favourites جوه الـ UnitOfWork
-            // تأكدي إنك ضفتيها في Interface و Class الـ UnitOfWork زي ما اتفقنا
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var userId = AuthFun(isArabic);
             var existingFav = await _unitOfWork.Favourites.GetFavouriteAsync(userId, productId);
 
             if (existingFav != null)
@@ -33,7 +38,7 @@ namespace Service
             }
             else
             {
-                var newFav = new Favourite // << كان بيضرب هنا عشان مش لاقي الـ Namespace
+                var newFav = new Favourite 
                 {
                     UserId = userId,
                     ProductId = productId
@@ -41,22 +46,42 @@ namespace Service
 
                 await _unitOfWork.Favourites.AddAsync(newFav);
                 await _unitOfWork.SaveChanges();
-                return "Added to favourites";
+                return isArabic? "تمت الاضافة الى المفضلة": "Added to favourites";
             }
         }
-
-        public async Task<List<FavouriteItemDto>> GetUserFavouritesAsync(string userId)
+        public async Task<List<FavouriteItemDto>> GetUserFavouritesAsync()
         {
-            var favs = await _unitOfWork.Favourites.GetFavouritesByUserIdAsync(userId);
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
-            // كان بيضرب هنا عشان مش عارف DTO
-            return favs.Select(f => new FavouriteItemDto
-            {
+            var userId = AuthFun(isArabic);
+           
+            var favs = await _unitOfWork.Favourites.GetFavouritesByUserIdAsync(userId);
+            return favs.
+                Select(f => new FavouriteItemDto{
                 Id = f.Product.Id,
-                Name = f.Product.NameEn,
+                Name =isArabic? f.Product.NameAr:f.Product.NameEn,
                 ImageUrl = f.Product.ImageUrl,
+                category=f.Product.Category.Name,
                 Price = f.Product.Price
             }).ToList();
+        }
+        private string? AuthFun(bool isArabic)
+        {
+            var sellerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(sellerId))
+                throw new UnauthorizedAccessException(isArabic ? "يجب تسجيل الدخول أولاً" : "Unauthorized: Please login");
+
+            var user = _httpContextAccessor?.HttpContext?.User;
+
+
+            if (user==null)
+            {
+                throw new InvalidOperationException(isArabic
+                    ? "يجب عليك تسجيل الدخول"
+                    : "you must be Authoruze");
+            }
+            return sellerId;
         }
     }
 }

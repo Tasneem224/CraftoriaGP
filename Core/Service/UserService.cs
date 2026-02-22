@@ -43,7 +43,6 @@ namespace Service
             if (user == null)
                 throw new UserNotFoundException("User not found");
 
-            // ⭐ جلب roles
             var roles = await _userManager.GetRolesAsync(user);
 
             return new UserProfileDto
@@ -58,7 +57,6 @@ namespace Service
                 Specialization = user.Specialization,
                 YearOfExperience=user.YearsOfExperience,
 
-                // ⭐ تحويل role إلى enum
                 roleType = roles.Any()
                     ? Enum.Parse<RoleType>(roles.First())
                     : RoleType.Customer
