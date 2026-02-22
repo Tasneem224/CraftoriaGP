@@ -132,6 +132,9 @@
   <data name="CodeVerifiedSuccessfully" xml:space="preserve">
     <value>تم التحقق من الرمز بنجاح.</value>
   </data>
+  <data name="CurrentUserDataReturnedSuccessfully" xml:space="preserve">
+    <value>تم استرجاع بيانات المستخدم الحالي بنجاح.</value>
+  </data>
   <data name="EmailAlreadyRegistered" xml:space="preserve">
     <value>هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد إلكتروني آخر.</value>
   </data>
@@ -142,7 +145,7 @@
     <value>البريد الإلكتروني لا يمكن أن يكون فارغاً</value>
   </data>
   <data name="EmailVerifiedSuccessfully" xml:space="preserve">
-    <value />
+    <value>تم التحقق من البريد الإلكتروني بنجاح.</value>
   </data>
   <data name="ExpertInfoSavedSuccessfully" xml:space="preserve">
     <value>تم حفظ معلومات الخبير بنجاح!</value>
@@ -230,6 +233,9 @@
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>هذا المستخدم غير موجود</value>
+  </data>
+  <data name="UserProfileUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث الملف الشخصي للمستخدم بنجاح.</value>
   </data>
   <data name="UseTheVerificationCode" xml:space="preserve">
     <value>من فضلك استخدم رمز التحقق بالأسفل لمواصلة عملية تسجيل الدخول</value>

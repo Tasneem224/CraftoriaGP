@@ -42,6 +42,8 @@
         public const string ExpertInfoSavedSuccessfully = "ExpertInfoSavedSuccessfully";
         public const string OtpSentSuccessfullyToEmail = "OtpSentSuccessfullyToEmail";
         public const string EmailVerifiedSuccessfully = "EmailVerifiedSuccessfully";
+        public const string CurrentUserDataReturnedSuccessfully = "CurrentUserDataReturnedSuccessfully";
+        public const string UserProfileUpdatedSuccessfully = "UserProfileUpdatedSuccessfully";
 
 
 

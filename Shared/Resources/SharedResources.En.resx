@@ -132,6 +132,9 @@
   <data name="CodeVerifiedSuccessfully" xml:space="preserve">
     <value>Code verified successfully.</value>
   </data>
+  <data name="CurrentUserDataReturnedSuccessfully" xml:space="preserve">
+    <value>Data of the current user returned successfully.</value>
+  </data>
   <data name="EmailAlreadyRegistered" xml:space="preserve">
     <value>This email is already registered. Please use another email</value>
   </data>
@@ -230,6 +233,9 @@
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>this user is not found</value>
+  </data>
+  <data name="UserProfileUpdatedSuccessfully" xml:space="preserve">
+    <value>User Profile updated successfully.</value>
   </data>
   <data name="UseTheVerificationCode" xml:space="preserve">
     <value>Please use the verification code below to continue the signup process</value>
