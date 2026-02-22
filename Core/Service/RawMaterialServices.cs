@@ -8,6 +8,7 @@ using GTranslate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
+using Shared.Extensions;
 using Shared.IdentityModule;
 using Shared.ProductModule;
 using System;
@@ -105,7 +106,7 @@ namespace Service
             var material = new RawMaterial
             {
                 NameEn = dto.NameEn,
-                NameAr = dto.NameAr,
+                NameAr = dto.NameAr.NormalizeArabicText() ?? dto.NameAr,
                 Price = dto.Price,
                 Quantity = dto.Quantity ?? 0,
                 DescriptionAr = DescAr,
@@ -158,6 +159,7 @@ namespace Service
             ;
 
             Materials.NameEn = dataFromRequest.NameEn ?? Materials.NameEn ;
+            Materials.NameAr = dataFromRequest.NameAr.NormalizeArabicText() ?? Materials.NameAr ;
             Materials.Price = dataFromRequest.Price ?? Materials.Price ;
 
             if (dataFromRequest.Price.HasValue && dataFromRequest.Price > 0)

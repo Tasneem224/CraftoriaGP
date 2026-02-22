@@ -3,11 +3,16 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using ServiceAbstraction;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing; 
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace Service
 {
@@ -34,39 +39,53 @@ namespace Service
 
         public async Task<string> UploadAsync(IFormFile file)
         {
-            var ext = System.IO.Path.GetExtension(file.FileName).ToLower();
+            if (file == null || file.Length == 0) return string.Empty;
 
-            RawUploadParams uploadParams;
+            var ext = Path.GetExtension(file.FileName).ToLower();
+            bool isPdf = ext == ".pdf";
 
-            if (ext == ".pdf")
+            string folderName = isPdf ? "portfolio" : "images";
+
+            Stream streamToUpload = isPdf
+                ? file.OpenReadStream()
+                : await CompressImageAsync(file);
+
+            using (streamToUpload)
             {
-                uploadParams = new RawUploadParams
+                var uploadParams = new RawUploadParams
                 {
-                    File = new FileDescription(file.FileName, file.OpenReadStream()),
+                    File = new FileDescription(file.FileName, streamToUpload),
                     UseFilename = true,
                     UniqueFilename = false,
                     Overwrite = true,
-                    Folder = "portfolio",       // اختياري
-                    AccessMode = "public"       // 👈 مهم جدًا
+                    Folder = folderName,
+                    AccessMode = "public"
                 };
-            }
-            else
-            {
-                uploadParams = new RawUploadParams
-                {
-                    File = new FileDescription(file.FileName, file.OpenReadStream()),
-                    UseFilename = true,
-                    UniqueFilename = false,
-                    Overwrite = true,
-                    Folder = "images",
-                    AccessMode = "public"       // 👈 مهم جدًا
-                };
-            }
 
-            var result = await Task.Run(() => _cloudinary.Upload(uploadParams));
-            return result.SecureUrl.ToString();
+                var result = await _cloudinary.UploadAsync(uploadParams);
+
+                return result.SecureUrl.ToString();
+            }
         }
 
+        // دالة مساعدة (Helper Method) لضغط الصور فقط
+        private async Task<Stream> CompressImageAsync(IFormFile file)
+        {
+            var outStream = new MemoryStream();
+            using var image = await Image.LoadAsync(file.OpenReadStream());
+            int maxWidth = 1080;
+            if (image.Width > maxWidth)
+            {
+                int newHeight = (int)((double)image.Height / image.Width * maxWidth);
+                image.Mutate(x => x.Resize(maxWidth, newHeight));
+            }
+
+            var encoder = new JpegEncoder { Quality = 75 };
+            await image.SaveAsJpegAsync(outStream, encoder);
+
+            outStream.Position = 0;
+            return outStream;
+        }
     }
 
 }

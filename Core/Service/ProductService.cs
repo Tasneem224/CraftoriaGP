@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
 using Shared.ErrorModels;
+using Shared.Extensions;
 using Shared.IdentityModule;
 using Shared.ProductModule;
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
@@ -54,61 +56,73 @@ namespace Service
         }
         public async Task<ReturnProductDto> AddProductAsync(CreateProductDto dto)
         {
+            var totalStopwatch = Stopwatch.StartNew();
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+            var sellerId = AuthFun(isArabic);
+            if (dto.ImageFile == null) throw new Exception("You should upload an image");
 
-           var sellerId= AuthFun(isArabic);
+            async Task<string> UploadWithTimer()
+            {
+                var sw = Stopwatch.StartNew();
+                var result = await _cloudinary.UploadAsync(dto.ImageFile);
+                sw.Stop();
+                Console.WriteLine($"[Performance] ☁️ Cloudinary Upload took: {sw.ElapsedMilliseconds} ms");
+                return result;
+            }
 
-            string imageUrl;
-            if (dto.ImageFile != null)
-                    imageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
-            
+            async Task<string> TranslateWithTimer()
+            {
+                var sw = Stopwatch.StartNew();
+                string targetLang = isArabic ? "en" : "ar";
+                var result = await _translationService.TranslateAsync(dto.Description!, targetLang);
+                sw.Stop();
+                Console.WriteLine($"[Performance] 🌍 Translation API took: {sw.ElapsedMilliseconds} ms");
+                return result;
+            }
 
-            else
-            {
-                throw new Exception("you should upload image");
-            }
-            string DescAr;
-            string DescEn;
-            if (isArabic)
-            {
-                DescAr = dto.Description!;
-                DescEn = await _translationService.TranslateAsync(dto.Description!, "en");
-            }
-            else
-            {
-                DescEn = dto.Description!;
-                DescAr = await _translationService.TranslateAsync(dto.Description!, "ar");
-            }
+            var uploadTask = UploadWithTimer();
+            var translateTask = TranslateWithTimer();
+
+            await Task.WhenAll(uploadTask, translateTask);
+
+            string imageUrl = uploadTask.Result;
+            string translatedText = translateTask.Result;
+
+            string DescAr = isArabic ? dto.Description! : translatedText;
+            string DescEn = isArabic ? translatedText : dto.Description!;
+
+            var dbStopwatch = Stopwatch.StartNew();
 
             var product = new Product
             {
                 NameEn = dto.NameEn,
-                NameAr = dto.NameAr,
+                NameAr = dto.NameAr.NormalizeArabicText() ?? dto.NameAr,
                 Price = dto.Price,
                 Quantity = dto.Quantity ?? 0,
-                DescriptionAr = DescAr,
+                DescriptionAr = DescAr.NormalizeArabicText(),
                 DescriptionEn = DescEn,
                 CategoryId = dto.CategoryId,
                 SellerId = sellerId!,
                 ImageUrl = imageUrl
             };
+
             if (dto.Tags != null && dto.Tags.Any())
             {
+                var cleanTags = dto.Tags.Select(t => t.Trim()).ToList();
                 var tagRepo = _unitOfWork.GetRepository<Tag, int>();
-                var existingTags = await tagRepo.GetAllAsync();
 
-                foreach (var tagName in dto.Tags)
+                var existingTags = await tagRepo.GetAllQueryable()
+                .AsTracking()
+                .Where(t => cleanTags.Contains(t.Name))
+                .ToListAsync();
+                foreach (var tagName in cleanTags)
                 {
-                    var cleanTagName = tagName.Trim();
+                    var tag = existingTags.FirstOrDefault(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
 
-                    var tag = existingTags.FirstOrDefault(t => t.Name.Equals(cleanTagName, StringComparison.OrdinalIgnoreCase));
-
-                    if (tag != null)product.tags.Add(tag);
+                    if (tag != null)                  
+                        product.tags.Add(tag);
                     else
-                    {
-                        var newTag = new Tag { Name = cleanTagName };
-                        product.tags.Add(newTag);
-                    }
+                      product.tags.Add(new Tag { Name = tagName });
                 }
             }
             await _unitOfWork.GetRepository<Product, int>().AddAsync(product);
@@ -117,60 +131,40 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
 
+            dbStopwatch.Stop();
+            Console.WriteLine($"[Performance] 💾 Database (EF Core) took: {dbStopwatch.ElapsedMilliseconds} ms");
+
+            totalStopwatch.Stop();
+            Console.WriteLine($"[Performance] ⏱️ TOTAL AddProductAsync took: {totalStopwatch.ElapsedMilliseconds} ms");
+            Console.WriteLine("--------------------------------------------------");
+
             return ReturnDto(isArabic, product, category);
         }
         public async Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dataFromRequest)
         {
-
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
-
             AuthFun(isArabic);
 
             var repo = _unitOfWork.GetRepository<Product, int>();
-            var product = await repo.GetByIdAsync(id);
+
+
+            var product = await repo.GetAllQueryable()
+                                    .Include(p => p.tags)
+                                    .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
             {
                 throw new ItemNotFound("this product not found");
             }
-            (string DescAr, string DescEn) = await TranslateDescription(dataFromRequest, isArabic);
 
-            product.NameEn = dataFromRequest.NameEn ?? product.NameEn;
-            product.NameAr = dataFromRequest.NameAr ?? product.NameAr;
-
-            if (dataFromRequest.Price.HasValue && dataFromRequest.Price > 0)
-                product.Price = dataFromRequest.Price.Value;
-
-            if (dataFromRequest.CategoryId.HasValue && dataFromRequest.CategoryId > 0)
-                product.CategoryId = dataFromRequest.CategoryId.Value;
-            if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
-            {
-                (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
-                product.DescriptionAr = descAr;
-                product.DescriptionEn = descEn;
-            }
-
-            if (dataFromRequest.ImageFile != null)
-            {
-
-                if (!string.IsNullOrEmpty(product.ImageUrl))
-                {
-                    string publicId = GetPublicIdFromUrl(product.ImageUrl);
-                    if (!string.IsNullOrEmpty(publicId))
-                    {
-                        _cloudinary.DeleteAsync(publicId);
-                    }
-                }
-
-                product.ImageUrl = await _cloudinary.UploadAsync(dataFromRequest.ImageFile);
-            }
+            await UpdateData(dataFromRequest, isArabic, product);
 
             repo.Update(product);
+
             await _unitOfWork.SaveChanges();
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(product.CategoryId);
-
 
             return ReturnDto(isArabic, product, category);
         }
@@ -306,6 +300,8 @@ namespace Service
             return searchResults;
         }
 
+
+
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
         {
             string DescAr;
@@ -322,6 +318,71 @@ namespace Service
             }
 
             return (DescAr, DescEn);
+        }
+        private async Task UpdateData(UpdateProductDto dataFromRequest, bool isArabic, Product product)
+        {
+            product.NameEn = dataFromRequest.NameEn ?? product.NameEn;
+
+            if (!string.IsNullOrWhiteSpace(dataFromRequest.NameAr))
+            {
+                product.NameAr = dataFromRequest.NameAr.NormalizeArabicText();
+            }
+
+            if (dataFromRequest.Price.HasValue && dataFromRequest.Price > 0)
+                product.Price = dataFromRequest.Price.Value;
+
+            if (dataFromRequest.CategoryId.HasValue && dataFromRequest.CategoryId > 0)
+                product.CategoryId = dataFromRequest.CategoryId.Value;
+
+
+            if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
+            {
+                (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
+
+                product.DescriptionAr = descAr.NormalizeArabicText(); // توحيد الوصف العربي
+                product.DescriptionEn = descEn;
+            }
+
+
+            if (dataFromRequest.Tags != null)
+            {
+                product.tags.Clear();
+
+                if (dataFromRequest.Tags.Any())
+                {
+                    var tagRepo = _unitOfWork.GetRepository<Tag, int>();
+                    var existingDbTags = await tagRepo.GetAllAsync();
+
+                    foreach (var tagName in dataFromRequest.Tags)
+                    {
+                        var cleanTagName = tagName.Trim();
+                        var tag = existingDbTags.FirstOrDefault(t => t.Name.Equals(cleanTagName, StringComparison.OrdinalIgnoreCase));
+
+                        if (tag != null)
+                        {
+                            product.tags.Add(tag);
+                        }
+                        else
+                        {
+                            product.tags.Add(new Tag { Name = cleanTagName });
+                        }
+                    }
+                }
+            }
+
+            if (dataFromRequest.ImageFile != null)
+            {
+                if (!string.IsNullOrEmpty(product.ImageUrl))
+                {
+                    string publicId = GetPublicIdFromUrl(product.ImageUrl);
+                    if (!string.IsNullOrEmpty(publicId))
+                    {
+                        _cloudinary.DeleteAsync(publicId); // ⚠️ ضفت await هنا عشان الـ Delete يشتغل صح
+                    }
+                }
+
+                product.ImageUrl = await _cloudinary.UploadAsync(dataFromRequest.ImageFile);
+            }
         }
         private static ReturnProductDto ReturnDto(bool isArabic, Product product, ProductCategory category)
         {
