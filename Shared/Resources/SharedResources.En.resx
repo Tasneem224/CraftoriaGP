@@ -168,6 +168,9 @@
   <data name="ProblemWhileSaveTheUserFromGoogle" xml:space="preserve">
     <value>A Problem Occured While Trying Save the new user from google</value>
   </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>this product not found</value>
+  </data>
   <data name="ReceivedRequestToResetPassword" xml:space="preserve">
     <value>We received a request to reset your password for</value>
   </data>
@@ -177,8 +180,14 @@
   <data name="Required" xml:space="preserve">
     <value>This field is required</value>
   </data>
+  <data name="RoleIsNotValidToDoThisOperation" xml:space="preserve">
+    <value>role is not valid to do this operation</value>
+  </data>
   <data name="SendOtpSuccessfully" xml:space="preserve">
     <value>OTP sent successfully</value>
+  </data>
+  <data name="ShouldUploadImage" xml:space="preserve">
+    <value>you should upload image</value>
   </data>
   <data name="TheCodeWillExpireIn" xml:space="preserve">
     <value>This code will expire in</value>
@@ -188,6 +197,9 @@
   </data>
   <data name="TryingToCreateAccount2" xml:space="preserve">
     <value>account using this email address.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>this user is not found</value>
   </data>
   <data name="UseTheVerificationCode" xml:space="preserve">
     <value>Please use the verification code below to continue the signup process</value>

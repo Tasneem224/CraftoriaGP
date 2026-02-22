@@ -168,6 +168,9 @@
   <data name="ProblemWhileSaveTheUserFromGoogle" xml:space="preserve">
     <value>حدثت مشكلة أثناء محاولة تسجيل المستخدم الجديد من جوجل</value>
   </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>هذا المنتج غير موجود</value>
+  </data>
   <data name="ReceivedRequestToResetPassword" xml:space="preserve">
     <value>لقد تلقينا طلبا لإعادة تعيين كلمة المرور الخاصة بك ل</value>
   </data>
@@ -177,8 +180,14 @@
   <data name="Required" xml:space="preserve">
     <value>هذا الحقل مطلوب</value>
   </data>
+  <data name="RoleIsNotValidToDoThisOperation" xml:space="preserve">
+    <value>غير مسموح لك ان تقوم بهذه العملية لانك لست بائعا</value>
+  </data>
   <data name="SendOtpSuccessfully" xml:space="preserve">
     <value>تم إرسال رمز التحقق بنجاح</value>
+  </data>
+  <data name="ShouldUploadImage" xml:space="preserve">
+    <value>يجب ان ترفع صورة</value>
   </data>
   <data name="TheCodeWillExpireIn" xml:space="preserve">
     <value>هذا الرمز سوف ينتهي خلال </value>
@@ -188,6 +197,9 @@
   </data>
   <data name="TryingToCreateAccount2" xml:space="preserve">
     <value>حساب باستخدام هذا الإيميل</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>هذا المستخدم غير موجود</value>
   </data>
   <data name="UseTheVerificationCode" xml:space="preserve">
     <value>من فضلك استخدم رمز التحقق بالأسفل لمواصلة عملية تسجيل الدخول</value>

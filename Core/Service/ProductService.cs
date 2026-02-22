@@ -6,17 +6,19 @@ using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 using ServiceAbstraction;
 using Shared.ErrorModels;
 using Shared.IdentityModule;
 using Shared.ProductModule;
+using Shared.Resources;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace Service
 {
-    public class ProductService(ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
+    public class ProductService(ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork, IStringLocalizer<SharedResources> _stringLocalizer) : IProductService
     {
 
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
@@ -63,7 +65,7 @@ namespace Service
 
             else
             {
-                throw new Exception("you should upload image");
+                throw new Exception(_stringLocalizer[SharedResourcesKeys.ShouldUploadImage]);
             }
             string DescAr;
             string DescEn;
@@ -129,7 +131,7 @@ namespace Service
 
             if (product == null)
             {
-                throw new ItemNotFound("this product not found");
+                throw new ItemNotFound(_stringLocalizer[SharedResourcesKeys.ProductNotFound]);
             }
             (string DescAr, string DescEn) = await TranslateDescription(dataFromRequest, isArabic);
 
@@ -181,7 +183,7 @@ namespace Service
             var product = await repo.GetByIdAsync(id);
             if (product == null)
             {
-                throw new ItemNotFound("this item is already not found");
+                throw new ItemNotFound(_stringLocalizer[SharedResourcesKeys.ProductNotFound]);
             }
             
 
@@ -206,7 +208,7 @@ namespace Service
             var checkUser = await _userManager.FindByIdAsync(id);
             if (checkUser is null)
             {
-                throw new UserNotFoundException("this user is not found");
+                throw new UserNotFoundException(_stringLocalizer[SharedResourcesKeys.UserNotFound]);
 
             }
             var user = await _userManager.FindByIdAsync(id);
@@ -215,7 +217,7 @@ namespace Service
             {
                 if (role != RoleType.Beginner.ToString() && role != RoleType.Expert.ToString())
                 {
-                    throw new InvalidOperationException("role is not valid to do this operation");
+                    throw new InvalidOperationException(_stringLocalizer[SharedResourcesKeys.RoleIsNotValidToDoThisOperation]);
                 }
             }
             var repo = _unitOfWork.GetRepository<Product, int>();
@@ -234,7 +236,7 @@ namespace Service
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
                 {
-                    throw new UserNotFoundException("this user is not found");
+                    throw new UserNotFoundException(_stringLocalizer[SharedResourcesKeys.UserNotFound]);
                 }
 
                 var repo = _unitOfWork.GetRepository<Product, int>();

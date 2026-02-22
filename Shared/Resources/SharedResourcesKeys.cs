@@ -27,6 +27,10 @@
         public const string UseTheVerificationCode = "UseTheVerificationCode";
         public const string TheCodeWillExpireIn = "TheCodeWillExpireIn";
         public const string IgnoreIfNotYou = "IgnoreIfNotYou";
+        public const string ShouldUploadImage = "ShouldUploadImage";
+        public const string ProductNotFound = "ProductNotFound";
+        public const string UserNotFound = "UserNotFound";
+        public const string RoleIsNotValidToDoThisOperation = "RoleIsNotValidToDoThisOperation";
 
 
 
