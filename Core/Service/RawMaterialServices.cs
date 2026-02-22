@@ -7,9 +7,11 @@ using DomainLayer.Models.RawMaterials;
 using GTranslate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 using ServiceAbstraction;
 using Shared.IdentityModule;
 using Shared.ProductModule;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,13 +28,15 @@ namespace Service
         private readonly ICloudinaryService _cloudinary;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITranslationService _translationServic;
-        public RawMaterialServices(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager , ICloudinaryService cloudinary,IHttpContextAccessor httpContextAccessor) 
+        private readonly IStringLocalizer<SharedResources> _stringLocalizer;
+        public RawMaterialServices(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager , ICloudinaryService cloudinary,IHttpContextAccessor httpContextAccessor, IStringLocalizer<SharedResources> stringLocalizer) 
         { 
             _userManager = userManager;
 
             _unitOfWork = unitOfWork;
             _cloudinary = cloudinary;
             _httpContextAccessor = httpContextAccessor;
+            _stringLocalizer = stringLocalizer;
         }
 
         public async Task<ReturnProductDto> AddMaterialsAsync(CreateProductDto dto)
@@ -65,7 +69,7 @@ namespace Service
 
             else
             {
-                throw new Exception("you should upload image");
+                throw new Exception();
             }
 
 
@@ -128,7 +132,7 @@ namespace Service
             var product = await repo.GetByIdAsync(id);
             if (product == null)
             {
-                throw new ItemNotFound("this item is already not found");
+                throw new ItemNotFound(_stringLocalizer[SharedResourcesKeys.ProductNotFound]);
             }
 
 
@@ -178,7 +182,7 @@ namespace Service
             var checkUser = await _userManager.FindByIdAsync(id);
             if (checkUser is null)
             {
-                throw new UserNotFoundException("this user is not found");
+                throw new UserNotFoundException(_stringLocalizer[SharedResourcesKeys.UserNotFound]);
 
             }
             var user = await _userManager.FindByIdAsync(id);
@@ -187,7 +191,7 @@ namespace Service
             {
                 if (role != RoleType.Supplier.ToString())
                 {
-                    throw new InvalidOperationException("role is not valid to do this operation");
+                    throw new InvalidOperationException(_stringLocalizer[SharedResourcesKeys.RoleIsNotValidToDoThisOperation]);
                 }
             }
             var repo = _unitOfWork.GetRepository<RawMaterial, int>();
@@ -245,7 +249,7 @@ namespace Service
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                throw new UserNotFoundException("this user is not found");
+                throw new UserNotFoundException(_stringLocalizer[SharedResourcesKeys.UserNotFound]);
             }
 
             // 2. الحصول على الـ Repository وعمل Count للمنتجات الخاصة بهذا المستخدم
@@ -263,7 +267,7 @@ namespace Service
 
             if (Materials == null)
             {
-                throw new ItemNotFound("this product not found");
+                throw new ItemNotFound(_stringLocalizer[SharedResourcesKeys.ProductNotFound]);
             }
             ;
 
