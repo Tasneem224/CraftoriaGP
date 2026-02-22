@@ -1,10 +1,12 @@
 ﻿using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Service;
 using ServiceAbstraction;
 using Shared.Category;
 using Shared.ProductModule;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
-    public class ProductsController(IProductService _productService, ICategoryService _categoryService) : BaseApiController
+    public class ProductsController(IProductService _productService, ICategoryService _categoryService, IStringLocalizer<SharedResources> _stringLocalizer) : BaseApiController
     {
         [HttpGet("GetAllProducts")]
         public async Task<IActionResult> GetAll()
@@ -33,9 +35,10 @@ namespace Presentation.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _productService.GetProductByIdAsync(id);
-            if (product == null) return NotFound(new { message = "Product not found" });
+            if (product == null) return NotFound(new { message = _stringLocalizer[SharedResourcesKeys.ProductNotFound] });
             return Ok(product);
         }
+
         [Authorize]
         [HttpPost("CreateProduct")]
         public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
@@ -43,8 +46,9 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var result = await _productService.AddProductAsync(dto);
-            return Ok(new { message = "Created Successfully", data = result });
+            return Ok(new { message = _stringLocalizer[SharedResourcesKeys.CreatedSuccessfully], data = result });
         }
+
         [HttpGet("my-products-count")]
         public async Task<IActionResult> GetMyProductsCount(string userId)
         {
@@ -52,6 +56,7 @@ namespace Presentation.Controllers
             var count = await _productService.GetProductsCountByUserIdAsync(userId);
             return Ok(new { totalProducts = count });
         }
+
         [Authorize]
         [HttpPut("UpdateProduct")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
@@ -62,9 +67,9 @@ namespace Presentation.Controllers
             try
             {
                 var result = await _productService.UpdateProductAsync(id, dto);
-                if (result == null) return NotFound(new { message = "Product not found" });
+                if (result == null) return NotFound(new { message = _stringLocalizer[SharedResourcesKeys.ProductNotFound] });
 
-                return Ok(new { message = "Updated Successfully", data = result });
+                return Ok(new { message = _stringLocalizer[SharedResourcesKeys.UpdatedSuccessfully], data = result });
             }
             catch (System.Exception ex)
             {
@@ -76,15 +81,15 @@ namespace Presentation.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _productService.DeleteProductAsync(id);
-            if (!success) return NotFound("Product not found");
+            if (!success) return NotFound(_stringLocalizer[SharedResourcesKeys.ProductNotFound]);
 
-            return Ok(new { message = "Deleted Successfully" });
+            return Ok(new { message = _stringLocalizer[SharedResourcesKeys.DeletedSuccessfully] });
         }
         [HttpGet("GetAllProductCategories")]
         public async Task<IActionResult> GetAllProductCategories()
         {
             var result = await _categoryService.GetAllProductCategoriesAsync();
-            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, _stringLocalizer[SharedResourcesKeys.CategoriesReturnedSuccessfully]);
         }
 
       
@@ -92,7 +97,7 @@ namespace Presentation.Controllers
         public async Task<IActionResult> GetAllProductCategoriesById(int id)
         {
             var result = await _productService.GetAllProductsOfSpecificCategory(id);
-            return SendSuccessResponse<IEnumerable<ReturnProductsOfCategory>>(result, "Categories are returned successfully");
+            return SendSuccessResponse<IEnumerable<ReturnProductsOfCategory>>(result, _stringLocalizer[SharedResourcesKeys.CategoriesReturnedSuccessfully]);
 
         }
        
