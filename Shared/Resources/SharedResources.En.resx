@@ -153,6 +153,9 @@
   <data name="IgnoreIfNotYou" xml:space="preserve">
     <value>If this wasn’t you, you can safely ignore this email.</value>
   </data>
+  <data name="InvalidToken" xml:space="preserve">
+    <value>Invalid token.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minutes</value>
   </data>

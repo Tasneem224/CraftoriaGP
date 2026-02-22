@@ -2,9 +2,11 @@
 using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 using ServiceAbstraction;
 using Shared.IdentityModule;
 using Shared.Profile;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,15 +21,18 @@ namespace Service
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IStringLocalizer<SharedResources> _stringLocalizer;
 
 
-        public UserService(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, ICloudinaryService cloudinaryService)
+
+        public UserService(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, ICloudinaryService cloudinaryService, IStringLocalizer<SharedResources> stringLocalizer)
         {
 
 
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _cloudinaryService = cloudinaryService;
+            _stringLocalizer = stringLocalizer;
 
         }
         public async Task<UserProfileDto> GetCurrentUserAsync()
@@ -36,12 +41,12 @@ namespace Service
                 .User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
-                throw new UnauthorizedAccessException("Invalid token");
+                throw new UnauthorizedAccessException(_stringLocalizer[SharedResourcesKeys.InvalidToken]);
 
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
-                throw new UserNotFoundException("User not found");
+                throw new UserNotFoundException(_stringLocalizer[SharedResourcesKeys.UserNotFound]);
 
             // ⭐ جلب roles
             var roles = await _userManager.GetRolesAsync(user);
@@ -71,12 +76,13 @@ namespace Service
                .User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
-                throw new UnauthorizedAccessException("Invalid token");
+               // throw new UnauthorizedAccessException("Invalid token");
+                throw new UnauthorizedAccessException(_stringLocalizer[SharedResourcesKeys.InvalidToken]);
 
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
-                throw new UserNotFoundException("User not found");
+                throw new UserNotFoundException(_stringLocalizer[SharedResourcesKeys.UserNotFound]);
 
             checkUpdateData(updateUserDto, user);
 

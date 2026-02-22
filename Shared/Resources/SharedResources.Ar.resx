@@ -153,6 +153,9 @@
   <data name="IgnoreIfNotYou" xml:space="preserve">
     <value>إذا لم تكن أنت من طلبت هذا الإيميل  من فضلك تجاهل هذا الإيميل</value>
   </data>
+  <data name="InvalidToken" xml:space="preserve">
+    <value>رمز المصادقة غير صالح.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>دقائق</value>
   </data>

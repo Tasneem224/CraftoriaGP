@@ -33,6 +33,7 @@
         public const string RoleIsNotValidToDoThisOperation = "RoleIsNotValidToDoThisOperation";
         public const string ReviewNotFound = "ReviewNotFound";
         public const string CannotDeleteThisReview = "CannotDeleteThisReview";
+        public const string InvalidToken = "InvalidToken";
 
 
 
