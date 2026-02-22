@@ -138,8 +138,8 @@ namespace Service
 
             var product = await repo.GetAllQueryable()
                                     .Include(p => p.tags)
+                                    .Include(p=>p.Category)
                                     .FirstOrDefaultAsync(p => p.Id == id);
-
             if (product == null)
             {
                 throw new ItemNotFound("this product not found");
@@ -147,14 +147,9 @@ namespace Service
 
             await UpdateData(dataFromRequest, isArabic, product);
 
-            repo.Update(product);
-
             await _unitOfWork.SaveChanges();
 
-            var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
-            var category = await categoryRepo.GetByIdAsync(product.CategoryId);
-
-            return ReturnDto(isArabic, product, category);
+            return ReturnDto(isArabic, product, product.Category);
         }
         public async Task<bool> DeleteProductAsync(int id)
         {
@@ -263,7 +258,7 @@ namespace Service
                     Product = p,
                     TagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : ""
                 })
-                .Select(x=> new
+                .Select(x => new
                 {
                     x.Product,
                     SearchableText = $"{x.Product.NameAr} {x.Product.NameEn} {x.Product.DescriptionAr} {x.Product.DescriptionEn} {x.TagsText}".ToLower().NormalizeArabicText()
@@ -296,7 +291,6 @@ namespace Service
         }
 
 
-
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
         {
             string DescAr;
@@ -317,11 +311,8 @@ namespace Service
         private async Task UpdateData(UpdateProductDto dataFromRequest, bool isArabic, Product product)
         {
             product.NameEn = dataFromRequest.NameEn ?? product.NameEn;
-
             if (!string.IsNullOrWhiteSpace(dataFromRequest.NameAr))
-            {
-                product.NameAr = dataFromRequest.NameAr.NormalizeArabicText();
-            }
+                product.NameAr = dataFromRequest.NameAr.NormalizeArabicText()!;
 
             if (dataFromRequest.Price.HasValue && dataFromRequest.Price > 0)
                 product.Price = dataFromRequest.Price.Value;
@@ -329,55 +320,53 @@ namespace Service
             if (dataFromRequest.CategoryId.HasValue && dataFromRequest.CategoryId > 0)
                 product.CategoryId = dataFromRequest.CategoryId.Value;
 
+            var tasks = new List<Task>();
 
             if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
             {
-                (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
-
-                product.DescriptionAr = descAr.NormalizeArabicText(); // توحيد الوصف العربي
-                product.DescriptionEn = descEn;
-            }
-
-
-            if (dataFromRequest.Tags != null)
-            {
-                product.tags.Clear();
-
-                if (dataFromRequest.Tags.Any())
-                {
-                    var tagRepo = _unitOfWork.GetRepository<Tag, int>();
-                    var existingDbTags = await tagRepo.GetAllAsync();
-
-                    foreach (var tagName in dataFromRequest.Tags)
-                    {
-                        var cleanTagName = tagName.Trim();
-                        var tag = existingDbTags.FirstOrDefault(t => t.Name.Equals(cleanTagName, StringComparison.OrdinalIgnoreCase));
-
-                        if (tag != null)
-                        {
-                            product.tags.Add(tag);
-                        }
-                        else
-                        {
-                            product.tags.Add(new Tag { Name = cleanTagName });
-                        }
-                    }
-                }
+                tasks.Add(Task.Run(async () => {
+                    (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
+                    product.DescriptionAr = descAr.NormalizeArabicText();
+                    product.DescriptionEn = descEn;
+                }));
             }
 
             if (dataFromRequest.ImageFile != null)
             {
-                if (!string.IsNullOrEmpty(product.ImageUrl))
-                {
-                    string publicId = GetPublicIdFromUrl(product.ImageUrl);
-                    if (!string.IsNullOrEmpty(publicId))
+                tasks.Add(Task.Run(async () => {
+                    if (!string.IsNullOrEmpty(product.ImageUrl))
                     {
-                        _cloudinary.DeleteAsync(publicId); // ⚠️ ضفت await هنا عشان الـ Delete يشتغل صح
+                        string publicId = GetPublicIdFromUrl(product.ImageUrl);
+                        if (!string.IsNullOrEmpty(publicId))
+                        {
+                             _cloudinary.DeleteAsync(publicId); 
+                        }
+                    }
+                    product.ImageUrl = await _cloudinary.UploadAsync(dataFromRequest.ImageFile);
+                }));
+            }
+
+            if (dataFromRequest.Tags != null)
+            {
+                product.tags.Clear();
+                if (dataFromRequest.Tags.Any())
+                {
+                    var tagRepo = _unitOfWork.GetRepository<Tag, int>();
+                    var cleanTags = dataFromRequest.Tags.Select(t => t.Trim()).ToList();
+
+                    var existingDbTags = await tagRepo.GetAllQueryable()
+                        .Where(t => cleanTags.Contains(t.Name))
+                        .ToListAsync();
+
+                    foreach (var tagName in cleanTags)
+                    {
+                        var tag = existingDbTags.FirstOrDefault(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                        product.tags.Add(tag ?? new Tag { Name = tagName });
                     }
                 }
-
-                product.ImageUrl = await _cloudinary.UploadAsync(dataFromRequest.ImageFile);
             }
+
+            await Task.WhenAll(tasks);
         }
         private static ReturnProductDto ReturnDto(bool isArabic, Product product, ProductCategory category)
         {
