@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Presentation.Controllers;
 using ServiceAbstraction;
 using Shared.Interaction;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +17,13 @@ namespace Presentation
     public class ReviewsController:BaseApiController
     {
         private readonly IUserInteractionService _reviewService;
+        private readonly IStringLocalizer<SharedResources> _stringLocalizer;
 
-        public ReviewsController(IUserInteractionService reviewService)
+
+        public ReviewsController(IUserInteractionService reviewService, IStringLocalizer<SharedResources> stringLocalizer)
         {
             _reviewService = reviewService;
+            _stringLocalizer = stringLocalizer;
         }
 
         [Authorize]
@@ -28,10 +33,10 @@ namespace Presentation
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null)
-                return Unauthorized("User ID not found in token");
+                return Unauthorized();
 
             if (dto.ProductId == null && dto.RawMaterialId == null && dto.TargetUserId == null)
-                return BadRequest("you should determine an item first");
+                return BadRequest(_stringLocalizer[SharedResourcesKeys.DetermineAnItemFirst]);
 
            var review= await _reviewService.AddOrUpdateReviewAsync(userId, dto);
 
@@ -44,10 +49,10 @@ namespace Presentation
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userId == null) return Unauthorized();
+            if (userId == null) return Unauthorized(_stringLocalizer[SharedResourcesKeys.UserIdNotFoundInToken]);
 
              await _reviewService.DeleteReviewAsync(reviewId, userId);
-                return SendSuccessResponse("Review deleted successfully");
+                return SendSuccessResponse(_stringLocalizer[SharedResourcesKeys.ReviewDeletedSuccessfully]);
         }
 
         [HttpGet("GetProductReviews")]

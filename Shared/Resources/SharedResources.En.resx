@@ -135,6 +135,9 @@
   <data name="CurrentUserDataReturnedSuccessfully" xml:space="preserve">
     <value>Data of the current user returned successfully.</value>
   </data>
+  <data name="DetermineAnItemFirst" xml:space="preserve">
+    <value>You should determine an item first.</value>
+  </data>
   <data name="EmailAlreadyRegistered" xml:space="preserve">
     <value>This email is already registered. Please use another email</value>
   </data>
@@ -210,6 +213,9 @@
   <data name="Required" xml:space="preserve">
     <value>This field is required</value>
   </data>
+  <data name="ReviewDeletedSuccessfully" xml:space="preserve">
+    <value>Review deleted successfully.</value>
+  </data>
   <data name="ReviewNotFound" xml:space="preserve">
     <value>Review Not Found</value>
   </data>
@@ -230,6 +236,9 @@
   </data>
   <data name="TryingToCreateAccount2" xml:space="preserve">
     <value>account using this email address.</value>
+  </data>
+  <data name="UserIdNotFoundInToken" xml:space="preserve">
+    <value>User ID not found in token.</value>
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>this user is not found</value>

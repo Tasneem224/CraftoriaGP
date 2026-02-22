@@ -44,6 +44,9 @@
         public const string EmailVerifiedSuccessfully = "EmailVerifiedSuccessfully";
         public const string CurrentUserDataReturnedSuccessfully = "CurrentUserDataReturnedSuccessfully";
         public const string UserProfileUpdatedSuccessfully = "UserProfileUpdatedSuccessfully";
+        public const string UserIdNotFoundInToken = "UserIdNotFoundInToken";
+        public const string DetermineAnItemFirst = "DetermineAnItemFirst";
+        public const string ReviewDeletedSuccessfully = "ReviewDeletedSuccessfully";
 
 
 

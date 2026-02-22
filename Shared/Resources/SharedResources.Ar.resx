@@ -135,6 +135,9 @@
   <data name="CurrentUserDataReturnedSuccessfully" xml:space="preserve">
     <value>تم استرجاع بيانات المستخدم الحالي بنجاح.</value>
   </data>
+  <data name="DetermineAnItemFirst" xml:space="preserve">
+    <value>يجب عليك تحديد عنصر أولاً.</value>
+  </data>
   <data name="EmailAlreadyRegistered" xml:space="preserve">
     <value>هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد إلكتروني آخر.</value>
   </data>
@@ -210,6 +213,9 @@
   <data name="Required" xml:space="preserve">
     <value>هذا الحقل مطلوب</value>
   </data>
+  <data name="ReviewDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف التقييم بنجاح.</value>
+  </data>
   <data name="ReviewNotFound" xml:space="preserve">
     <value>التقييم غير موجود</value>
   </data>
@@ -230,6 +236,9 @@
   </data>
   <data name="TryingToCreateAccount2" xml:space="preserve">
     <value>حساب باستخدام هذا الإيميل</value>
+  </data>
+  <data name="UserIdNotFoundInToken" xml:space="preserve">
+    <value>لم يتم العثور على معرف المستخدم في رمز المصادقة.</value>
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>هذا المستخدم غير موجود</value>
