@@ -10,7 +10,8 @@ namespace Shared.Favourites
     {
         public int Id { get; set; }           // Product Id
         public string Name { get; set; }
-        public string? ImageUrl { get; set; }
+        public string ImageUrl { get; set; }
         public decimal Price { get; set; }
+        public string category { get; set; }
     }
 }
