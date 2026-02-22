@@ -63,20 +63,14 @@ namespace Service
 
             async Task<string> UploadWithTimer()
             {
-                var sw = Stopwatch.StartNew();
                 var result = await _cloudinary.UploadAsync(dto.ImageFile);
-                sw.Stop();
-                Console.WriteLine($"[Performance] ☁️ Cloudinary Upload took: {sw.ElapsedMilliseconds} ms");
                 return result;
             }
 
             async Task<string> TranslateWithTimer()
             {
-                var sw = Stopwatch.StartNew();
                 string targetLang = isArabic ? "en" : "ar";
                 var result = await _translationService.TranslateAsync(dto.Description!, targetLang);
-                sw.Stop();
-                Console.WriteLine($"[Performance] 🌍 Translation API took: {sw.ElapsedMilliseconds} ms");
                 return result;
             }
 
@@ -131,12 +125,6 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
 
-            dbStopwatch.Stop();
-            Console.WriteLine($"[Performance] 💾 Database (EF Core) took: {dbStopwatch.ElapsedMilliseconds} ms");
-
-            totalStopwatch.Stop();
-            Console.WriteLine($"[Performance] ⏱️ TOTAL AddProductAsync took: {totalStopwatch.ElapsedMilliseconds} ms");
-            Console.WriteLine("--------------------------------------------------");
 
             return ReturnDto(isArabic, product, category);
         }
@@ -259,19 +247,26 @@ namespace Service
 
             var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
             var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
-            var normalizedQuery = query.Trim().ToLower();
+            var normalizedQuery1 = query.Trim().ToLower();
+            var normalizedQuery= normalizedQuery1.NormalizeArabicText();
 
             var allProducts = await _unitOfWork.GetRepository<Product, int>()
                 .GetAllQueryable()
                 .Include(p => p.Category)
                 .Include(p => p.Seller) 
+                .Include(t=>t.tags)
                 .ToListAsync();
 
             var searchResults = allProducts
                 .Select(p => new
                 {
                     Product = p,
-                    SearchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn}".ToLower()
+                    TagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : ""
+                })
+                .Select(x=> new
+                {
+                    x.Product,
+                    SearchableText = $"{x.Product.NameAr} {x.Product.NameEn} {x.Product.DescriptionAr} {x.Product.DescriptionEn} {x.TagsText}".ToLower().NormalizeArabicText()
                 })
                 .Select(x => new
                 {
