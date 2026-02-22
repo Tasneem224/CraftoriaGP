@@ -21,6 +21,7 @@ namespace Presentation
             _favService = favService;
         }
 
+
         [HttpPost("Toggle")]
         public async Task<IActionResult> Toggle([FromQuery] int productId)
         {
