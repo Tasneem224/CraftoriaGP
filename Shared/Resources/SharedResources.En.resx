@@ -126,14 +126,23 @@
   <data name="CannotDeleteThisReview" xml:space="preserve">
     <value>You are not allowed to delete this review</value>
   </data>
+  <data name="CategoriesReturnedSuccessfully" xml:space="preserve">
+    <value>CategoriesReturnedSuccessfully</value>
+  </data>
   <data name="CodeIsValidForMinutes" xml:space="preserve">
     <value>This code is valid for</value>
   </data>
   <data name="CodeVerifiedSuccessfully" xml:space="preserve">
     <value>Code verified successfully.</value>
   </data>
+  <data name="CreatedSuccessfully" xml:space="preserve">
+    <value>Created successfully.</value>
+  </data>
   <data name="CurrentUserDataReturnedSuccessfully" xml:space="preserve">
     <value>Data of the current user returned successfully.</value>
+  </data>
+  <data name="DeletedSuccessfully" xml:space="preserve">
+    <value>Deleted successfully.</value>
   </data>
   <data name="DetermineAnItemFirst" xml:space="preserve">
     <value>You should determine an item first.</value>
@@ -201,6 +210,9 @@
   <data name="ProductNotFound" xml:space="preserve">
     <value>this product not found</value>
   </data>
+  <data name="RawMaterialNotFound" xml:space="preserve">
+    <value>Raw Material not found.</value>
+  </data>
   <data name="ReceivedRequestToResetPassword" xml:space="preserve">
     <value>We received a request to reset your password for</value>
   </data>
@@ -236,6 +248,9 @@
   </data>
   <data name="TryingToCreateAccount2" xml:space="preserve">
     <value>account using this email address.</value>
+  </data>
+  <data name="UpdatedSuccessfully" xml:space="preserve">
+    <value>Updated successfully.</value>
   </data>
   <data name="UserIdNotFoundInToken" xml:space="preserve">
     <value>User ID not found in token.</value>

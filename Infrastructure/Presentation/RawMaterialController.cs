@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Presentation.Controllers;
 using Service;
 using ServiceAbstraction;
 using Shared.Category;
 using Shared.ProductModule;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Presentation
 {
-    public class RawMaterialController(IRawMaterialServices _materialService, ICategoryService _categoryService):BaseApiController
+    public class RawMaterialController(IRawMaterialServices _materialService, ICategoryService _categoryService, IStringLocalizer<SharedResources> _stringLocalizer) :BaseApiController
     {
         [HttpGet("my-Material-count")]
         [Authorize]
@@ -34,6 +36,8 @@ namespace Presentation
             var products = await _materialService.GetAllMaterialsAsync();
             return Ok(products);
         }
+
+
         [HttpPost("GetRawMaterialOfSpecificUser")]
         public async Task<IActionResult> GetAllMaterialsOfSpecifiUser(string userId)
         {
@@ -45,7 +49,7 @@ namespace Presentation
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _materialService.GetMaterialsByIdAsync(id);
-            if (product == null) return NotFound(new { message = "Raw Material not found" });
+            if (product == null) return NotFound(new { message = _stringLocalizer[SharedResourcesKeys.RawMaterialNotFound] });
             return Ok(product);
         }
 
@@ -55,7 +59,7 @@ namespace Presentation
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var result = await _materialService.AddMaterialsAsync(dto);
-            return Ok(new { message = "Created Successfully", data = result });
+            return Ok(new { message = _stringLocalizer[SharedResourcesKeys.CreatedSuccessfully], data = result });
         }
 
         [HttpPut("UpdateRawMaterial")]
@@ -67,9 +71,9 @@ namespace Presentation
             try
             {
                 var result = await _materialService.UpdateMaterialsAsync(id, dto);
-                if (result == null) return NotFound(new { message = "Raw Material not found" });
+                if (result == null) return NotFound(new { message = _stringLocalizer[SharedResourcesKeys.RawMaterialNotFound] });
 
-                return Ok(new { message = "Updated Successfully", data = result });
+                return Ok(new { message = _stringLocalizer[SharedResourcesKeys.UpdatedSuccessfully], data = result });
             }
             catch (System.Exception ex)
             {
@@ -81,15 +85,15 @@ namespace Presentation
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _materialService.DeleteMaterialsAsync(id);
-            if (!success) return NotFound("Product not found");
+            if (!success) return NotFound(_stringLocalizer[SharedResourcesKeys.ProductNotFound]);
 
-            return Ok(new { message = "Deleted Successfully" });
+            return Ok(new { message = _stringLocalizer[SharedResourcesKeys.DeletedSuccessfully] });
         }
         [HttpGet("GetAllRawMaterialCategories")]
         public async Task<IActionResult> GetAllMaterialsCategories()
         {
             var result = await _categoryService.GetAllMaterialsCategoriesAsync();
-            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, _stringLocalizer[SharedResourcesKeys.CategoriesReturnedSuccessfully]);
         }
 
 
@@ -97,7 +101,7 @@ namespace Presentation
         public async Task<IActionResult> GetAllMaterialsCategoriesById(int id)
         {
             var result = await _categoryService.GetAllMaterialsCategoriesByIdAsync(id);
-            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
+            return SendSuccessResponse<IEnumerable<CategoryDto>>(result, _stringLocalizer[SharedResourcesKeys.CategoriesReturnedSuccessfully]);
 
         }
     }

@@ -47,6 +47,11 @@
         public const string UserIdNotFoundInToken = "UserIdNotFoundInToken";
         public const string DetermineAnItemFirst = "DetermineAnItemFirst";
         public const string ReviewDeletedSuccessfully = "ReviewDeletedSuccessfully";
+        public const string RawMaterialNotFound = "RawMaterialNotFound";
+        public const string CreatedSuccessfully = "CreatedSuccessfully";
+        public const string UpdatedSuccessfully = "UpdatedSuccessfully";
+        public const string DeletedSuccessfully = "DeletedSuccessfully";
+        public const string CategoriesReturnedSuccessfully = "CategoriesReturnedSuccessfully";
 
 
 

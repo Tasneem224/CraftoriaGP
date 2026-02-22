@@ -126,14 +126,23 @@
   <data name="CannotDeleteThisReview" xml:space="preserve">
     <value>لا يمكنك حذف هذا التقييم</value>
   </data>
+  <data name="CategoriesReturnedSuccessfully" xml:space="preserve">
+    <value>تم استرجاع الأقسام بنجاح.</value>
+  </data>
   <data name="CodeIsValidForMinutes" xml:space="preserve">
     <value>هذا الرقم صالح لمدة</value>
   </data>
   <data name="CodeVerifiedSuccessfully" xml:space="preserve">
     <value>تم التحقق من الرمز بنجاح.</value>
   </data>
+  <data name="CreatedSuccessfully" xml:space="preserve">
+    <value>تم الإنشاء بنجاح.</value>
+  </data>
   <data name="CurrentUserDataReturnedSuccessfully" xml:space="preserve">
     <value>تم استرجاع بيانات المستخدم الحالي بنجاح.</value>
+  </data>
+  <data name="DeletedSuccessfully" xml:space="preserve">
+    <value>تم الحذف بنجاح.</value>
   </data>
   <data name="DetermineAnItemFirst" xml:space="preserve">
     <value>يجب عليك تحديد عنصر أولاً.</value>
@@ -201,6 +210,9 @@
   <data name="ProductNotFound" xml:space="preserve">
     <value>هذا المنتج غير موجود</value>
   </data>
+  <data name="RawMaterialNotFound" xml:space="preserve">
+    <value>لم يتم العثور على المادة الخام.</value>
+  </data>
   <data name="ReceivedRequestToResetPassword" xml:space="preserve">
     <value>لقد تلقينا طلبا لإعادة تعيين كلمة المرور الخاصة بك ل</value>
   </data>
@@ -236,6 +248,9 @@
   </data>
   <data name="TryingToCreateAccount2" xml:space="preserve">
     <value>حساب باستخدام هذا الإيميل</value>
+  </data>
+  <data name="UpdatedSuccessfully" xml:space="preserve">
+    <value>تم التحديث بنجاح.</value>
   </data>
   <data name="UserIdNotFoundInToken" xml:space="preserve">
     <value>لم يتم العثور على معرف المستخدم في رمز المصادقة.</value>
