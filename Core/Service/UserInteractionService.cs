@@ -2,8 +2,10 @@
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 using ServiceAbstraction;
 using Shared.Interaction;
+using Shared.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +18,14 @@ namespace Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<SharedResources> _stringLocalizer;
 
-        public UserInteractionService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+
+        public UserInteractionService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IStringLocalizer<SharedResources> stringLocalizer)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _stringLocalizer = stringLocalizer;
         }
 
         public async Task<ReviewDto> AddOrUpdateReviewAsync(string userId, AddReviewDto dto)
@@ -92,9 +97,9 @@ namespace Service
             var interaction = await _unitOfWork.UserInteractions.GetByIdAsync(reviewId);
 
             if (interaction == null)
-                throw new Exception("Review not found");
+                throw new Exception(_stringLocalizer[SharedResourcesKeys.ReviewNotFound]);
 
-            if (interaction.UserId != userId) throw new UnauthorizedAccessException("U can't delete this Review");
+            if (interaction.UserId != userId) throw new UnauthorizedAccessException(_stringLocalizer[SharedResourcesKeys.CannotDeleteThisReview]);
 
             _unitOfWork.UserInteractions.Remove(interaction);
             await _unitOfWork.SaveChanges();

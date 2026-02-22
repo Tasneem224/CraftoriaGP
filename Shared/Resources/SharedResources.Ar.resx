@@ -123,6 +123,9 @@
   <data name="AddToFav" xml:space="preserve">
     <value>تم الإضافة إلى المفضلة</value>
   </data>
+  <data name="CannotDeleteThisReview" xml:space="preserve">
+    <value>لا يمكنك حذف هذا التقييم</value>
+  </data>
   <data name="CodeIsValidForMinutes" xml:space="preserve">
     <value>هذا الرقم صالح لمدة</value>
   </data>
@@ -179,6 +182,9 @@
   </data>
   <data name="Required" xml:space="preserve">
     <value>هذا الحقل مطلوب</value>
+  </data>
+  <data name="ReviewNotFound" xml:space="preserve">
+    <value>التقييم غير موجود</value>
   </data>
   <data name="RoleIsNotValidToDoThisOperation" xml:space="preserve">
     <value>غير مسموح لك ان تقوم بهذه العملية لانك لست بائعا</value>

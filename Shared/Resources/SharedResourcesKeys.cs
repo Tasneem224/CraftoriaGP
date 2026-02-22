@@ -31,6 +31,8 @@
         public const string ProductNotFound = "ProductNotFound";
         public const string UserNotFound = "UserNotFound";
         public const string RoleIsNotValidToDoThisOperation = "RoleIsNotValidToDoThisOperation";
+        public const string ReviewNotFound = "ReviewNotFound";
+        public const string CannotDeleteThisReview = "CannotDeleteThisReview";
 
 
 

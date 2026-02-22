@@ -123,6 +123,9 @@
   <data name="AddToFav" xml:space="preserve">
     <value>Added to favourites</value>
   </data>
+  <data name="CannotDeleteThisReview" xml:space="preserve">
+    <value>You are not allowed to delete this review</value>
+  </data>
   <data name="CodeIsValidForMinutes" xml:space="preserve">
     <value>This code is valid for</value>
   </data>
@@ -179,6 +182,9 @@
   </data>
   <data name="Required" xml:space="preserve">
     <value>This field is required</value>
+  </data>
+  <data name="ReviewNotFound" xml:space="preserve">
+    <value>Review Not Found</value>
   </data>
   <data name="RoleIsNotValidToDoThisOperation" xml:space="preserve">
     <value>role is not valid to do this operation</value>
