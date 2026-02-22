@@ -34,6 +34,14 @@
         public const string ReviewNotFound = "ReviewNotFound";
         public const string CannotDeleteThisReview = "CannotDeleteThisReview";
         public const string InvalidToken = "InvalidToken";
+        public const string RegistrationSuccessful = "RegistrationSuccessful";
+        public const string ValidationFailed = "ValidationFailed";
+        public const string LoginSuccessful = "LoginSuccessful";
+        public const string CodeVerifiedSuccessfully = "CodeVerifiedSuccessfully";
+        public const string GoogleLoginSuccessful = "GoogleLoginSuccessful";
+        public const string ExpertInfoSavedSuccessfully = "ExpertInfoSavedSuccessfully";
+        public const string OtpSentSuccessfullyToEmail = "OtpSentSuccessfullyToEmail";
+        public const string EmailVerifiedSuccessfully = "EmailVerifiedSuccessfully";
 
 
 

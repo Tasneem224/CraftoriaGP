@@ -129,6 +129,9 @@
   <data name="CodeIsValidForMinutes" xml:space="preserve">
     <value>هذا الرقم صالح لمدة</value>
   </data>
+  <data name="CodeVerifiedSuccessfully" xml:space="preserve">
+    <value>تم التحقق من الرمز بنجاح.</value>
+  </data>
   <data name="EmailAlreadyRegistered" xml:space="preserve">
     <value>هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد إلكتروني آخر.</value>
   </data>
@@ -138,11 +141,20 @@
   <data name="EmailCannotBeNull" xml:space="preserve">
     <value>البريد الإلكتروني لا يمكن أن يكون فارغاً</value>
   </data>
+  <data name="EmailVerifiedSuccessfully" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ExpertInfoSavedSuccessfully" xml:space="preserve">
+    <value>تم حفظ معلومات الخبير بنجاح!</value>
+  </data>
   <data name="ExpiredOtp" xml:space="preserve">
     <value>رمز التحقق غير صحيح أو منتهي الصلاحية</value>
   </data>
   <data name="FailedToResetPassword" xml:space="preserve">
     <value>فشل في إعادة تعيين كلمة المرور</value>
+  </data>
+  <data name="GoogleLoginSuccessful" xml:space="preserve">
+    <value>تم تسجيل الدخول بواسطة جوجل بنجاح.</value>
   </data>
   <data name="Hello" xml:space="preserve">
     <value>مرحبا</value>
@@ -156,11 +168,17 @@
   <data name="InvalidToken" xml:space="preserve">
     <value>رمز المصادقة غير صالح.</value>
   </data>
+  <data name="LoginSuccessful" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>دقائق</value>
   </data>
   <data name="NotSaveOtp" xml:space="preserve">
     <value>حدث خطأ أثناء حفظ رمز التحقق</value>
+  </data>
+  <data name="OtpSentSuccessfullyToEmail" xml:space="preserve">
+    <value>تم إرسال رمز التحقق بنجاح إلى {0}، يرجى تفقد بريدك الإلكتروني.</value>
   </data>
   <data name="PasswordReset" xml:space="preserve">
     <value>إعادة تعيين كلمة المرور</value>
@@ -179,6 +197,9 @@
   </data>
   <data name="ReceivedRequestToResetPassword" xml:space="preserve">
     <value>لقد تلقينا طلبا لإعادة تعيين كلمة المرور الخاصة بك ل</value>
+  </data>
+  <data name="RegistrationSuccessful" xml:space="preserve">
+    <value>تم تسجيل الحساب بنجاح.</value>
   </data>
   <data name="RemoveFav" xml:space="preserve">
     <value>تم الحذف من المفضلة</value>
@@ -212,5 +233,8 @@
   </data>
   <data name="UseTheVerificationCode" xml:space="preserve">
     <value>من فضلك استخدم رمز التحقق بالأسفل لمواصلة عملية تسجيل الدخول</value>
+  </data>
+  <data name="ValidationFailed" xml:space="preserve">
+    <value>فشل التحقق من صحة البيانات.</value>
   </data>
 </root>

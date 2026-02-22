@@ -1,12 +1,14 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Presentation.Controllers;
 using ServiceAbstraction;
 using Shared.IdentityModule;
+using Shared.Resources;
 
 namespace Presentation
 {
-    public class AuthenticationController(IServiceManager _serviceManager, IAuthenticationService _authenticationService) : BaseApiController
+    public class AuthenticationController(IServiceManager _serviceManager, IAuthenticationService _authenticationService, IStringLocalizer<SharedResources> _stringLocalizer) : BaseApiController
     {
         [HttpPost("Register")]
                 public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
@@ -14,7 +16,7 @@ namespace Presentation
 
             
                         var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
-                        return SendSuccessResponse(user, "Registration successful");
+                        return SendSuccessResponse(user, _stringLocalizer[SharedResourcesKeys.RegistrationSuccessful]);
                 }
 
         [HttpPost("Login")]
@@ -22,12 +24,12 @@ namespace Presentation
         {
             if (!ModelState.IsValid)
             {
-                return SendErrorResponse("Validation failed", ModelState, 422);
+                return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ValidationFailed], ModelState, 422);
             }
 
             var user = await _serviceManager.AuthenticationService.LoginAsync(loginDTO);
 
-            return SendSuccessResponse(user, "Login  successful");
+            return SendSuccessResponse(user, _stringLocalizer[SharedResourcesKeys.LoginSuccessful]);
 
         }
 
@@ -35,11 +37,11 @@ namespace Presentation
         public async Task<IActionResult> ForgetPassword([FromBody] ForgotPasswordDto dto)
         {
             if (!ModelState.IsValid)
-                return SendErrorResponse("Validation failed", ModelState, 422);
+                return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ValidationFailed], ModelState, 422);
 
             var result = await _authenticationService.ForgotPasswordAsync(dto.Email);
 
-            return SendSuccessResponse(result, "OTP sent successfully");
+            return SendSuccessResponse(result, _stringLocalizer[SharedResourcesKeys.SendOtpSuccessfully]);
         }
 
     
@@ -48,13 +50,13 @@ namespace Presentation
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
         {
             if (!ModelState.IsValid)
-                return SendErrorResponse("Validation failed", ModelState, 422);
+                return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ValidationFailed], ModelState, 422);
 
             var isValid = await _authenticationService.VerifyOtpAsync(dto);
 
                 if (!isValid)
                 {
-                return SendErrorResponse("The Otp Code is wrong or has expired", null, 400);
+                return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ExpiredOtp], null, 400);
             }
 
 
@@ -64,7 +66,7 @@ namespace Presentation
                 Code = dto.OtpCode
             };
 
-            return SendSuccessResponse(responseData, "Code Verified Successfully");
+            return SendSuccessResponse(responseData, _stringLocalizer[SharedResourcesKeys.CodeVerifiedSuccessfully]);
 
 
         }
@@ -73,11 +75,11 @@ namespace Presentation
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
         {
             if (!ModelState.IsValid)
-            return SendErrorResponse("Validation failed", ModelState, 422);
+            return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ValidationFailed], ModelState, 422);
             var result = await _authenticationService.ResetPasswordAsync(dto);
 
             // return Ok(new { message = result });
-            return SendSuccessResponse(result, "Password reset successfully");
+            return SendSuccessResponse(result, _stringLocalizer[SharedResourcesKeys.PasswordResetSuccessfully]);
         }
 
 
@@ -85,13 +87,14 @@ namespace Presentation
         public async Task<IActionResult> VerifyEmail(VerifyEmailDTO verifyEmailDTO)
         {
            var verify= await _authenticationService.VerifyEmailAsync(verifyEmailDTO);
-            return SendSuccessResponse(verify, $"OTP is sent successfully to {verifyEmailDTO.Email} ,Check Your Email");
+            //return SendSuccessResponse(verify, $"OTP is sent successfully to {verifyEmailDTO.Email} ,Check Your Email");
+            return SendSuccessResponse(verify, _stringLocalizer[SharedResourcesKeys.OtpSentSuccessfullyToEmail, verifyEmailDTO.Email]);
         }
         [HttpPost("CheckEmailOtp")]
         public async Task<IActionResult> CheckEmailOtp(VerifyOtpDto verifyOtpDto)
         {
             var check=await _authenticationService.CheckEmailOTPAsync(verifyOtpDto);
-            return  SendSuccessResponse(check, $"Email Is verified successfully ");
+            return  SendSuccessResponse(check, _stringLocalizer[SharedResourcesKeys.EmailVerifiedSuccessfully]);
 
         }
 
@@ -100,13 +103,13 @@ namespace Presentation
         {
             // Validation
             if (!ModelState.IsValid)
-                return SendErrorResponse("Validation failed", ModelState, 422);
+                return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ValidationFailed], ModelState, 422);
 
             // Call Service
             var result = await _authenticationService.GoogleLoginAsync(model);
 
             // Return Uniform Response
-            return SendSuccessResponse(result, "Google Login successful");
+            return SendSuccessResponse(result, _stringLocalizer[SharedResourcesKeys.GoogleLoginSuccessful]);
         }
 
         [HttpPost("Expert-With-google")]
@@ -114,10 +117,10 @@ namespace Presentation
         {
             // Validation
             if (!ModelState.IsValid)
-                return SendErrorResponse("Validation failed", ModelState, 422);
+                return SendErrorResponse(_stringLocalizer[SharedResourcesKeys.ValidationFailed], ModelState, 422);
 
             await _authenticationService.ExpertWithGoolgeService(infos);
-            return Ok("Expert information saved successfully!😊😊😊😊");
+            return Ok(_stringLocalizer[SharedResourcesKeys.ExpertInfoSavedSuccessfully]);
 
 
         }

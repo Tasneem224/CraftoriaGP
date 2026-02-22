@@ -129,6 +129,9 @@
   <data name="CodeIsValidForMinutes" xml:space="preserve">
     <value>This code is valid for</value>
   </data>
+  <data name="CodeVerifiedSuccessfully" xml:space="preserve">
+    <value>Code verified successfully.</value>
+  </data>
   <data name="EmailAlreadyRegistered" xml:space="preserve">
     <value>This email is already registered. Please use another email</value>
   </data>
@@ -138,11 +141,20 @@
   <data name="EmailCannotBeNull" xml:space="preserve">
     <value>Email cannot be null</value>
   </data>
+  <data name="EmailVerifiedSuccessfully" xml:space="preserve">
+    <value>Email is verified successfully.</value>
+  </data>
+  <data name="ExpertInfoSavedSuccessfully" xml:space="preserve">
+    <value>Expert information saved successfully!</value>
+  </data>
   <data name="ExpiredOtp" xml:space="preserve">
     <value>Invalid or Expired OTP</value>
   </data>
   <data name="FailedToResetPassword" xml:space="preserve">
     <value>Failed to reset password</value>
+  </data>
+  <data name="GoogleLoginSuccessful" xml:space="preserve">
+    <value>Google Login successful.</value>
   </data>
   <data name="Hello" xml:space="preserve">
     <value>Hello</value>
@@ -156,11 +168,17 @@
   <data name="InvalidToken" xml:space="preserve">
     <value>Invalid token.</value>
   </data>
+  <data name="LoginSuccessful" xml:space="preserve">
+    <value>Login successful.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minutes</value>
   </data>
   <data name="NotSaveOtp" xml:space="preserve">
     <value>Could not save OTP</value>
+  </data>
+  <data name="OtpSentSuccessfullyToEmail" xml:space="preserve">
+    <value>OTP is sent successfully to {0}, check your email.</value>
   </data>
   <data name="PasswordReset" xml:space="preserve">
     <value>Password Reset</value>
@@ -179,6 +197,9 @@
   </data>
   <data name="ReceivedRequestToResetPassword" xml:space="preserve">
     <value>We received a request to reset your password for</value>
+  </data>
+  <data name="RegistrationSuccessful" xml:space="preserve">
+    <value>Registration successful.</value>
   </data>
   <data name="RemoveFav" xml:space="preserve">
     <value>Removed From Favourite</value>
@@ -212,5 +233,8 @@
   </data>
   <data name="UseTheVerificationCode" xml:space="preserve">
     <value>Please use the verification code below to continue the signup process</value>
+  </data>
+  <data name="ValidationFailed" xml:space="preserve">
+    <value>Validation failed.</value>
   </data>
 </root>
