@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Presentation
 {
     [Authorize]
-    public class ProfileController(IProfileService _userService) : BaseApiController
+    public class UserProfileController(IProfileService _userService) : BaseApiController
     {
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser()
