@@ -79,6 +79,7 @@ namespace Service
             _unitOfWork.UserInteractions.Remove(interaction);
             await _unitOfWork.SaveChanges();
         }
+
         public async Task<List<ReviewDto>> GetProductReviewsAsync(int productId)
         {
             var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfProducBytIdAsync(productId);
