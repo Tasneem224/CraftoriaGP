@@ -32,7 +32,6 @@ namespace DomainLayer.Models.Interaction
         [ForeignKey(nameof(TargetUserId))]
         public ApplicationUser? TargetUser { get; set; }
 
-        public bool? IsFavourite { get; set; }
 
         [Range(1, 5)]
         public short? Rating { get; set; }
