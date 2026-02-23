@@ -22,7 +22,6 @@ namespace Service
             _unitOfWork = unitOfWork;
             _userManager = userManager;
         }
-
         public async Task<ReviewDto> AddOrUpdateReviewAsync(string userId, AddReviewDto dto)
         {
             UserInteraction? interaction = null;
@@ -68,25 +67,6 @@ namespace Service
 
             };
         }
-
-        private async Task<UserInteraction?> checkIfThereIsAnyReviewBefore(string userId, AddReviewDto dto, UserInteraction? interaction)
-        {
-            if (dto.ProductId.HasValue)
-            {
-                interaction = await _unitOfWork.UserInteractions.GetByProductAsync(userId, dto.ProductId.Value);
-            }
-            else if (dto.RawMaterialId.HasValue)
-            {
-                interaction = await _unitOfWork.UserInteractions.GetByRawMaterialAsync(userId, dto.RawMaterialId.Value);
-            }
-            else if (!string.IsNullOrEmpty(dto.TargetUserId))
-            {
-                interaction = await _unitOfWork.UserInteractions.GetByTargetUserAsync(userId, dto.TargetUserId);
-            }
-
-            return interaction;
-        }
-
         public async Task DeleteReviewAsync(int reviewId, string userId)
         {
             var interaction = await _unitOfWork.UserInteractions.GetByIdAsync(reviewId);
@@ -101,22 +81,19 @@ namespace Service
         }
         public async Task<List<ReviewDto>> GetProductReviewsAsync(int productId)
         {
-            var reviews = await _unitOfWork.UserInteractions.GetReviewsByProductIdAsync(productId);
+            var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfProducBytIdAsync(productId);
             return MapToDto(reviews);
         }
-
         public async Task<List<ReviewDto>> GetRawMaterialReviewsAsync(int rawMaterialId)
         {
-            var reviews = await _unitOfWork.UserInteractions.GetReviewsByRawMaterialIdAsync(rawMaterialId);
+            var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfRawMaterialByIdAsync(rawMaterialId);
             return MapToDto(reviews);
         }
-
         public async Task<List<ReviewDto>> GetUserReviewsAsync(string targetUserId)
         {
-            var reviews = await _unitOfWork.UserInteractions.GetReviewsByTargetUserIdAsync(targetUserId);
+            var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfTargetUserByIdAsync(targetUserId);
             return MapToDto(reviews);
         }
-
         public async Task<ReviewStatsDto> GetUserStatsAsync(string userId)
         {
             var count = await _unitOfWork.UserInteractions.GetTotalInteractionsCountForUserAsync(userId);
@@ -128,20 +105,6 @@ namespace Service
                 AverageRating = Math.Round(average, 1) // نقرب لرقم عشري واحد (مثلاً 4.5)
             };
         }
-        private List<ReviewDto> MapToDto(IEnumerable<UserInteraction> list)
-        {
-            return list.Select(x => new ReviewDto
-            {
-                InteractionId = x.Id,
-                ReviewerId = x.UserId,
-                // بنجيب الاسم من الـ Navigation Property اللي عملنا لها Include في الـ Repo
-                ReviewerName = x.User?.UserName ?? "مستخدم",
-                Rating = x.Rating ?? 0,
-                ReviewComment = x.Review,
-                CreatedAt = x.InteractionDate
-            }).ToList();
-        }
-
         public async Task<ReviewStatsDto> GetProductStatsAsync(int productId)
         {
             var count = await _unitOfWork.UserInteractions.GetTotalCountByProductIdAsync(productId);
@@ -163,6 +126,39 @@ namespace Service
                 TotalReviews = count,
                 AverageRating = Math.Round(average, 1)
             };
+        }
+
+
+
+        private List<ReviewDto> MapToDto(IEnumerable<UserInteraction> list)
+        {
+            return list.Select(x => new ReviewDto
+            {
+                InteractionId = x.Id,
+                ReviewerId = x.UserId,
+                // بنجيب الاسم من الـ Navigation Property اللي عملنا لها Include في الـ Repo
+                ReviewerName = x.User?.UserName ?? "مستخدم",
+                Rating = x.Rating ?? 0,
+                ReviewComment = x.Review,
+                CreatedAt = x.InteractionDate
+            }).ToList();
+        }
+        private async Task<UserInteraction?> checkIfThereIsAnyReviewBefore(string userId, AddReviewDto dto, UserInteraction? interaction)
+        {
+            if (dto.ProductId.HasValue)
+            {
+                interaction = await _unitOfWork.UserInteractions.GetByProductAsync(userId, dto.ProductId.Value);
+            }
+            else if (dto.RawMaterialId.HasValue)
+            {
+                interaction = await _unitOfWork.UserInteractions.GetByRawMaterialAsync(userId, dto.RawMaterialId.Value);
+            }
+            else if (!string.IsNullOrEmpty(dto.TargetUserId))
+            {
+                interaction = await _unitOfWork.UserInteractions.GetByTargetUserAsync(userId, dto.TargetUserId);
+            }
+
+            return interaction;
         }
     }
 }

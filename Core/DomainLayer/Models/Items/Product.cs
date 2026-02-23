@@ -21,16 +21,11 @@ namespace DomainLayer.Models.Items
         public ApplicationUser Seller { get; set; } = default!;
 
 
-        // [DisplayName("Category")]
-        // [ForeignKey("Category")]
-        //// public int CategoryId {  get; set; }
-        //// public Category Category { get; set; }
-        ///
         [DisplayName("category")]
         [ForeignKey("Category")]
          public int CategoryId {  get; set; }
 
-        public ProductCategory Category { get; set; } = default!;
+        public virtual ProductCategory Category { get; set; } = default!;
 
 
         public ICollection<UserInteraction> Interactions { get; set; } = new List<UserInteraction>();

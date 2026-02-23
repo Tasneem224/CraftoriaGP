@@ -17,13 +17,11 @@ namespace DomainLayer.Models.RawMaterials
 
         [ForeignKey(nameof(supplierId))]
         public ApplicationUser supplier { get; set; } = default!;
-
-
+            
+        public ICollection<UserInteraction> Interactions { get; set; } = new List<UserInteraction>();
         public int CategoryId { get; set; }
         [ForeignKey(nameof(CategoryId))]
         public Raw_Category_Material Category { get; set; } = default!;
-
-        public ICollection<UserInteraction> Interactions { get; set; } = new List<UserInteraction>();
 
     }
 }

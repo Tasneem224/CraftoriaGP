@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,9 +27,10 @@ namespace Shared.Extensions
                 }
             }
             string result = string.Join(" ", words);
-            text = text.Replace("ة", "ه");
+            text = result.Replace("ة", "ه");
 
             return text;
         }
+
     }
 }

@@ -404,6 +404,7 @@ namespace Service
             }
             return sellerId;
         }
+
         private string GetPublicIdFromUrl(string url)
         {
             try

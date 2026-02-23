@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Presentation
 {
     [Authorize]
-    public class UserProfileController(IUserService _userService) : BaseApiController
+    public class ProfileController(IProfileService _userService) : BaseApiController
     {
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser()
@@ -27,6 +27,12 @@ namespace Presentation
             var updatedUser = await _userService.UpdateUserProfile(updateUserDto);
             return SendSuccessResponse(updatedUser, "User Profile updated successfully");
         }
-
+        [HttpGet("GetAllReviewThatCreatedBySpecificUser")]
+        [Authorize] 
+        public async Task<IActionResult> GetAllReviewThatCreatedBySpecificUser()
+        {
+            var reviews = await _userService.GetAllReviewsCreatedByUser();
+            return SendSuccessResponse(reviews);
+        }
     }
 }

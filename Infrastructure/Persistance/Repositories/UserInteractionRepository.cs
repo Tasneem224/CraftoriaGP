@@ -1,9 +1,11 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Models.Interaction;
+using DomainLayer.Models.RawMaterials;
 using DomainLayer.Models.TopRated;
 using Google;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data.Contexts;
+using Shared.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +32,7 @@ namespace Persistance.Repositories
         public async Task<UserInteraction?> GetByTargetUserAsync(string userId, string targetUserId)
              => await _context.UserInteractions.FirstOrDefaultAsync(x => x.UserId == userId && x.TargetUserId == targetUserId);
 
-        public async Task<IEnumerable<UserInteraction>> GetReviewsByProductIdAsync(int productId)
+        public async Task<IEnumerable<UserInteraction>> GetAllReviewsOfProducBytIdAsync(int productId)
         {
             return await _context.UserInteractions
                 .Where(x => x.ProductId == productId)
@@ -39,7 +41,7 @@ namespace Persistance.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<UserInteraction>> GetReviewsByRawMaterialIdAsync(int rawMaterialId)
+        public async Task<IEnumerable<UserInteraction>> GetAllReviewsOfRawMaterialByIdAsync(int rawMaterialId)
         {
             return await _context.UserInteractions
                             .Where(x => x.RawMaterialId == rawMaterialId)
@@ -48,7 +50,7 @@ namespace Persistance.Repositories
                             .ToListAsync();
         }
 
-        public async Task<IEnumerable<UserInteraction>> GetReviewsByTargetUserIdAsync(string targetUserId)
+        public async Task<IEnumerable<UserInteraction>> GetAllReviewsOfTargetUserByIdAsync(string targetUserId)
         {
             return await _context.UserInteractions
                 .Where(x => x.TargetUserId == targetUserId)
@@ -154,7 +156,17 @@ namespace Persistance.Repositories
                 .ToListAsync();
         }
 
-
-
+        public async Task<IEnumerable<UserInteraction>> GetAllReviewThatCreatedBySpecificUser(string userId)
+        {
+            return await _context.UserInteractions
+                .Where(x => x.UserId == userId && (x.Rating.HasValue || !string.IsNullOrWhiteSpace(x.Review)))
+                .Include(x => x.User) 
+                .Include(X=>X.Product)
+                .ThenInclude(x=>x.Category)
+                .Include(x=>x.RawMaterial)
+                .ThenInclude(r => r.Category)
+                .OrderByDescending(x => x.InteractionDate)
+                .ToListAsync();
+        }
     }
 }

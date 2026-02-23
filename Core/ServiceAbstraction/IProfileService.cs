@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace ServiceAbstraction
 {
-    public interface IUserService
+    public interface IProfileService
     {
+
         Task<UserProfileDto> GetCurrentUserAsync();
         Task<UserProfileDto> UpdateUserProfile(UpdateUserDto updateUserDto);
+        Task<IEnumerable<ReviewsProfile>> GetAllReviewsCreatedByUser( );
     }
 }

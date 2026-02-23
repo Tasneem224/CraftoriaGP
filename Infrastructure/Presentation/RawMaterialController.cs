@@ -17,7 +17,6 @@ namespace Presentation
     public class RawMaterialController(IRawMaterialServices _materialService, ICategoryService _categoryService):BaseApiController
     {
         [HttpGet("my-Material-count")]
-        [Authorize]
         public async Task<IActionResult> GetMyMaterialsCount(string userId)
         {
             var count = await _materialService.GetMaterialsCountByUserIdAsync(userId);
@@ -45,12 +44,14 @@ namespace Presentation
         }
 
         [HttpPost("CreateRawMaterial")]
+        [Authorize]
         public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
 
             var result = await _materialService.AddMaterialsAsync(dto);
             return Ok(new { message = "Created Successfully", data = result });
         }
+        [Authorize]
 
         [HttpPut("UpdateRawMaterial")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
@@ -60,7 +61,7 @@ namespace Presentation
                 return Ok(new { message = "Updated Successfully", data = result });
            
         }
-
+        [Authorize]
         [HttpDelete("DeleteRawMaterial")]
         public async Task<IActionResult> Delete(int id)
         {

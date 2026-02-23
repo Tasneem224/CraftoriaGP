@@ -38,7 +38,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("LocalConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -69,7 +69,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IDataSeeding, DataSeeding>();
             builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
-            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IUserInteractionRepository, UserInteractionRepository>();
             builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

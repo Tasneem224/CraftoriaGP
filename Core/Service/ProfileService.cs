@@ -1,4 +1,5 @@
-﻿using DomainLayer.Exceptions;
+﻿using DomainLayer.Contracts;
+using DomainLayer.Exceptions;
 using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,20 +15,22 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class UserService : IUserService
+    public class ProfileService : IProfileService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IUserInteractionRepository _userInteractionRepository;
 
 
-        public UserService(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, ICloudinaryService cloudinaryService)
+        public ProfileService(IUserInteractionRepository userInteractionRepository,IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, ICloudinaryService cloudinaryService)
         {
 
 
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _cloudinaryService = cloudinaryService;
+            _userInteractionRepository = userInteractionRepository;
 
         }
         public async Task<UserProfileDto> GetCurrentUserAsync()
@@ -119,6 +122,35 @@ namespace Service
 
             if (updateUserDto.Gender.HasValue)
                 user.Gender = (Gender)updateUserDto.Gender.Value;
+        }
+
+        public async Task<IEnumerable< ReviewsProfile>> GetAllReviewsCreatedByUser()
+        {
+            var userId = _httpContextAccessor.HttpContext?
+              .User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("Invalid token");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            
+            if (user == null)
+                throw new UserNotFoundException("User not found");
+
+          var reviews=  await _userInteractionRepository.GetAllReviewThatCreatedBySpecificUser(user.Id);
+            return reviews.Select(p=>new ReviewsProfile
+            {
+                ItemId = p.ProductId ?? p.RawMaterialId ?? 0,
+                UserId= p.TargetUserId,
+                Review =p.Review,
+               Rating=p.Rating,
+                ItemImage = p.Product?.ImageUrl
+                ?? p.RawMaterial?.ImageUrl
+                ?? p.TargetUser?.ProfileImage 
+                ?? "default-image.png",
+                CategoryName=p.Product.Category.Name,
+                ReviewId =p.Id
+            });
         }
     }
 }
