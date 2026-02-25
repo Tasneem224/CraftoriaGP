@@ -14,6 +14,7 @@ using Persistance.Data.Contexts;
 using Persistance.Repositories;
 using Service;
 using ServiceAbstraction;
+using StackExchange.Redis;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("LocalConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -73,7 +74,13 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IUserInteractionRepository, UserInteractionRepository>();
             builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ICacheRepository, CacheRpository>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnectionString")!);
+            });
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+               
             .AddJwtBearer(options =>
             {
                options.TokenValidationParameters = new TokenValidationParameters

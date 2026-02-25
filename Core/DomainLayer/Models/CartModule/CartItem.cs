@@ -13,6 +13,6 @@ namespace DomainLayer.Models.CartModule
         public string PictureURL { get; set; }
         public string Category { get; set; }
         public decimal Price { get; set; }
-        public int Qunatity { get; set; }
+        public int Quantity { get; set; }
     }
 }
