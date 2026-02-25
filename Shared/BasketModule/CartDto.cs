@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Shared.BasketModule
 {
-    public record CartDto
+    public class CartDto
     {
-        public string Id { get; init; } = default!;
-        public ICollection<CartItemDto> basketItems { get; init; } = [];
+        public string Id { get; set; } = default!;
+        public ICollection<CartItemDto> cartItems { get; set; } = [];
 
     }
 }

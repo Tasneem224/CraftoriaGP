@@ -1,4 +1,5 @@
 
+using AutoMapper;
 using CloudinaryDotNet;
 using CraftoriaApp.CustomeMiddleWares;
 using CraftoriaApp.Validators;
@@ -9,10 +10,13 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
 using Service;
+using Service.Mapping_Profiles;
+using Service.MappingProfiles;
 using ServiceAbstraction;
 using StackExchange.Redis;
 using System.Reflection;
@@ -39,7 +43,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("LocalConnection"),
+                    builder.Configuration.GetConnectionString("Connection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -75,9 +79,12 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ICacheRepository, CacheRpository>();
+            builder.Services.AddScoped<ICartService, CartService>();
+
+            builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
-                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnectionString")!);
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnection")!);
             });
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                

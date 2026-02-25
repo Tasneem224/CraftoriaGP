@@ -9,6 +9,7 @@ namespace ServiceAbstraction
     public interface IServiceManager
     {
         public IAuthenticationService AuthenticationService { get; }
+        public ICartService CartService { get; }
 
     }
 }

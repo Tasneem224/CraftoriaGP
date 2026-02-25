@@ -9,8 +9,10 @@ namespace ServiceAbstraction
 {
     public  interface ICartService
     {
+        Task<CartDto> AddItemToCartAsync(string cartId, int itemId);
+        Task<CartDto> UpdateQuantityAsync(string cartId, int productId, bool isIncrement);
+        Task<CartDto> RemoveItemFromCartAsync(string cartId, int productId);
         Task<CartDto> GetCartAsync(string id);
-        Task<bool> DeleteCartAsync(string id);
-        Task<CartDto> CreateOrUpdateCartAsync(CartDto cartDto);
+      
     }
 }

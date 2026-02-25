@@ -5,12 +5,12 @@ namespace Shared.BasketModule
     public record CartItemDto
     {
         public int Id { get; init; }
-        public string UrlImage { get; init; }
-        public string ItemName { get; init; }= string.Empty;
-        public string CategoryName {  get; init; }= string.Empty;
-        public decimal Price {  get; init; }
-        public int CategoryId { get; init; }
-        [Range(1,50)]
-        public int quantity { get; init; }
+        public string PictureURL { get; set; } = default!;
+        public string ItemName { get; set; }= string.Empty;
+       
+        public string Category {  get; set; }= string.Empty;
+        public decimal Price {  get; set; }
+        public int CategoryId { get; set; }
+        public int Quantity { get; init; }
     }
 }

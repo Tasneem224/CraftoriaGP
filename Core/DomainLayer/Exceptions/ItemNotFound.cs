@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Exceptions
 {
-    public sealed class ItemNotFound(string msg):NotFoundException(msg) 
+    public sealed class ItemNotFound(string id):NotFoundException($"item with id {id} is not Exist") 
     {
 
     }
