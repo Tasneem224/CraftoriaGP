@@ -60,10 +60,6 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IRawMaterialServices, RawMaterialServices>();
             builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ITopRatedService, TopRatedService>();
-
-
-
-
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddFluentValidationClientsideAdapters();
@@ -80,7 +76,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ICartRepository, CartRpository>();
             builder.Services.AddScoped<ICartService, CartService>();
-
+            builder.Services.AddScoped<ICacheRepository, CacheRepository>();
             builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
