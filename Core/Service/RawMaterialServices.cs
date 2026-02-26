@@ -7,6 +7,7 @@ using DomainLayer.Models.RawMaterials;
 using GTranslate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
 using Shared.Extensions;
 using Shared.IdentityModule;
@@ -18,6 +19,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Service
 {
@@ -42,7 +44,7 @@ namespace Service
         public async Task<IEnumerable<ReturnProductDto>> GetAllMaterialsAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
-
+            
 
             var MaterialsRepo = _unitOfWork.GetRepository<RawMaterial, int>();
             var Materials = await MaterialsRepo.GetAllAsync();
@@ -52,7 +54,7 @@ namespace Service
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            return ReturnListDto(Materials, categoriesDict);
+            return ReturnListDto(isArabic, Materials, categoriesDict,null);
         }
         public async Task<ReturnProductDto> GetMaterialsByIdAsync(int id)
         {
@@ -78,29 +80,29 @@ namespace Service
 
             string? sellerId = AuthFun(isArabic);
 
-            string imageUrl;
-            if (dto.ImageFile != null)
-            {
+            if (dto.ImageFile == null) throw new Exception("You should upload an image");
 
-                imageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
+            async Task<string> UploadWithTimer()
+            {
+                var result = await _cloudinary.UploadAsync(dto.ImageFile);
+                return result;
             }
 
-            else
+            async Task<string> TranslateWithTimer()
             {
-                throw new Exception("you should upload image");
+                string targetLang = isArabic ? "en" : "ar";
+                var result = await _translationService.TranslateAsync(dto.Description!, targetLang);
+                return result;
             }
-            string DescAr;
-            string DescEn;
-            if (isArabic)
-            {
-                DescAr = dto.Description!;
-                DescEn = await _translationService.TranslateAsync(dto.Description!, "en");
-            }
-            else
-            {
-                DescEn = dto.Description!;
-                DescAr = await _translationService.TranslateAsync(dto.Description!, "ar");
-            }
+            var uploadTask = UploadWithTimer();
+            var translateTask = TranslateWithTimer();
+
+            await Task.WhenAll(uploadTask, translateTask);
+
+            string imageUrl = uploadTask.Result;
+            string translatedText = translateTask.Result;
+            string DescAr = isArabic ? dto.Description! : translatedText;
+            string DescEn = isArabic ? translatedText : dto.Description!;
 
 
             var material = new RawMaterial
@@ -118,21 +120,21 @@ namespace Service
 
             if (dto.Tags != null && dto.Tags.Any())
             {
+                var cleanTags = dto.Tags.Select(t => t.Trim()).ToList();
                 var tagRepo = _unitOfWork.GetRepository<Tag, int>();
-                var existingTags = await tagRepo.GetAllAsync();
 
-                foreach (var tagName in dto.Tags)
+                var existingTags = await tagRepo.GetAllQueryable()
+                .AsTracking()
+                .Where(t => cleanTags.Contains(t.Name))
+                .ToListAsync();
+                foreach (var tagName in cleanTags)
                 {
-                    var cleanTagName = tagName.Trim();
+                    var tag = existingTags.FirstOrDefault(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase));
 
-                    var tag = existingTags.FirstOrDefault(t => t.Name.Equals(cleanTagName, StringComparison.OrdinalIgnoreCase));
-
-                    if (tag != null) material.tags.Add(tag);
+                    if (tag != null)
+                        material.tags.Add(tag);
                     else
-                    {
-                        var newTag = new Tag { Name = cleanTagName };
-                        material.tags.Add(newTag);
-                    }
+                        material.tags.Add(new Tag { Name = tagName });
                 }
             }
 
@@ -228,7 +230,8 @@ namespace Service
         {
 
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
-
+           
+            
             var checkUser = await _userManager.FindByIdAsync(id);
             if (checkUser is null)
             {
@@ -236,6 +239,7 @@ namespace Service
 
             }
             var user = await _userManager.FindByIdAsync(id);
+                var name = $"{user!.FirstName} {user!.SecondName}";
             var roles = await _userManager.GetRolesAsync(user!);
             foreach (var role in roles)
             {
@@ -253,7 +257,7 @@ namespace Service
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            return ReturnListDto(Materials, categoriesDict);
+            return ReturnListDto(isArabic,Materials, categoriesDict, name);
 
 
         }
@@ -324,18 +328,19 @@ namespace Service
                 SellerName = material.supplier?.FirstName + " " + material.supplier?.SecondName,
             };
         }
-        private static IEnumerable<ReturnProductDto> ReturnListDto(IEnumerable<RawMaterial> Materials, Dictionary<int, string> categoriesDict)
+        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic,IEnumerable<RawMaterial> Materials, Dictionary<int, string> categoriesDict,string name)
         {
             return Materials.Select(p => new ReturnProductDto
             {
                 Id = p.Id,
-                Name = p.NameEn,
+                Name = isArabic ? p.NameAr : p.NameEn,
                 Price = p.Price,
                 Quantity = p.Quantity ?? 0,
-                Description = p.DescriptionEn,
+                Description = isArabic ? p.DescriptionAr : p.DescriptionEn,
                 ImageUrl = p.ImageUrl,
                 CategoryId = p.CategoryId,
                 SellerId = p.supplierId,
+                SellerName = name,
                 CategoryName = categoriesDict.ContainsKey(p.CategoryId)
                                            ? categoriesDict[p.CategoryId]
                                            : "Unknown"

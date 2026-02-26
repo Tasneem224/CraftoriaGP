@@ -29,7 +29,7 @@ namespace Presentation
             var products = await _materialService.GetAllMaterialsAsync();
             return Ok(products);
         }
-        [HttpPost("GetRawMaterialOfSpecificUser")]
+        [HttpGet("GetRawMaterialOfSpecificUser")]
         public async Task<IActionResult> GetAllMaterialsOfSpecifiUser(string userId)
         {
             var products = await _materialService.GetAllMaterialsOfSpecifiUserAsync(userId);

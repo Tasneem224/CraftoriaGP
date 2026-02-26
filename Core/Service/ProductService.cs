@@ -56,7 +56,6 @@ namespace Service
         }
         public async Task<ReturnProductDto> AddProductAsync(CreateProductDto dto)
         {
-            var totalStopwatch = Stopwatch.StartNew();
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
             var sellerId = AuthFun(isArabic);
             if (dto.ImageFile == null) throw new Exception("You should upload an image");
