@@ -22,8 +22,8 @@ namespace Presentation
         }
 
 
-        [HttpPost("Toggle")]
         [Authorize]
+        [HttpPost("Toggle")]
         public async Task<IActionResult> Toggle([FromQuery] int productId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

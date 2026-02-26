@@ -43,8 +43,8 @@ namespace Presentation
             return Ok(product);
         }
 
-        [HttpPost("CreateRawMaterial")]
         [Authorize]
+        [HttpPost("CreateRawMaterial")]
         public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
 
