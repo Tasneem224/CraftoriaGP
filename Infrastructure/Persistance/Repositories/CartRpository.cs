@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Persistance.Repositories
 {
-    public class CacheRpository(IConnectionMultiplexer _connection) : ICacheRepository
+    public class CartRpository(IConnectionMultiplexer _connection) : ICartRepository
     {
 
         private readonly IDatabase _database = _connection.GetDatabase();

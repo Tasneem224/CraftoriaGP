@@ -78,7 +78,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IUserInteractionRepository, UserInteractionRepository>();
             builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<ICacheRepository, CacheRpository>();
+            builder.Services.AddScoped<ICartRepository, CartRpository>();
             builder.Services.AddScoped<ICartService, CartService>();
 
             builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Contracts
 {
-    public interface ICacheRepository
+    public interface ICartRepository
     {
         Task<T?> GetAsync<T>(string id);
         Task<T?> AddOrUpdateAsync<T>(string id,T entity, TimeSpan? timeToLive = null);

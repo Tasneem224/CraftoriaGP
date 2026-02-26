@@ -17,10 +17,10 @@ namespace Service
 {
     public class CartService : ICartService
     {
-        private readonly ICacheRepository _cacheRepository;
+        private readonly ICartRepository _cacheRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        public CartService(IUnitOfWork unitOfWork,ICacheRepository cacheRepository,IMapper mapper)
+        public CartService(IUnitOfWork unitOfWork,ICartRepository cacheRepository,IMapper mapper)
         {
             _cacheRepository = cacheRepository;
             _mapper = mapper;

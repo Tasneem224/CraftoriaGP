@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class ServiceManager(IUnitOfWork unitOfWork,UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationrRepo,IMapper _mapper,ICacheRepository _cacheRepository) : IServiceManager
+    public class ServiceManager(IUnitOfWork unitOfWork,UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationrRepo,IMapper _mapper,ICartRepository _cacheRepository) : IServiceManager
     {
         private readonly Lazy<IAuthenticationService> _LazyAuthenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _configuration, _cloudinaryService,_emailService, _emailVerificationrRepo));
         private readonly Lazy<ICartService> _LazyCartService = new Lazy<ICartService>(() => new CartService(unitOfWork, _cacheRepository,_mapper));
