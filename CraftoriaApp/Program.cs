@@ -43,7 +43,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("LocalConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -77,6 +77,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<ICartRepository, CartRpository>();
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+            builder.Services.AddScoped<ICacheService, CacheService>();
             builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {

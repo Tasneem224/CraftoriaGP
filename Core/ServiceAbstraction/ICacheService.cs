@@ -8,7 +8,7 @@ namespace ServiceAbstraction
 {
     public interface ICacheService
     {
-        Task<string?> GetAsync<T>(string key);
-        Task SetAsync(string key, object value, TimeSpan timeToLive);
+        Task<string?> GetCacheValueAsync<T>(string key);
+        Task SetCacheValueAsync(string key, object value, TimeSpan timeToLive);
     }
 }

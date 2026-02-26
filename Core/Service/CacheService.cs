@@ -15,11 +15,11 @@ namespace Service
         {
             _cacheRepository = cacheRepository;
         }
-        public Task<string?> GetAsync<T>(string key)=>
+        public Task<string?> GetCacheValueAsync<T>(string key)=>
              _cacheRepository.GetAsync(key);
         
 
-        public Task SetAsync(string key, object value, TimeSpan timeToLive)=>
+        public Task SetCacheValueAsync(string key, object value, TimeSpan timeToLive)=>
                         _cacheRepository.SetAsync(key, value, timeToLive );
 
     }

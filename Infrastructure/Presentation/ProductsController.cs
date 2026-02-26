@@ -16,7 +16,7 @@ namespace Presentation.Controllers
 {
     public class ProductsController(IProductService _productService, ICategoryService _categoryService) : BaseApiController
     {
-        [HttpGet("GetAllProducts")]
+        [HttpGetAttribute("GetAllProducts")]
         public async Task<IActionResult> GetAll()
         {
             var products = await _productService.GetAllProductsAsync();
