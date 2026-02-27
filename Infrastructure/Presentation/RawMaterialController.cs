@@ -54,18 +54,18 @@ namespace Presentation
         [Authorize]
 
         [HttpPut("UpdateRawMaterial")]
-        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
+        public async Task<IActionResult> Update(int RawMaterialid, [FromForm] UpdateProductDto dto)
         {
 
-                var result = await _materialService.UpdateMaterialsAsync(id, dto);
+                var result = await _materialService.UpdateMaterialsAsync(RawMaterialid, dto);
                 return Ok(new { message = "Updated Successfully", data = result });
            
         }
         [Authorize]
         [HttpDelete("DeleteRawMaterial")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int RawMaterialid)
         {
-            var success = await _materialService.DeleteMaterialsAsync(id);
+            var success = await _materialService.DeleteMaterialsAsync(RawMaterialid);
             return Ok(new { message = "Deleted Successfully" });
         }
 
