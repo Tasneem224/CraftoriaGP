@@ -12,6 +12,6 @@ namespace ServiceAbstraction
 
         Task<UserProfileDto> GetCurrentUserAsync();
         Task<UserProfileDto> UpdateUserProfile(UpdateUserDto updateUserDto);
-        Task<IEnumerable<ReviewsProfile>> GetAllReviewsCreatedByUser( );
+        Task<IEnumerable<ReviewsProfile>> GetAllReviewsCreatedByUser(string userId);
     }
 }

@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace Presentation
 {
-    [Authorize]
     public class UserProfileController(IProfileService _userService) : BaseApiController
     {
+    [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser()
         {
@@ -21,6 +21,8 @@ namespace Presentation
             return SendSuccessResponse(user, "Data of the current User returned successfully");
 
         }
+        [Authorize]
+
         [HttpPost]
         public async Task<IActionResult> UpdateUserProfile(UpdateUserDto updateUserDto)
         {
@@ -28,10 +30,9 @@ namespace Presentation
             return SendSuccessResponse(updatedUser, "User Profile updated successfully");
         }
         [HttpGet("GetAllReviewThatCreatedBySpecificUser")]
-        [Authorize] 
-        public async Task<IActionResult> GetAllReviewThatCreatedBySpecificUser()
+        public async Task<IActionResult> GetAllReviewThatCreatedBySpecificUser(string userId)
         {
-            var reviews = await _userService.GetAllReviewsCreatedByUser();
+            var reviews = await _userService.GetAllReviewsCreatedByUser(userId);
             return SendSuccessResponse(reviews);
         }
     }

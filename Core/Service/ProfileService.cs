@@ -124,14 +124,9 @@ namespace Service
                 user.Gender = (Gender)updateUserDto.Gender.Value;
         }
 
-        public async Task<IEnumerable< ReviewsProfile>> GetAllReviewsCreatedByUser()
+        public async Task<IEnumerable< ReviewsProfile>> GetAllReviewsCreatedByUser(string userId)
         {
-            var userId = _httpContextAccessor.HttpContext?
-              .User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-                throw new UnauthorizedAccessException("Invalid token");
-
+            
             var user = await _userManager.FindByIdAsync(userId);
             
             if (user == null)
