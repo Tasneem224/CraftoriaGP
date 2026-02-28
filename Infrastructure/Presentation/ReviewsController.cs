@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Attributes;
 using Presentation.Controllers;
 using ServiceAbstraction;
 using Shared.Interaction;
@@ -49,6 +50,7 @@ namespace Presentation
              await _reviewService.DeleteReviewAsync(reviewId, userId);
                 return SendSuccessResponse("Review deleted successfully");
         }
+        [RedisCache(100)]
 
         [HttpGet("GetProductReviews")]
         public async Task<IActionResult> GetProductReviews(int productId)
@@ -56,13 +58,18 @@ namespace Presentation
             var reviews = await _reviewService.GetProductReviewsAsync(productId);
             return SendSuccessResponse(reviews);
         }
+            [RedisCache(100)]
         [HttpGet("GetRawMaterialReviews")]
         public async Task<IActionResult> GetRawMaterialReviews(int materialId)
         {
             var reviews = await _reviewService.GetRawMaterialReviewsAsync(materialId);
             return SendSuccessResponse(reviews);
         }
+<<<<<<< HEAD
 
+=======
+            [RedisCache(100)]
+>>>>>>> Caching
         [HttpGet("GetUserReviews")]
         public async Task<IActionResult> GetUserReviews(string targetUserId)
         {

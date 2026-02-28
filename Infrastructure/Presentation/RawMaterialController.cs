@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Attributes;
 using Presentation.Controllers;
 using Service;
 using ServiceAbstraction;
@@ -22,6 +23,7 @@ namespace Presentation
             var count = await _materialService.GetMaterialsCountByUserIdAsync(userId);
             return Ok(new { totalRawMaterial = count });
         }
+        [RedisCache(200)]
 
         [HttpGet("GetAllMaterials")]
         public async Task<IActionResult> GetAllMaterials()
@@ -29,7 +31,13 @@ namespace Presentation
             var products = await _materialService.GetAllMaterialsAsync();
             return Ok(products);
         }
+<<<<<<< HEAD
         [HttpGet("GetRawMaterialOfSpecificUser")]
+=======
+        [RedisCache(120)]
+
+        [HttpPost("GetRawMaterialOfSpecificUser")]
+>>>>>>> Caching
         public async Task<IActionResult> GetAllMaterialsOfSpecifiUser(string userId)
         {
             var products = await _materialService.GetAllMaterialsOfSpecifiUserAsync(userId);
@@ -68,6 +76,7 @@ namespace Presentation
             var success = await _materialService.DeleteMaterialsAsync(RawMaterialid);
             return Ok(new { message = "Deleted Successfully" });
         }
+        [RedisCache(200)]
 
         [HttpGet("GetAllRawMaterialCategories")]
         public async Task<IActionResult> GetAllMaterialsCategories()
