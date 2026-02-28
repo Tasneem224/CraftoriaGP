@@ -62,6 +62,10 @@ namespace Presentation
             var reviews = await _reviewService.GetRawMaterialReviewsAsync(materialId);
             return SendSuccessResponse(reviews);
         }
+<<<<<<< Updated upstream
+=======
+        [RedisCache(100)]
+>>>>>>> Stashed changes
         [HttpGet("GetUserReviews")]
         public async Task<IActionResult> GetUserReviews(string targetUserId)
         {
