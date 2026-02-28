@@ -1,6 +1,7 @@
 ﻿using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Attributes;
 using Service;
 using ServiceAbstraction;
 using Shared.Category;
@@ -16,19 +17,22 @@ namespace Presentation.Controllers
 {
     public class ProductsController(IProductService _productService, ICategoryService _categoryService) : BaseApiController
     {
+
+        [RedisCache(200)]
         [HttpGetAttribute("GetAllProducts")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllProducts()
         {
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
+
         [HttpGet("GetProductsOfSpecificUser")]
         public async Task<IActionResult> GetProductsOfSpecificUser(string userId)
         {
             var products = await _productService.GetAllProductsOfSpecifiUserAsync(userId);
             return Ok(products);
         }
-
+        [RedisCache(120)]
         [HttpGet("GetProductDetailsById")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -43,7 +47,7 @@ namespace Presentation.Controllers
             var result = await _productService.AddProductAsync(dto);
             return Ok(new { message = "Created Successfully", data = result });
         }
-
+        [RedisCache(200)]
         [HttpGet("my-products-count")]
         public async Task<IActionResult> GetMyProductsCount(string userId)
         {
@@ -67,13 +71,15 @@ namespace Presentation.Controllers
             var success = await _productService.DeleteProductAsync(id);
             return Ok(new { message = "Deleted Successfully" });
         }
+        [RedisCache(200)]
 
         [HttpGet("GetAllProductCategories")]
         public async Task<IActionResult> GetAllProductCategories()
         {
             var result = await _categoryService.GetAllProductCategoriesAsync();
             return SendSuccessResponse(result, "Categories are returned successfully");
-        }      
+        }
+        [RedisCache(120)]
 
         [HttpGet("GetAllProductsOfSpecificCategory")]
         public async Task<IActionResult> GetAllProductCategoriesById(int id)

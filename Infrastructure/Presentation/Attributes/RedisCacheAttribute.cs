@@ -7,12 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Presentation.Attributes
 {
      //Attribute, IAsyncActionFilter
-    internal class RedisCacheAttribute :ActionFilterAttribute
+    internal class RedisCacheAttribute(int _durarionInSeconds=200) :ActionFilterAttribute
     {
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
@@ -25,8 +26,16 @@ namespace Presentation.Attributes
                 {
                     Content=cachedData,
                     ContentType = "application/json",
-                    //StatusCode = Status,
+                    StatusCode = StatusCodes.Status200OK,
                 };
+                return;
+            
+            }
+            var resultContext=await next.Invoke();
+            if (resultContext.Result is OkObjectResult okObjectResult) {
+                var serializedData = JsonSerializer.Serialize(okObjectResult.Value);
+
+                await cacheService.SetCacheValueAsync(key, serializedData, TimeSpan.FromSeconds(_durarionInSeconds));
             
             }
         }
