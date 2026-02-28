@@ -77,7 +77,7 @@ namespace Presentation
         }
 
 
-        [HttpPost("GetAllRawMaterialsCategoriesById")]
+        [HttpGet("GetAllRawMaterialsCategoriesById")]
         public async Task<IActionResult> GetAllMaterialsCategoriesById(int id)
         {
             var result = await _categoryService.GetAllMaterialsCategoriesByIdAsync(id);
