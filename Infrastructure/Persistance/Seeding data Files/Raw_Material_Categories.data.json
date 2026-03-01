@@ -1,46 +1,57 @@
 ﻿[
   {
-    "Name": "Textile & Fabric",
+    "NameEn": "Textile & Fabric",
+    "NameAr": "المنسوجات والأقمشة",
     "Image": ""
   },
   {
-    "Name": "Wood & Natural",
+    "NameEn": "Wood & Natural",
+    "NameAr": "الأخشاب والمواد الطبيعية",
     "Image": ""
   },
   {
-    "Name": "Clay & Ceramics",
+    "NameEn": "Clay & Ceramics",
+    "NameAr": "الصلصال والسيراميك",
     "Image": ""
   },
   {
-    "Name": "Metal",
+    "NameEn": "Metal",
+    "NameAr": "المعادن",
     "Image": ""
   },
   {
-    "Name": "Resin & Chemicals",
+    "NameEn": "Resin & Chemicals",
+    "NameAr": "الريزين والمواد الكيميائية",
     "Image": ""
   },
   {
-    "Name": "Art Supplies",
+    "NameEn": "Art Supplies",
+    "NameAr": "أدوات الفنون",
     "Image": ""
   },
   {
-    "Name": "Jewelry Materials",
+    "NameEn": "Jewelry Materials",
+    "NameAr": "خامات المجوهرات",
     "Image": ""
   },
   {
-    "Name": "Cosmetics & Candle",
+    "NameEn": "Cosmetics & Candle",
+    "NameAr": "مستحضرات التجميل والشموع",
     "Image": ""
   },
   {
-    "Name": "Packaging",
+    "NameEn": "Packaging",
+    "NameAr": "التغليف والتعبئة",
     "Image": ""
   },
   {
-    "Name": "Eco & Recycled",
+    "NameEn": "Eco & Recycled",
+    "NameAr": "مواد صديقة للبيئة ومعاد تدويرها",
     "Image": ""
   },
   {
-    "Name": "Other",
+    "NameEn": "Other",
+    "NameAr": "أخرى",
     "Image": ""
   }
 ]

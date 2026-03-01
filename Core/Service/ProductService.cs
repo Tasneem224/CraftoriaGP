@@ -34,7 +34,7 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var categories = await categoryRepo.GetAllAsync();
 
-            var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
+            var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
 
             return ReturnListDto(isArabic, products, categoriesDict);
         }
@@ -201,7 +201,7 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var categories = await categoryRepo.GetAllAsync();
 
-            var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
+            var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
             return ReturnListDto(isArabic, products, categoriesDict);
 
         }
@@ -218,6 +218,7 @@ namespace Service
 
                 return query.Count(p => p.SellerId == userId);
             }
+
         public async Task<IEnumerable<ReturnProductsOfCategory>> GetAllProductsOfSpecificCategory(int id)
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
@@ -252,42 +253,23 @@ namespace Service
                 .ToListAsync();
 
             var searchResults = allProducts
-                .Select(p => new
-                {
-                    Product = p,
-                    TagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : ""
-                })
-                .Select(x => new
-                {
-                    x.Product,
-                    SearchableText = $"{x.Product.NameAr} {x.Product.NameEn} {x.Product.DescriptionAr} {x.Product.DescriptionEn} {x.TagsText}".ToLower().NormalizeArabicText()
-                })
-                .Select(x => new
-                {
-                    x.Product,
-                    x.SearchableText,
-                    Score = Fuzz.WeightedRatio(normalizedQuery, x.SearchableText)
-                })
-                .Where(x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
-                .OrderByDescending(x => x.Score) 
-                .Select(x => new ReturnProductDto
-                {
-                    Id = x.Product.Id,
-                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
-                    Price = x.Product.Price,
-                    Description = isArabic ? x.Product.DescriptionAr : x.Product.DescriptionEn, 
-                    ImageUrl = x.Product.ImageUrl,
-                    CategoryId = x.Product.CategoryId,
-                    CategoryName = x.Product.Category != null
-                                   ? (isArabic ? x.Product.Category.Name : x.Product.Category.Name)
-                                   : "Unknown",
-                    SellerId = x.Product.SellerId,
-                    SellerName = x.Product.Seller?.DisplayName ?? "Unknown Seller"
-                })
-                .ToList();
+              .Select(p => {
+                  var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
+                  var searchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn} {tagsText}".ToLower().NormalizeArabicText();
 
-            return searchResults;
-        }
+                  var score = Fuzz.WeightedRatio(normalizedQuery, searchableText);
+
+                  return new { Product = p, Score = score, SearchableText = searchableText };
+              })
+              .Where(
+                x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
+              .OrderByDescending(x => x.Score)
+              .Select(
+                x => ReturnDto(isArabic, x.Product, x.Product.Category))
+              .ToList();
+
+                    return searchResults;
+                }
 
 
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
@@ -379,7 +361,9 @@ namespace Service
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
                 SellerId = product.SellerId,
-                CategoryName = category != null ? category.Name : "",
+                CategoryName = category != null
+                ? (isArabic ? category.NameAr : category.NameEn)
+                : (isArabic ? "غير معروف" : "Unknown"),
                 SellerName = product.Seller?.FirstName+" "+ product.Seller?.SecondName ,
             };
         }
@@ -403,7 +387,6 @@ namespace Service
             }
             return sellerId;
         }
-
         private string GetPublicIdFromUrl(string url)
         {
             try
@@ -418,7 +401,7 @@ namespace Service
                 throw new Exception();
             }
         }
-        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic, IEnumerable<Product> products, Dictionary<int, string> categoriesDict)
+        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic, IEnumerable<Product> products, Dictionary<int, ProductCategory> categoriesDict)
         {
             return products.Select(p => new ReturnProductDto
             {
@@ -430,9 +413,9 @@ namespace Service
                 ImageUrl = p.ImageUrl,
                 CategoryId = p.CategoryId,
                 SellerId = p.SellerId,
-                CategoryName = categoriesDict.ContainsKey(p.CategoryId)
-                               ? categoriesDict[p.CategoryId]
-                               : "Unknown"
+                CategoryName = categoriesDict.TryGetValue(p.CategoryId, out var category)
+            ? (isArabic ? category.NameAr : category.NameEn) 
+            : (isArabic ? "غير معروف" : "Unknown")
             }).ToList();
         }
 

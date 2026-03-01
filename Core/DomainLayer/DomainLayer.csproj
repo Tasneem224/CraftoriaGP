@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />
+    <Compile Remove="Models\NewFolder\**" />
+    <EmbeddedResource Remove="Models\NewFolder\**" />
+    <None Remove="Models\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\NewFolder\" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />
   </ItemGroup>
 
 </Project>

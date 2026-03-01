@@ -45,7 +45,7 @@ namespace Service
                 Price = product.Price,
                 Quantity = 1,
                 PictureURL = product.ImageUrl,
-                Category = product.Category.Name,
+                Category = product.Category.NameEn,
                 CategoryId = product.CategoryId
             };
 

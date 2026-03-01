@@ -1,102 +1,127 @@
 ﻿[
   {
-    "Name": "Jewelry & Accessories",
-    "image": ""
+    "NameEn": "Jewelry & Accessories",
+    "NameAr": "المجوهرات والإكسسوارات",
+      "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328308/Jewelry_Accessories_y9cyve.png"
   },
   {
-    "Name": "Clothing & Fashion",
-    "image": ""
+    "NameEn": "Clothing & Fashion",
+    "NameAr": "الملابس والأزياء",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328133/Clothing_Fashion_kaysad.png"
   },
   {
-    "Name": "Bags & Wallets",
-    "image": ""
+    "NameEn": "Bags & Wallets",
+    "NameAr": "الحقائب والمحافظ",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328051/Bags_Wallets_iphtuz.png"
   },
   {
-    "Name": "Home Decor",
-    "image": ""
+    "NameEn": "Home Decor",
+    "NameAr": "ديكور المنزل",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328214/Home_Decor_lvqppl.png"
   },
   {
-    "Name": "Furniture & Woodwork",
-    "image": ""
+    "NameEn": "Furniture & Woodwork",
+    "NameAr": "الأثاث والأعمال الخشبية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328132/Furniture_Woodwork_gckmxe.png"
   },
   {
-    "Name": "Pottery & Ceramics",
-    "image": ""
+    "NameEn": "Pottery & Ceramics",
+    "NameAr": "الفخار والسيراميك",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328204/Pottery_Ceramics_gucnzb.png"
   },
   {
-    "Name": "Textiles & Fabric Crafts",
-    "image": ""
+    "NameEn": "Textiles & Fabric Crafts",
+    "NameAr": "المنسوجات والأعمال القماشية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328302/Textiles_Fabric_Crafts_joljzq.png"
   },
   {
-    "Name": "Leather Products",
-    "image": ""
+    "NameEn": "Leather Products",
+    "NameAr": "المنتجات الجلدية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328089/Leather_Products_qo92ch.png"
   },
   {
-    "Name": "Art & Paintings",
-    "image": ""
+    "NameEn": "Art & Paintings",
+    "NameAr": "الفنون واللوحات",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328066/Art_Paintings_h3blvj.png"
   },
   {
-    "Name": "Candles & Soaps",
-    "image": ""
+    "NameEn": "Candles & Soaps",
+    "NameAr": "الشموع والصابون",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328062/Candles_Soaps_gpqmne.png"
   },
   {
-    "Name": "Paper Crafts & Stationery",
-    "image": ""
+    "NameEn": "Paper Crafts & Stationery",
+    "NameAr": "الأعمال الورقية والمكتبية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328132/Paper_Crafts_Stationery_r7iarf.png"
   },
   {
-    "Name": "Kids & Toys",
-    "image": ""
+    "NameEn": "Kids & Toys",
+    "NameAr": "الأطفال والألعاب",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328056/Kids_Toys_t31d86.png"
   },
   {
-    "Name": "Accessories & Gifts",
-    "image": ""
+    "NameEn": "Accessories & Gifts",
+    "NameAr": "الإكسسوارات والهدايا",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328044/Accessories_Gifts_z7whuh.png"
   },
   {
-    "Name": "Metal Crafts",
-    "image": ""
+    "NameEn": "Metal Crafts",
+    "NameAr": "الأعمال المعدنية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328199/Metal_Crafts_ghuhri.png"
   },
   {
-    "Name": "Glass Crafts",
-    "image": ""
+    "NameEn": "Glass Crafts",
+    "NameAr": "الأعمال الزجاجية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328154/Glass_Crafts_tarwbb.png"
   },
   {
-    "name": "Resin Art",
-    "image": ""
+    "NameEn": "Resin Art",
+    "NameAr": "فن الريزين",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328311/Resin_Art_m579qz.png"
   },
   {
-    "Name": "Handmade Cosmetics",
-    "image": ""
+    "NameEn": "Handmade Cosmetics",
+    "NameAr": "مستحضرات تجميل يدوية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328202/Handmade_Cosmetics_ex2fzs.png"
   },
   {
-    "Name": "Traditional & Cultural Crafts",
-    "image": ""
+    "NameEn": "Traditional & Cultural Crafts",
+    "NameAr": "الحرف التقليدية والثقافية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328332/Traditional_Cultural_Crafts_bl6rlk.png"
   },
   {
-    "Name": "Recycled & Eco Crafts",
-    "image": ""
+    "NameEn": "Recycled & Eco Crafts",
+    "NameAr": "أعمال معاد تدويرها وصديقة للبيئة",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328254/Recycled_Eco_Crafts_bqwoxr.png"
   },
   {
-    "Name": "Seasonal & Event Crafts",
-    "image": ""
+    "NameEn": "Seasonal & Event Crafts",
+    "NameAr": "أعمال يدوية للمناسبات والمواسم",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328301/Seasonal_Event_Crafts_oo1pof.png"
   },
   {
-    "Name": "Custom & Personalized Items",
-    "image": ""
+    "NameEn": "Custom & Personalized Items",
+    "NameAr": "قطع مخصصة حسب الطلب",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328140/Custom_Personalized_Items_t6djol.png"
   },
   {
-    "Name": "Religious & Spiritual Crafts",
-    "image": ""
+    "NameEn": "Religious & Spiritual Crafts",
+    "NameAr": "أعمال دينية وروحانية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328317/Religious_Spiritual_Crafts_i21jqo.png"
   },
   {
-    "Name": "Handmade Kitchenware",
-    "image": ""
+    "NameEn": "Handmade Kitchenware",
+    "NameAr": "أدوات مطبخ يدوية",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328214/Handmade_Kitchenware_vd386g.png"
   },
   {
-    "Name": "Wall Art & Frames",
-    "image": ""
+    "NameEn": "Wall Art & Frames",
+    "NameAr": "فن الجدران والبراويز",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328329/Wall_Art_Frames_loencv.png"
   },
   {
-    "Name": "Other",
-    "image": ""
+    "NameEn": "Other",
+    "NameAr": "أخرى",
+    "image": "https://res.cloudinary.com/dcm3pvbzd/image/upload/v1772328864/Other_tnfrui.avif"
   }
 ]

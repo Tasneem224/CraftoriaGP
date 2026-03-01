@@ -15,6 +15,11 @@ namespace Presentation.Attributes
      //Attribute, IAsyncActionFilter
     internal class RedisCacheAttribute(int _durarionInSeconds=200) :ActionFilterAttribute
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNameCaseInsensitive = true
+        };
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var cacheService=context.HttpContext.RequestServices.GetRequiredService<IServiceManager>().cacheService;
@@ -33,9 +38,7 @@ namespace Presentation.Attributes
             }
             var resultContext=await next.Invoke();
             if (resultContext.Result is OkObjectResult okObjectResult) {
-                var serializedData = JsonSerializer.Serialize(okObjectResult.Value);
-
-                await cacheService.SetCacheValueAsync(key, serializedData, TimeSpan.FromSeconds(_durarionInSeconds));
+                await cacheService.SetCacheValueAsync(key, okObjectResult.Value, TimeSpan.FromSeconds(_durarionInSeconds));
             
             }
         }
@@ -43,7 +46,8 @@ namespace Presentation.Attributes
         private string GenerateKey(HttpRequest request)
         {
             StringBuilder key = new StringBuilder();
-
+            var language = request.Headers["Accept-Language"].ToString().Split(',').FirstOrDefault() ?? "en";
+            key.Append($"{language}:");
             key.Append(request.Path);
             foreach(var item in request.Query.OrderBy(q => q.Key))
             {

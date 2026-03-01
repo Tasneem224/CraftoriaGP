@@ -31,13 +31,10 @@ namespace Presentation
             var products = await _materialService.GetAllMaterialsAsync();
             return Ok(products);
         }
-<<<<<<< HEAD
-        [HttpGet("GetRawMaterialOfSpecificUser")]
-=======
+
         [RedisCache(120)]
 
         [HttpPost("GetRawMaterialOfSpecificUser")]
->>>>>>> Caching
         public async Task<IActionResult> GetAllMaterialsOfSpecifiUser(string userId)
         {
             var products = await _materialService.GetAllMaterialsOfSpecifiUserAsync(userId);

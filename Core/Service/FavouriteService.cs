@@ -61,7 +61,7 @@ namespace Service
                 Id = f.Product.Id,
                 Name =isArabic? f.Product.NameAr:f.Product.NameEn,
                 ImageUrl = f.Product.ImageUrl,
-                category=f.Product.Category.Name,
+                category=f.Product.Category.NameEn,
                 Price = f.Product.Price
             }).ToList();
         }

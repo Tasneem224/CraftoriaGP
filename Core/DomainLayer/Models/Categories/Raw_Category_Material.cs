@@ -12,7 +12,8 @@ namespace DomainLayer.Models.Categories
     public class Raw_Category_Material:BaseEntity<int>
     {
         
-        public string Name { get; set; } = string.Empty;
+        public string NameAr { get; set; } = string.Empty;
+        public string NameEn { get; set; } = string.Empty;
         public string image { get; set; } = string.Empty;
 
 

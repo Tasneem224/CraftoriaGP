@@ -52,7 +52,7 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<Raw_Category_Material, int>();
             var categories = await categoryRepo.GetAllAsync();
 
-            var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
+            var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
 
             return ReturnListDto(isArabic, Materials, categoriesDict,null);
         }
@@ -255,7 +255,7 @@ namespace Service
             var categoryRepo = _unitOfWork.GetRepository<Raw_Category_Material, int>();
             var categories = await categoryRepo.GetAllAsync();
 
-            var categoriesDict = categories.ToDictionary(c => c.Id, c => c.Name);
+            var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
 
             return ReturnListDto(isArabic,Materials, categoriesDict, name);
 
@@ -324,11 +324,13 @@ namespace Service
                 ImageUrl = material.ImageUrl,
                 CategoryId = material.CategoryId,
                 SellerId = material.supplierId,
-                CategoryName = category != null ? category.Name : "",
+                CategoryName = category != null
+                ? (isArabic ? category.NameAr : category.NameEn)
+                : (isArabic ? "غير معروف" : "Unknown"),
                 SellerName = material.supplier?.FirstName + " " + material.supplier?.SecondName,
             };
         }
-        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic,IEnumerable<RawMaterial> Materials, Dictionary<int, string> categoriesDict,string name)
+        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic,IEnumerable<RawMaterial> Materials, Dictionary<int, Raw_Category_Material> categoriesDict,string name)
         {
             return Materials.Select(p => new ReturnProductDto
             {
@@ -341,9 +343,10 @@ namespace Service
                 CategoryId = p.CategoryId,
                 SellerId = p.supplierId,
                 SellerName = name,
-                CategoryName = categoriesDict.ContainsKey(p.CategoryId)
-                                           ? categoriesDict[p.CategoryId]
-                                           : "Unknown"
+                CategoryName = categoriesDict.TryGetValue(p.CategoryId, out var category)
+            ? (isArabic ? category.NameAr : category.NameEn)
+                        : (isArabic ? "غير معروف" : "Unknown")
+
             }).ToList();
         }
         private string AuthFun(bool isArabic)

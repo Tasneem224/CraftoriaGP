@@ -143,7 +143,7 @@ namespace Service
                 ?? p.RawMaterial?.ImageUrl
                 ?? p.TargetUser?.ProfileImage 
                 ?? "default-image.png",
-                CategoryName=p.Product.Category.Name,
+                CategoryName=p.Product.Category.NameEn,
                 ReviewId =p.Id
             });
         }
