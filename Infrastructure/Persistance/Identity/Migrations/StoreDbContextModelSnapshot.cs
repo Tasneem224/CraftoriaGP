@@ -54,7 +54,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Categories.Raw_Category_Material", b =>
@@ -87,7 +87,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RawMaterialCategories");
+                    b.ToTable("RawMaterialCategories", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.EmailVerificationCodes", b =>
@@ -126,7 +126,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailVerificationCodes");
+                    b.ToTable("EmailVerificationCodes", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Favourite.Favourite", b =>
@@ -163,7 +163,7 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("UserId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("Favourites");
+                    b.ToTable("Favourites", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Identity.ApplicationUser", b =>
@@ -333,7 +333,7 @@ namespace Persistance.Identity.Migrations
                         .IsUnique()
                         .HasFilter("[TargetUserId] IS NOT NULL");
 
-                    b.ToTable("UserInteractions");
+                    b.ToTable("UserInteractions", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Items.Item", b =>
@@ -418,154 +418,7 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.session.ExpertAvailability", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("ExpertId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExpertId");
-
-                    b.ToTable("ExpertAvailabilities");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.session.ExpertService", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DurationInMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ExpertId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TitleAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TitleEn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExpertId");
-
-                    b.ToTable("ExpertServices");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.session.Session", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AmountPaid")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BeginnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ExpertAvailabilityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ExpertId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("ExpertServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MeetingLink")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BeginnerId");
-
-                    b.HasIndex("ExpertAvailabilityId");
-
-                    b.HasIndex("ExpertId");
-
-                    b.HasIndex("ExpertServiceId");
-
-                    b.ToTable("Sessions");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("ItemTag", b =>
@@ -640,7 +493,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.RawMaterials.RawMaterial", b =>
@@ -658,7 +511,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("supplierId");
 
-                    b.ToTable("RawMaterials");
+                    b.ToTable("RawMaterials", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Favourite.Favourite", b =>
@@ -707,63 +560,6 @@ namespace Persistance.Identity.Migrations
                     b.Navigation("TargetUser");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.session.ExpertAvailability", b =>
-                {
-                    b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Expert")
-                        .WithMany("Availabilities")
-                        .HasForeignKey("ExpertId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Expert");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.session.ExpertService", b =>
-                {
-                    b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Expert")
-                        .WithMany("ExpertServices")
-                        .HasForeignKey("ExpertId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Expert");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.session.Session", b =>
-                {
-                    b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Beginner")
-                        .WithMany("SessionsAsBeginner")
-                        .HasForeignKey("BeginnerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DomainLayer.Models.session.ExpertAvailability", "Availability")
-                        .WithMany()
-                        .HasForeignKey("ExpertAvailabilityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Expert")
-                        .WithMany("SessionsAsExpert")
-                        .HasForeignKey("ExpertId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DomainLayer.Models.session.ExpertService", "Service")
-                        .WithMany()
-                        .HasForeignKey("ExpertServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Availability");
-
-                    b.Navigation("Beginner");
-
-                    b.Navigation("Expert");
-
-                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("ItemTag", b =>
@@ -846,17 +642,9 @@ namespace Persistance.Identity.Migrations
 
             modelBuilder.Entity("DomainLayer.Models.Identity.ApplicationUser", b =>
                 {
-                    b.Navigation("Availabilities");
-
-                    b.Navigation("ExpertServices");
-
                     b.Navigation("Products");
 
                     b.Navigation("ReceivedReviews");
-
-                    b.Navigation("SessionsAsBeginner");
-
-                    b.Navigation("SessionsAsExpert");
 
                     b.Navigation("WrittenReviews");
 
