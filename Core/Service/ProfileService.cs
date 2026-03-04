@@ -133,6 +133,7 @@ namespace Service
                 throw new UserNotFoundException("User not found");
 
           var reviews=  await _userInteractionRepository.GetAllReviewThatCreatedBySpecificUser(user.Id);
+
             return reviews.Select(p=>new ReviewsProfile
             {
                 ItemId = p.ProductId ?? p.RawMaterialId ?? 0,
@@ -143,7 +144,9 @@ namespace Service
                 ?? p.RawMaterial?.ImageUrl
                 ?? p.TargetUser?.ProfileImage 
                 ?? "default-image.png",
-                CategoryName=p.Product.Category.NameEn,
+                CategoryName =
+    p.Product?.Category?.NameEn
+    ?? p.RawMaterial?.Category?.NameEn,
                 ReviewId =p.Id
             });
         }

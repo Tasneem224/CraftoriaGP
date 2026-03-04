@@ -2,6 +2,7 @@
 using DomainLayer.Exceptions;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
+using DomainLayer.Models.Items;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
@@ -39,23 +40,39 @@ namespace Service
 
         }
 
-        public async Task<IEnumerable<ReviewsBelongToUSer>> GetReviewOfCustomer(string CustomerId)
+        public async Task<IEnumerable<ReviewsBelongToUSer>> GetReviewOfCustomer(string sellerId)
         {
+            var reviews = await _unitOfWork
+                .GetRepository<UserInteraction, int>()
+                .GetAllQueryable()
+                .Where(r =>
+                    r.TargetUserId == sellerId
+                    || (r.Product != null && r.Product.SellerId == sellerId)
+                    || (r.RawMaterial != null && r.RawMaterial.supplierId == sellerId)
+                )
+                .Select(r => new ReviewsBelongToUSer
+                {
+                    ItemId = r.ProductId ?? r.RawMaterialId ?? 0,
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == CustomerId);
-            var reviews = await _unitOfWork.GetRepository<UserInteraction, int>().GetAllQueryable()
-                .Where(r => r.UserId == CustomerId)
-               .Select(r => new ReviewsBelongToUSer
-               {
-                   ItemId = r.ProductId ?? r.RawMaterialId ?? 0,
-                   UserId = r.UserId,
-                   review = r.Review ?? "",
-                   Rating = r.Rating,
-                   PicturUrl = r.Product != null ? r.Product.ImageUrl : (r.RawMaterial != null ? r.RawMaterial.ImageUrl : ""),
-                   FirstName = user.FirstName,
-                   SecondName = user.SecondName,
-                   CreatedAt = r.CreatedAt
-               }).ToListAsync();
+                    UserId = r.UserId,
+                    FirstName = r.User.FirstName,
+                    SecondName = r.User.SecondName,
+
+                    review = r.Review ?? "",
+                    Rating = r.Rating,
+
+                    PicturUrl =
+                        r.Product != null
+                            ? r.Product.ImageUrl
+                            : (r.RawMaterial != null
+                                ? r.RawMaterial.ImageUrl
+                                : ""),
+
+                    CreatedAt = r.CreatedAt
+                })
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
             return reviews;
         }
     }

@@ -163,7 +163,7 @@ namespace Persistance.Repositories
                 .Include(x => x.User) 
                 .Include(X=>X.Product)
                 .ThenInclude(x=>x.Category)
-                .Include(x=>x.RawMaterial)
+                .Include(x=>x.RawMaterial)  
                 .ThenInclude(r => r.Category)
                 .OrderByDescending(x => x.InteractionDate)
                 .ToListAsync();
