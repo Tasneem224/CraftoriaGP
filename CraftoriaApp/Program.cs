@@ -83,6 +83,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<ICacheRepository, CacheRepository>();
             builder.Services.AddScoped<ICacheService, CacheService>();
             builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
+            builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnection")!);
@@ -106,7 +107,6 @@ namespace CraftoriaApp
                };
             });
             builder.Services.AddScoped<ITranslationService, TranslationService>();
-
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
 

@@ -13,12 +13,14 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class ServiceManager(ICacheRepository cacheRepository,ICacheService cacheService,IUnitOfWork unitOfWork,UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationrRepo,IMapper _mapper,ICartRepository _cacheRepository) : IServiceManager
+    public class ServiceManager(IAccountService accountService,ICacheRepository cacheRepository,ICacheService cacheService,IUnitOfWork unitOfWork,UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationrRepo,IMapper _mapper,ICartRepository _cacheRepository) : IServiceManager
     {
         private readonly Lazy<IAuthenticationService> _LazyAuthenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _configuration, _cloudinaryService,_emailService, _emailVerificationrRepo));
         private readonly Lazy<ICartService> _LazyCartService = new Lazy<ICartService>(() => new CartService(unitOfWork, _cacheRepository,_mapper));
         private readonly Lazy<ICacheService> _LazyCacheService = new Lazy<ICacheService>(() => new CacheService(cacheRepository));
+        private readonly Lazy<IAccountService> _LazyAccountService = new Lazy<IAccountService>(() => new AccountService(_userManager, unitOfWork));
 
+        public IAccountService accountService => _LazyAccountService.Value;
         public ICacheService cacheService => _LazyCacheService.Value;
         public IAuthenticationService AuthenticationService => _LazyAuthenticationService.Value;
         public ICartService CartService => _LazyCartService.Value;

@@ -22,7 +22,6 @@ namespace Presentation
 
         }
         [Authorize]
-
         [HttpPost]
         public async Task<IActionResult> UpdateUserProfile(UpdateUserDto updateUserDto)
         {
