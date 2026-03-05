@@ -25,6 +25,8 @@ namespace DomainLayer.Models.Items
         public string? DescriptionAr { get; set; } = default!;
     
         public virtual ICollection<Tag> tags { get; set; } = new HashSet<Tag>();
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = default!;
 
     }
 }
