@@ -1,6 +1,7 @@
 ﻿using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
+using DomainLayer.Models.session;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace DomainLayer.Models.Identity
 {
@@ -36,6 +38,26 @@ namespace DomainLayer.Models.Identity
 
         #endregion
 
+        // ضيفي دول جوه الـ ApplicationUser class
+        // جوه ApplicationUser.cs
+        #region Booking_System_Relations
+
+        [InverseProperty(nameof(ExpertService.Expert))]
+        public virtual ICollection<ExpertService> ExpertServices { get; set; }
+
+        [InverseProperty(nameof(ExpertAvailability.Expert))]
+        public virtual ICollection<ExpertAvailability> Availabilities { get; set; }
+
+        // الجلسات اللي أنا "خبير" فيها (بقدم فيها النصيحة)
+        [InverseProperty(nameof(Session.Expert))]
+        public virtual ICollection<Session> SessionsAsExpert { get; set; }
+
+        // الجلسات اللي أنا "بائع مبتدئ" فيها (حاجزها عشان أتعلم)
+        [InverseProperty(nameof(Session.Beginner))]
+        public virtual ICollection<Session> SessionsAsBeginner { get; set; }
+
+        #endregion
+
         // virtual for lazy loading
 
         [InverseProperty(nameof(Product.Seller))]
@@ -50,7 +72,7 @@ namespace DomainLayer.Models.Identity
 
         // 2. (Seller Reviews)
         [InverseProperty(nameof(UserInteraction.TargetUser))]
-        public ICollection<UserInteraction> ReceivedReviews { get; set; }   
+        public ICollection<UserInteraction> ReceivedReviews { get; set; }
 
     }
 }

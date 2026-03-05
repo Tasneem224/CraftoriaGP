@@ -64,6 +64,11 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IRawMaterialServices, RawMaterialServices>();
             builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ITopRatedService, TopRatedService>();
+            builder.Services.AddScoped<ISessionService, SessionService>();
+
+
+
+
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddFluentValidationClientsideAdapters();
