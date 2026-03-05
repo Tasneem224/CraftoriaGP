@@ -4,6 +4,7 @@ using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.Order;
 using DomainLayer.Models.RawMaterials;
 using DomainLayer.Models.session;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,10 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+        public DbSet<Address_Book> Adress_Shipping { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem>  OrderItems { get; set; }
         public DbSet<ExpertService> ExpertServices { get; set; }
         public DbSet<ExpertAvailability> ExpertAvailabilities { get; set; }
         public DbSet<Session> Sessions { get; set; }

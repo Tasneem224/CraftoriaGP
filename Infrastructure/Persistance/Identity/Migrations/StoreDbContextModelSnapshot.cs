@@ -41,11 +41,7 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("NameAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NameEn")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -58,7 +54,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Categories.Raw_Category_Material", b =>
@@ -78,11 +74,7 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("NameAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NameEn")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -95,7 +87,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RawMaterialCategories");
+                    b.ToTable("RawMaterialCategories", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.EmailVerificationCodes", b =>
@@ -134,7 +126,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailVerificationCodes");
+                    b.ToTable("EmailVerificationCodes", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Favourite.Favourite", b =>
@@ -171,7 +163,7 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("UserId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("Favourites");
+                    b.ToTable("Favourites", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Identity.ApplicationUser", b =>
@@ -341,7 +333,7 @@ namespace Persistance.Identity.Migrations
                         .IsUnique()
                         .HasFilter("[TargetUserId] IS NOT NULL");
 
-                    b.ToTable("UserInteractions");
+                    b.ToTable("UserInteractions", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Items.Item", b =>
@@ -426,7 +418,7 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.session.ExpertAvailability", b =>
@@ -469,7 +461,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("ExpertId");
 
-                    b.ToTable("ExpertAvailabilities");
+                    b.ToTable("ExpertAvailabilities", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.session.ExpertService", b =>
@@ -514,7 +506,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("ExpertId");
 
-                    b.ToTable("ExpertServices");
+                    b.ToTable("ExpertServices", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.session.Session", b =>
@@ -573,7 +565,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("ExpertServiceId");
 
-                    b.ToTable("Sessions");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("ItemTag", b =>
@@ -648,7 +640,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.RawMaterials.RawMaterial", b =>
@@ -666,7 +658,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("supplierId");
 
-                    b.ToTable("RawMaterials");
+                    b.ToTable("RawMaterials", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Favourite.Favourite", b =>
