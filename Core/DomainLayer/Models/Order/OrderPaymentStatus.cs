@@ -1,10 +1,11 @@
 ﻿namespace DomainLayer.Models.Order
 {
+  
     public enum OrderPaymentStatus
     {
-        pending,
-        paid,
-        failed,
-        refunded
+        pending = 0,
+        PaymentRecived = 1,
+        PaymentFailed = 2
     }
+
 }
