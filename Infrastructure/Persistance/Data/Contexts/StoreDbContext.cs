@@ -5,6 +5,7 @@ using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
+using DomainLayer.Models.session;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,9 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<ExpertService> ExpertServices { get; set; }
+        public DbSet<ExpertAvailability> ExpertAvailabilities { get; set; }
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<Favourite> Favourites { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<UserInteraction> UserInteractions { get; set; }
@@ -30,14 +34,38 @@ namespace Persistance.Data.Contexts
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // 1. Identity Tables Configuration
             builder.Entity<ApplicationUser>().ToTable("Users");
             builder.Entity<IdentityRole>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
+
+            // تجاهل الجداول الإضافية لـ Identity عشان الـ Warnings اللي كانت بتظهر
             builder.Ignore<IdentityUserClaim<string>>();
             builder.Ignore<IdentityUserToken<string>>();
             builder.Ignore<IdentityUserLogin<string>>();
             builder.Ignore<IdentityRoleClaim<string>>();
-            
+
+            // 2. تطبيق الـ Configuration Classes (السطر ده كفاية جداً لكل الملفات اللي في الـ Assembly)
+            builder.ApplyConfigurationsFromAssembly(typeof(StoreDbContext).Assembly);
+
+            // 3. ضبط الـ Decimal Properties (عشان نلغي الـ Warnings الصفراء)
+            builder.Entity<ApplicationUser>()
+                .Property(u => u.CommissionRate)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<ExpertService>()
+                .Property(s => s.Price)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Session>()
+                .Property(s => s.AmountPaid)
+                .HasColumnType("decimal(18,2)");
+
+            // 4. Inheritance Strategy
+            builder.Entity<Item>().UseTpcMappingStrategy();
+
+            // 5. الـ Favourite Configuration (يفضل تنقليها لكلاس منفصل لاحقاً بس شغالة هنا)
             builder.Entity<Favourite>()
                 .HasIndex(f => new { f.UserId, f.ProductId })
                 .IsUnique();
@@ -48,12 +76,10 @@ namespace Persistance.Data.Contexts
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<Item>().UseTpcMappingStrategy();
-            builder.ApplyConfigurationsFromAssembly(typeof(ReferenceAssembly).Assembly);
-
+            // 🚨 ملاحظة: تم حذف السطر المكرر لـ ApplyConfigurations و ReferenceAssembly
         }
 
- 
+
         public DbSet<EmailVerificationCodes> EmailVerificationCodes { get; set; }
 
     }

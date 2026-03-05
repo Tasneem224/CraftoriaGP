@@ -15,6 +15,7 @@ namespace Persistance.Repositories
         private readonly StoreDbContext _dbContext;
         public IUserInteractionRepository UserInteractions { get; }
         public IFavouriteRepository Favourites { get; }
+        public ISessionRepository Sessions { get; } // الـ Repo الجديد
 
 
         public UnitOfWork(StoreDbContext context)
@@ -22,6 +23,7 @@ namespace Persistance.Repositories
             _dbContext = context;
             UserInteractions = new UserInteractionRepository(context);
             Favourites = new FavouriteRepository(context);
+            Sessions = new SessionRepository(context); // عمل الـ Instance
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
