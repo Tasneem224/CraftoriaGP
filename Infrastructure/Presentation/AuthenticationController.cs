@@ -9,6 +9,7 @@ namespace Presentation
     public class AuthenticationController(IServiceManager _serviceManager, IAuthenticationService _authenticationService) : BaseApiController
     {
         [HttpPost("Register")]
+
                 public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
                 {
 
