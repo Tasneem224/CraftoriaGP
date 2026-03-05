@@ -1,13 +1,18 @@
-﻿namespace DomainLayer.Models.Order
+﻿using System.Runtime.Serialization;
+
+namespace DomainLayer.Models.Order
 {
   
     public enum OrderPaymentStatus
     {
-        Pending,    
-        PaymentReceived, 
-        PaymentFailed,   
-        Shipped,    
-        Delivered   
+        [EnumMember(Value = "Pending")]
+        Pending,          
+        [EnumMember(Value = "Received")]
+        PaymentReceived,  
+        [EnumMember(Value = "Failed")]
+        PaymentFailed,     
+        [EnumMember(Value = "Refunded")]
+        Refunded         
     }
 
-}
+    }

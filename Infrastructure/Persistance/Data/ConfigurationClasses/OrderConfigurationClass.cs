@@ -20,6 +20,7 @@ namespace Persistance.Data.ConfigurationClasses
                 builder.HasMany(o => o.OrderItems).WithOne().OnDelete(DeleteBehavior.Cascade);
 
                 builder.Property(o => o.orderPaymentStatus).HasConversion(p => p.ToString(), p => Enum.Parse<OrderPaymentStatus>(p));
+                builder.Property(o => o.orderStatus).HasConversion(p => p.ToString(), p => Enum.Parse<OrderStatus>(p));
 
                 builder
                 .HasOne(o => o.DeliveryMethod)
