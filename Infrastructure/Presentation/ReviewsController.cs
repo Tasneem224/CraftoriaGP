@@ -66,7 +66,7 @@ namespace Presentation
             return SendSuccessResponse(reviews);
         }
 
-            [RedisCache(100)]
+        [RedisCache(100)]
         [HttpGet("GetUserReviews")]
         public async Task<IActionResult> GetUserReviews(string targetUserId)
         {
