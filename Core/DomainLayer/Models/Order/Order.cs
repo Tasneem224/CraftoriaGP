@@ -12,13 +12,14 @@ namespace DomainLayer.Models.Order
         public string UserEmail { get; set; } = string.Empty;
         public ShippingAddress ShippingAddress { get; set; } = default!;
         public ICollection<OrderItem> OrderItems { get; set; } = default!;
-        public OrderPaymentStatus orderPaymentStatus { get; set; } = OrderPaymentStatus.pending;
+        public OrderPaymentStatus orderPaymentStatus { get; set; } = OrderPaymentStatus.Pending;
         public DeliveryMethod DeliveryMethod { get; set; } = default!;
         
         public int? DeliveryMethodId { get; set; }
         public decimal Subtotal { get; set; }
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.UtcNow;
         public string  PaymentIntentId { get; set; }=string.Empty;
+        public decimal GetTotal() => Subtotal + (DeliveryMethod?.Price ?? 0);
 
     }
 }

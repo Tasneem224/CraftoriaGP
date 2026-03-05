@@ -3,9 +3,11 @@
   
     public enum OrderPaymentStatus
     {
-        pending = 0,
-        PaymentRecived = 1,
-        PaymentFailed = 2
+        Pending,    
+        PaymentReceived, 
+        PaymentFailed,   
+        Shipped,    
+        Delivered   
     }
 
 }
