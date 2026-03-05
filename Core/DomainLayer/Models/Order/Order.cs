@@ -19,7 +19,7 @@ namespace DomainLayer.Models.Order
         public decimal Subtotal { get; set; }
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.UtcNow;
         public string  PaymentIntentId { get; set; }=string.Empty;
-        public decimal GetTotal() => Subtotal + (DeliveryMethod?.P ?? 0);
+        public decimal GetTotal() => Subtotal + (DeliveryMethod?.Price ?? 0);
 
     }
 }
