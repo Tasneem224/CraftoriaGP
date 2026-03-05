@@ -2,7 +2,7 @@
 
 namespace DomainLayer.Models.Order
 {
-    public class DeliveryMethod:BaseEntity<Guid>
+    public class DeliveryMethod:BaseEntity<int>
     {
         public int Id { get; set; }
         public string ShortName { get; set; } = string.Empty;
