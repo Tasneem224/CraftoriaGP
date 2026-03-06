@@ -12,8 +12,8 @@ namespace DomainLayer.Contracts
         IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>;
         IUserInteractionRepository UserInteractions { get; }
         IFavouriteRepository Favourites { get; }
-        IOrderRepository Orders { get; }
         ISessionRepository Sessions { get; } // الـ Repo الجديد
+        IOrderRepository Orders { get; }
 
         Task<int> SaveChanges();
 

@@ -13,7 +13,7 @@ namespace DomainLayer.Models.Order
         public ShippingAddress ShippingAddress { get; set; } = default!;
         public ICollection<OrderItem> OrderItems { get; set; } = default!;
         public OrderPaymentStatus orderPaymentStatus { get; set; } = OrderPaymentStatus.Pending;
-        public OrderStatus orderStatus { get; set; }
+        public OrderStatus orderStatus { get; set; }= OrderStatus.Pending;
         public DeliveryMethod DeliveryMethod { get; set; } = default!;
         
         public int? DeliveryMethodId { get; set; }

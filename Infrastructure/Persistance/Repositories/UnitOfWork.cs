@@ -16,7 +16,7 @@ namespace Persistance.Repositories
         public IUserInteractionRepository UserInteractions { get; }
         public IFavouriteRepository Favourites { get; }
         public ISessionRepository Sessions { get; } // الـ Repo الجديد
-        public IOrderRepository Orders { get; } // الـ Repo الجديد
+        public IOrderRepository Orders { get; } 
 
 
         public UnitOfWork(StoreDbContext context)
