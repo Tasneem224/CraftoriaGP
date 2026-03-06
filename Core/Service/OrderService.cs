@@ -20,7 +20,7 @@ namespace Service
 
         public async Task<OrderToReturnDto?> GetOrderByIdAsync(Guid id, string userEmail)
         {
-           var order =await _unitOfWork.GetRepository<Order,Guid>().GetByIdAsync(id);
+           var order =await _unitOfWork.Orders.GetOrderByIdWithItemsAsync(id);
             if (order == null)
                 throw new ItemNotFound("Order not found");
             if(order.UserEmail != userEmail)
@@ -31,8 +31,8 @@ namespace Service
                 OrderDate = order.OrderDate,
                 UserEmail = order.UserEmail,
                 DeliveryMethod = ,
-                OrderPaymentStatus = order.orderPaymentStatus,
-                ShippingPrice = order.ShippingPrice,
+                OrderPaymentStatus = order.orderPaymentStatus.ToString(),
+                ShippingPrice = order.c,
                 Status = order.Status,
                 Subtotal = order.Subtotal,
                 Total = order.GetTotal(),

@@ -16,6 +16,7 @@ namespace Persistance.Repositories
         public IUserInteractionRepository UserInteractions { get; }
         public IFavouriteRepository Favourites { get; }
         public ISessionRepository Sessions { get; } // الـ Repo الجديد
+        public IOrderRepository Orders { get; } // الـ Repo الجديد
 
 
         public UnitOfWork(StoreDbContext context)
@@ -24,6 +25,7 @@ namespace Persistance.Repositories
             UserInteractions = new UserInteractionRepository(context);
             Favourites = new FavouriteRepository(context);
             Sessions = new SessionRepository(context); // عمل الـ Instance
+            Orders= new OrderRepository(context); 
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
