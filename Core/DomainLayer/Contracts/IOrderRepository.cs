@@ -10,5 +10,6 @@ namespace DomainLayer.Contracts
     public interface IOrderRepository:IGenericRepository<Order, Guid>
     {
         Task<Order?> GetOrderByIdWithItemsAsync(Guid id);
+        Task<IEnumerable<Order>> GetOrdersForUserWithItemsAsync(string email);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Exceptions;
 using DomainLayer.Models.CartModule;
+using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.Order;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
 using Shared.Order;
@@ -14,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class OrderService(ICartRepository _cartRepository,IUnitOfWork _unitOfWork,ICartService _cartService) : IOrderService
+    public class OrderService(UserManager<ApplicationUser> _userManager,ICartRepository _cartRepository,IUnitOfWork _unitOfWork,ICartService _cartService) : IOrderService
     {
         public async Task<OrderToReturnDto?> CreateOrderAsync(string userEmail, int deliveryMethodId, string basketId, AddressBookDto shippingAddress)
         {
@@ -47,6 +49,43 @@ namespace Service
             }
             return null;
         }
+        public async Task<OrderToReturnDto?> GetOrderByIdAsync(Guid id, string userEmail)
+        {
+           var order =await _unitOfWork.Orders.GetOrderByIdWithItemsAsync(id);
+            if (order == null)
+                throw new ItemNotFound("Order not found");
+            if(order.UserEmail != userEmail)
+                throw new UnauthorizedAccessException("You are not authorized to access this order");
+
+            return new OrderToReturnDto
+            {
+                Id = order.Id,
+                OrderDate = order.OrderDate,
+                UserEmail = order.UserEmail,
+                DeliveryMethod =order.DeliveryMethod.ShortName,
+                OrderPaymentStatus = order.orderPaymentStatus.ToString(),
+                ShippingPrice = order.DeliveryMethod.Price,
+                Status = order.orderStatus.ToString(),
+                Subtotal = order.Subtotal,
+                Total = order.GetTotal(),
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto
+                {
+                    ProductId = oi.Item.ItemId,
+                    ProductName = oi.Item.ItemName,
+                    PictureUrl = oi.Item.ItemPictureUrl,
+                    Price = oi.Price,
+                    Quantity = oi.Quantity
+                }).ToList()
+            };
+        }
+        public async Task<IReadOnlyList<OrderToReturnDto>> GetOrdersForUserAsync(string userEmail)
+        {
+            
+            var orders = await _unitOfWork.Orders.GetOrdersForUserWithItemsAsync(userEmail);
+
+            return orders.Select(order => MapOrderToDto(order)).ToList();
+        }
+
         private async Task<List<OrderItem>> PrepareOrderItemsAsync(CustomerCart basket)
         {
             var orderItems = new List<OrderItem>();
@@ -98,22 +137,16 @@ namespace Service
                 DeliveryMethodId = deliveryMethod.Id
             };
         }
-        public async Task<OrderToReturnDto?> GetOrderByIdAsync(Guid id, string userEmail)
+        private OrderToReturnDto MapOrderToDto(Order order)
         {
-           var order =await _unitOfWork.Orders.GetOrderByIdWithItemsAsync(id);
-            if (order == null)
-                throw new ItemNotFound("Order not found");
-            if(order.UserEmail != userEmail)
-                throw new UnauthorizedAccessException("You are not authorized to access this order");
-
             return new OrderToReturnDto
             {
                 Id = order.Id,
                 OrderDate = order.OrderDate,
                 UserEmail = order.UserEmail,
-                DeliveryMethod =order.DeliveryMethod.ShortName,
-                OrderPaymentStatus = order.orderPaymentStatus.ToString(),
-                ShippingPrice = order.DeliveryMethod.Price,
+                DeliveryMethod = order.DeliveryMethod?.ShortName ?? "N/A",
+                OrderPaymentStatus = order.orderStatus.ToString(), 
+                ShippingPrice = order.DeliveryMethod?.Price ?? 0,
                 Status = order.orderStatus.ToString(),
                 Subtotal = order.Subtotal,
                 Total = order.GetTotal(),
@@ -126,11 +159,6 @@ namespace Service
                     Quantity = oi.Quantity
                 }).ToList()
             };
-        }
-
-        public Task<IReadOnlyList<OrderToReturnDto>> GetOrdersForUserAsync(string userEmail)
-        {
-            throw new NotImplementedException();
         }
     }
 }

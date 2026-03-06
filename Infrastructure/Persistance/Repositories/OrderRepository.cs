@@ -20,6 +20,15 @@ namespace Persistance.Repositories
                 .Include(o => o.DeliveryMethod)
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
+        public async Task<IEnumerable<Order>> GetOrdersForUserWithItemsAsync(string email)
+        {
+            return await _Context.Orders
+                .Where(o => o.UserEmail == email)
+                .Include(o => o.OrderItems)
+                .Include(o => o.DeliveryMethod)
+                .OrderByDescending(o => o.OrderDate) // عشان الأحدث يظهر الأول
+                .ToListAsync();
+        }
 
 
     }
