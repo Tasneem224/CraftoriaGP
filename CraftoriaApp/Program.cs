@@ -89,6 +89,9 @@ namespace CraftoriaApp
             builder.Services.AddScoped<ICacheService, CacheService>();
             builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnection")!);

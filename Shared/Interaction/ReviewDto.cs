@@ -9,6 +9,7 @@ namespace Shared.Interaction
     public class ReviewDto
     {
         public int InteractionId { get; set; }
+        public string? UserImage { get; set; }
         public string ReviewerId { get; set; }
         public string ReviewerName { get; set; }
         public short Rating { get; set; }
