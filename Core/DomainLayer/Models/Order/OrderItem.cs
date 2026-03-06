@@ -3,7 +3,7 @@
 namespace DomainLayer.Models.Order
 {
 
-        public class OrderItem : BaseEntity<Guid>
+        public class OrderItem : BaseEntity<int>
         {
             public ItemInOrderItem Item { get; set; } = default!;
             public decimal Price { get; set; }
