@@ -13,7 +13,7 @@ namespace ServiceAbstraction
         Task DeleteReviewAsync(int reviewId, string userId);
         Task<List<ReviewDto>> GetProductReviewsAsync(int productId);
         Task<List<ReviewDto>> GetRawMaterialReviewsAsync(int rawMaterialId);
-        Task<List<ReviewDto>> GetUserReviewsAsync(string targetUserId);
+        Task<List<AllReviewsOfTargetUser>> GetUserReviewsAsync(string targetUserId);
         Task<ReviewStatsDto> GetUserStatsAsync(string userId);
         Task<ReviewStatsDto> GetProductStatsAsync(int productId);
         Task<ReviewStatsDto> GetRawMaterialStatsAsync(int rawMaterialId);
