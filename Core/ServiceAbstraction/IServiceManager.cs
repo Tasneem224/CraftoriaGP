@@ -12,6 +12,7 @@ namespace ServiceAbstraction
         public ICartService CartService { get; }
         public ICacheService cacheService { get; }
         public IAccountService accountService { get; }
+        public IOrderService orderService { get; }
 
     }
 }
