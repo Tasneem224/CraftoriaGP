@@ -1,4 +1,5 @@
 ﻿using Shared.ProductModule;
+using Shared.Search;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,6 @@ namespace ServiceAbstraction
         Task<ReturnProductDto> UpdateProductAsync(int id, UpdateProductDto dto);
         Task<bool> DeleteProductAsync(int id);
         Task<int> GetProductsCountByUserIdAsync(string userId);
-        Task<List<ReturnProductDto>> SearchProductsAsync(string query);
+        Task<List<ReturnSearchDto>> SearchProductsAsync(string query);
     }
 }

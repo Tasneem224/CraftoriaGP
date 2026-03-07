@@ -13,6 +13,7 @@ using Shared.ErrorModels;
 using Shared.Extensions;
 using Shared.IdentityModule;
 using Shared.ProductModule;
+using Shared.Search;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
@@ -236,9 +237,9 @@ namespace Service
                         Price = p.Price
                     }).ToList();
         }
-        public async Task<List<ReturnProductDto>> SearchProductsAsync(string query)
+        public async Task<List<ReturnSearchDto>> SearchProductsAsync(string query)
         {
-            if (string.IsNullOrWhiteSpace(query)) return new List<ReturnProductDto>();
+            if (string.IsNullOrWhiteSpace(query)) return new List<ReturnSearchDto>();
 
             var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
             var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
@@ -264,8 +265,11 @@ namespace Service
               .Where(
                 x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
               .OrderByDescending(x => x.Score)
-              .Select(
-                x => ReturnDto(isArabic, x.Product, x.Product.Category))
+                .Select(x => new ReturnSearchDto 
+                {
+                    Id = x.Product.Id,
+                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn
+                })
               .ToList();
 
                     return searchResults;

@@ -12,13 +12,11 @@ namespace Presentation
 {
     public class HomeController : BaseApiController
     {
-        private readonly ITopRatedService _topRatedService;
         private readonly IServiceManager  _serviceManager;
 
         // بنعمل Inject للسرفيس الجديدة بتاعتنا
-        public HomeController(ITopRatedService topRatedService, IServiceManager serviceManager)
+        public HomeController( IServiceManager serviceManager)
         {
-            _topRatedService = topRatedService;
             _serviceManager = serviceManager;
         }
 
@@ -27,7 +25,7 @@ namespace Presentation
         [HttpGet("top-products")]
         public async Task<IActionResult> GetTopProducts([FromQuery] int count = 5)
         {
-            var result = await _topRatedService.GetTopProductsAsync(count);
+            var result = await _serviceManager.TopRatedService.GetTopProductsAsync(count);
 
             // لو القائمة فاضية ممكن ترجعي 200 برضه عادي (لستة فاضية) أو 404 حسب البيزنس
             return Ok(result);
@@ -38,13 +36,13 @@ namespace Presentation
         [HttpGet("top-sellers")]
         public async Task<IActionResult> GetTopSellers([FromQuery] int count = 5)
         {
-            var result = await _topRatedService.GetTopSellersAsync(count);
+            var result = await _serviceManager.TopRatedService.GetTopSellersAsync(count);
             return Ok(result);
         }
         [HttpGet("top-raw-materials")]
         public async Task<IActionResult> GetTopRawMaterials([FromQuery] int count = 5)
         {
-            var result = await _topRatedService.GetTopRawMaterialsAsync(count);
+            var result = await _serviceManager.TopRatedService.GetTopRawMaterialsAsync(count);
             return Ok(result);
         }
         [HttpGet("Search")]
