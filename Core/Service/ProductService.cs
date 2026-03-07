@@ -145,7 +145,7 @@ namespace Service
             }
 
             await UpdateData(dataFromRequest, isArabic, product);
-
+            _unitOfWork.GetRepository<Product, int>().Update(product); // بيأكد للـ Tracker إن فيه تعديل
             await _unitOfWork.SaveChanges();
 
             return ReturnDto(isArabic, product, product.Category);
@@ -291,6 +291,7 @@ namespace Service
         }
         private async Task UpdateData(UpdateProductDto dataFromRequest, bool isArabic, Product product)
         {
+            // 1. التحديثات المباشرة
             product.NameEn = dataFromRequest.NameEn ?? product.NameEn;
             if (!string.IsNullOrWhiteSpace(dataFromRequest.NameAr))
                 product.NameAr = dataFromRequest.NameAr.NormalizeArabicText()!;
@@ -301,32 +302,23 @@ namespace Service
             if (dataFromRequest.CategoryId.HasValue && dataFromRequest.CategoryId > 0)
                 product.CategoryId = dataFromRequest.CategoryId.Value;
 
+            // 2. إدارة المهمات (Tasks) بطريقة صحيحة
             var tasks = new List<Task>();
 
+            // مهمة الوصف والترجمة
             if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
             {
-                
-                    (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
-                    product.DescriptionAr = descAr.NormalizeArabicText();
-                    product.DescriptionEn = descEn;
-                ));
+                // بدل Task.Run، هنادي الميثود مباشرة ونضيف الـ Task للـ List
+                tasks.Add(UpdateDescriptionAsync(dataFromRequest, isArabic, product));
             }
 
+            // مهمة الصورة
             if (dataFromRequest.ImageFile != null)
             {
-               
-                    if (!string.IsNullOrEmpty(product.ImageUrl))
-                    {
-                        string publicId = GetPublicIdFromUrl(product.ImageUrl);
-                        if (!string.IsNullOrEmpty(publicId))
-                        {
-                             _cloudinary.DeleteAsync(publicId); 
-                        }
-                    }
-                    product.ImageUrl = await _cloudinary.UploadAsync(dataFromRequest.ImageFile);
-                ));
+                tasks.Add(UpdateImageAsync(dataFromRequest, product));
             }
 
+            // 3. تحديث الـ Tags (يجب أن يتم هنا لضمان الـ Tracking)
             if (dataFromRequest.Tags != null)
             {
                 product.tags.Clear();
@@ -334,7 +326,6 @@ namespace Service
                 {
                     var tagRepo = _unitOfWork.GetRepository<Tag, int>();
                     var cleanTags = dataFromRequest.Tags.Select(t => t.Trim()).ToList();
-
                     var existingDbTags = await tagRepo.GetAllQueryable()
                         .Where(t => cleanTags.Contains(t.Name))
                         .ToListAsync();
@@ -347,7 +338,31 @@ namespace Service
                 }
             }
 
-            await Task.WhenAll(tasks);
+            // 4. انتظار كل العمليات الخارجية (Cloudinary والترجمة)
+            if (tasks.Any())
+            {
+                await Task.WhenAll(tasks);
+            }
+        }
+
+        private async Task UpdateDescriptionAsync(UpdateProductDto dto, bool isAr, Product p)
+        {
+            (string descAr, string descEn) = await TranslateDescription(dto, isAr);
+            p.DescriptionAr = descAr.NormalizeArabicText();
+            p.DescriptionEn = descEn;
+        }
+
+        private async Task UpdateImageAsync(UpdateProductDto dto, Product p)
+        {
+            if (!string.IsNullOrEmpty(p.ImageUrl))
+            {
+                string publicId = GetPublicIdFromUrl(p.ImageUrl);
+                if (!string.IsNullOrEmpty(publicId))
+                {
+                     _cloudinary.DeleteAsync(publicId); // الـ await هنا ضروري جداً
+                }
+            }
+            p.ImageUrl = await _cloudinary.UploadAsync(dto.ImageFile);
         }
         private static ReturnProductDto ReturnDto(bool isArabic, Product product, ProductCategory category)
         {
