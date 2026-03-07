@@ -305,16 +305,16 @@ namespace Service
 
             if (!string.IsNullOrWhiteSpace(dataFromRequest.Description))
             {
-                tasks.Add(Task.Run(async () => {
+                
                     (string descAr, string descEn) = await TranslateDescription(dataFromRequest, isArabic);
                     product.DescriptionAr = descAr.NormalizeArabicText();
                     product.DescriptionEn = descEn;
-                }));
+                ));
             }
 
             if (dataFromRequest.ImageFile != null)
             {
-                tasks.Add(Task.Run(async () => {
+               
                     if (!string.IsNullOrEmpty(product.ImageUrl))
                     {
                         string publicId = GetPublicIdFromUrl(product.ImageUrl);
@@ -324,7 +324,7 @@ namespace Service
                         }
                     }
                     product.ImageUrl = await _cloudinary.UploadAsync(dataFromRequest.ImageFile);
-                }));
+                ));
             }
 
             if (dataFromRequest.Tags != null)

@@ -98,8 +98,7 @@ namespace Service
                   .GetAllQueryable()
                   .Where(r =>
                       r.TargetUserId == targetUserId
-                      || (r.Product != null && r.Product.SellerId == targetUserId)
-                      || (r.RawMaterial != null && r.RawMaterial.supplierId == targetUserId)
+                     
                   ).Select(x => new AllReviewsOfTargetUser
                                    {
                             InteractionId = x.Id,//review id
