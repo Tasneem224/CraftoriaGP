@@ -13,6 +13,8 @@ namespace ServiceAbstraction
         public ICacheService cacheService { get; }
         public IAccountService accountService { get; }
         public IOrderService orderService { get; }
+        public IProductService ProductService { get; }
+        public ITopRatedService TopRatedService{ get; }
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
+using Service;
 using ServiceAbstraction;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,13 @@ namespace Presentation
     public class HomeController : BaseApiController
     {
         private readonly ITopRatedService _topRatedService;
+        private readonly IServiceManager  _serviceManager;
 
         // بنعمل Inject للسرفيس الجديدة بتاعتنا
-        public HomeController(ITopRatedService topRatedService)
+        public HomeController(ITopRatedService topRatedService, IServiceManager serviceManager)
         {
             _topRatedService = topRatedService;
+            _serviceManager = serviceManager;
         }
 
         // 1. Endpoint للمنتجات الأعلى تقييماً
@@ -44,6 +47,16 @@ namespace Presentation
             var result = await _topRatedService.GetTopRawMaterialsAsync(count);
             return Ok(result);
         }
+        [HttpGet("Search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return BadRequest("Search query cannot be empty");
+
+            var results = await _serviceManager.ProductService.SearchProductsAsync(query);
+            return Ok(results);
+        }
+
+
 
     }
 }
