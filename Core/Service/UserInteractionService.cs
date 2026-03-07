@@ -93,18 +93,28 @@ namespace Service
         }
         public async Task<List<AllReviewsOfTargetUser>> GetUserReviewsAsync(string targetUserId)
         {
-            var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfTargetUserByIdAsync(targetUserId);
-            return    reviews.Select(x => new AllReviewsOfTargetUser
-            {
-                InteractionId = x.Id,
-                ReviewerId = x.UserId,
-                ReviewerName = x.User?.FirstName + x.User?.SecondName ?? "مستخدم",
-                Rating = x.Rating ?? 0,
-                ReviewerImage=x.User.ProfileImage,
-                ReviewComment = x.Review,
-                ItemId= x.Product==null? x.Product.Id:x.RawMaterial.Id,
-                CreatedAt = x.InteractionDate
-            }).ToList();
+            var reviews =  _unitOfWork
+                  .GetRepository<UserInteraction, int>()
+                  .GetAllQueryable()
+                  .Where(r =>
+                      r.TargetUserId == targetUserId
+                      || (r.Product != null && r.Product.SellerId == targetUserId)
+                      || (r.RawMaterial != null && r.RawMaterial.supplierId == targetUserId)
+                  ).Select(x => new AllReviewsOfTargetUser
+                                   {
+                            InteractionId = x.Id,//review id
+
+                            ReviewerId = x.UserId,
+
+                              ReviewerName = x.User.FirstName+" " + x.User.SecondName ?? "مستخدم",
+                      Rating = x.Rating ?? 0,
+
+                            ReviewerImage=x.User!.ProfileImage,
+                            ReviewComment = x.Review,
+                            ItemId= x.ProductId?? x.RawMaterialId,
+                            CreatedAt = x.InteractionDate
+                        }).ToList();
+            return reviews;
         }
         public async Task<ReviewStatsDto> GetUserStatsAsync(string userId)
         {

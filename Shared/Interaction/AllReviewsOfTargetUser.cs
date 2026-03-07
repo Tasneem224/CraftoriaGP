@@ -12,7 +12,7 @@ namespace Shared.Interaction
         public string ReviewerId { get; set; }
         public string? ReviewerImage { get; set; }
         public string ReviewerName { get; set; }
-        public int  ItemId { get; set; }
+        public int?  ItemId { get; set; }
 
         public short Rating { get; set; }
         public string? ReviewComment { get; set; }
