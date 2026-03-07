@@ -3,6 +3,7 @@ using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
 using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
+using Shared.Account;
 using Shared.Interaction;
 using System;
 using System.Collections.Generic;
@@ -90,10 +91,30 @@ namespace Service
             var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfRawMaterialByIdAsync(rawMaterialId);
             return MapToDto(reviews);
         }
-        public async Task<List<ReviewDto>> GetUserReviewsAsync(string targetUserId)
+        public async Task<List<AllReviewsOfTargetUser>> GetUserReviewsAsync(string targetUserId)
         {
-            var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfTargetUserByIdAsync(targetUserId);
-            return MapToDto(reviews);
+            var reviews =  _unitOfWork
+                  .GetRepository<UserInteraction, int>()
+                  .GetAllQueryable()
+                  .Where(r =>
+                      r.TargetUserId == targetUserId
+                      || (r.Product != null && r.Product.SellerId == targetUserId)
+                      || (r.RawMaterial != null && r.RawMaterial.supplierId == targetUserId)
+                  ).Select(x => new AllReviewsOfTargetUser
+                                   {
+                            InteractionId = x.Id,//review id
+
+                            ReviewerId = x.UserId,
+
+                              ReviewerName = x.User.FirstName+" " + x.User.SecondName ?? "مستخدم",
+                      Rating = x.Rating ?? 0,
+
+                            ReviewerImage=x.User!.ProfileImage,
+                            ReviewComment = x.Review,
+                            ItemId= x.ProductId?? x.RawMaterialId,
+                            CreatedAt = x.InteractionDate
+                        }).ToList();
+            return reviews;
         }
         public async Task<ReviewStatsDto> GetUserStatsAsync(string userId)
         {
@@ -137,8 +158,7 @@ namespace Service
             {
                 InteractionId = x.Id,
                 ReviewerId = x.UserId,
-                // بنجيب الاسم من الـ Navigation Property اللي عملنا لها Include في الـ Repo
-                ReviewerName = x.User?.UserName ?? "مستخدم",
+                ReviewerName = x.User?.FirstName + x.User?.SecondName ?? "مستخدم",
                 Rating = x.Rating ?? 0,
                 ReviewComment = x.Review,
                 CreatedAt = x.InteractionDate
