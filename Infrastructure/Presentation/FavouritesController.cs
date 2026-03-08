@@ -35,6 +35,7 @@ namespace Presentation
             return SendSuccessResponse(result);
         }
 
+
         [Authorize]
         [HttpGet("MyFavourites")]
         public async Task<IActionResult> GetMyFavourites()
