@@ -22,16 +22,12 @@ namespace Persistance.Repositories
         {
             _context = context;
         }
-
         public async Task<UserInteraction?> GetByProductAsync(string userId, int productId)
                    => await _context.UserInteractions.FirstOrDefaultAsync(x => x.UserId == userId && x.ProductId == productId);
-
         public async Task<UserInteraction?> GetByRawMaterialAsync(string userId, int rawMaterialId)
              => await _context.UserInteractions.FirstOrDefaultAsync(x => x.UserId == userId && x.RawMaterialId == rawMaterialId);
-
         public async Task<UserInteraction?> GetByTargetUserAsync(string userId, string targetUserId)
              => await _context.UserInteractions.FirstOrDefaultAsync(x => x.UserId == userId && x.TargetUserId == targetUserId);
-
         public async Task<IEnumerable<UserInteraction>> GetAllReviewsOfProducBytIdAsync(int productId)
         {
             return await _context.UserInteractions
@@ -40,7 +36,6 @@ namespace Persistance.Repositories
                 .OrderByDescending(x => x.InteractionDate)
                 .ToListAsync();
         }
-
         public async Task<IEnumerable<UserInteraction>> GetAllReviewsOfRawMaterialByIdAsync(int rawMaterialId)
         {
             return await _context.UserInteractions
@@ -49,7 +44,6 @@ namespace Persistance.Repositories
                             .OrderByDescending(x => x.InteractionDate)
                             .ToListAsync();
         }
-
         public async Task<IEnumerable<UserInteraction>> GetAllReviewsOfTargetUserByIdAsync(string targetUserId)
         {
             return await _context.UserInteractions
@@ -58,7 +52,6 @@ namespace Persistance.Repositories
                 .OrderByDescending(x => x.InteractionDate)
                 .ToListAsync();
         }
-
         public async Task<int> GetTotalCountByProductIdAsync(int productId)
         {
             return await _context.UserInteractions
@@ -73,7 +66,6 @@ namespace Persistance.Repositories
             return await query.AverageAsync(x => (double)x.Rating);
 
         }
-
         public async Task<int> GetTotalCountByRawMaterialIdAsync(int rawMaterialId)
         {
             return await _context.UserInteractions
@@ -87,7 +79,6 @@ namespace Persistance.Repositories
 
             return await query.AverageAsync(x => (double)x.Rating);
         }
-
         public async Task<int> GetTotalInteractionsCountForUserAsync(string userId)
         {
             return await _context.UserInteractions.CountAsync(x =>
@@ -105,7 +96,6 @@ namespace Persistance.Repositories
             if (!await query.AnyAsync()) return 0.0;
             return await query.AverageAsync(x => (double)x.Rating);
         }
-
         public async Task<List<TopRatedStat>> GetTopProductStatsAsync(int count)
         {
             return await _context.UserInteractions
@@ -121,7 +111,6 @@ namespace Persistance.Repositories
                 .Take(count)
                 .ToListAsync();
         }
-
         public async Task<List<TopRatedStat>> GetTopSellerStatsAsync(int count)
         {
             return await _context.UserInteractions
@@ -137,7 +126,6 @@ namespace Persistance.Repositories
                 .Take(count)
                 .ToListAsync();
         }
-
         public async Task<List<TopRatedStat>> GetTopRawMaterialStatsAsync(int count)
         {
             return await _context.UserInteractions
@@ -155,7 +143,7 @@ namespace Persistance.Repositories
                 .Take(count)
                 .ToListAsync();
         }
-
+       
         public async Task<IEnumerable<UserInteraction>> GetAllReviewThatCreatedBySpecificUser(string userId)
         {
             return await _context.UserInteractions
@@ -167,6 +155,13 @@ namespace Persistance.Repositories
                 .ThenInclude(r => r.Category)
                 .OrderByDescending(x => x.InteractionDate)
                 .ToListAsync();
+        }
+
+        public async Task<int> GetCountCustomerReviews(string customerReviewId)
+        {
+            var review = await _context.UserInteractions.
+               CountAsync(x => x.UserId == customerReviewId && (x.Rating.HasValue || !string.IsNullOrWhiteSpace(x.Review)));
+            return review;
         }
     }
 }

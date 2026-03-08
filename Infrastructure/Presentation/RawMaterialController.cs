@@ -41,7 +41,7 @@ namespace Presentation
             return Ok(products);
         }
 
-        [HttpGet("GetRawMaterialById")]
+        [HttpGet("GetRawMaterialDetails")]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _materialService.GetMaterialsByIdAsync(id);

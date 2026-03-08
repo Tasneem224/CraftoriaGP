@@ -149,7 +149,7 @@ namespace Service
             };
         }
 
-
+       
 
         private List<ReviewDto> MapToDto(IEnumerable<UserInteraction> list)
         {
@@ -179,6 +179,11 @@ namespace Service
             }
 
             return interaction;
+        }
+
+        public Task<int> GetCountCustomerReviews(string customerReviewId)
+        {
+            return (_unitOfWork.UserInteractions.GetCountCustomerReviews(customerReviewId));
         }
     }
 }
