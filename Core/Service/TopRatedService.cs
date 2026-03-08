@@ -91,6 +91,42 @@ namespace Service
             return result;
         }
 
+        public async Task<List<TopSellersDto>> GetTopSellersByRoleAsync(string role, int count = 5)
+        {
+            // 1. نجيب كل اليوزرز اللي في الـ Role ده (Expert, Supplier, الخ)
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+            var roleUserIds = usersInRole.Select(u => u.Id).ToList();
+
+            // لو مفيش أي يوزر في الرول ده، نرجع لستة فاضية
+            if (!roleUserIds.Any()) return new List<TopSellersDto>();
+
+            // 2. نبعت الأيديهات للـ Repository الجديد اللي لسه عاملينه
+            var stats = await _unitOfWork.UserInteractions.GetTopSellerStatsByRoleUserIdsAsync(count, roleUserIds);
+            var result = new List<TopSellersDto>();
+
+            foreach (var stat in stats)
+            {
+                // 3. نجيب بيانات اليوزر الحقيقية
+                var user = await _userManager.FindByIdAsync(stat.SellerId);
+
+                if (user != null)
+                {
+                    result.Add(new TopSellersDto
+                    {
+                        SellerId = user.Id,
+                        Name = user.DisplayName,
+                        ImageUrl = user.ProfileImage,
+                        Speciality = !string.IsNullOrEmpty(user.Specialization)
+                                     ? user.Specialization
+                                     : "Artisan",
+                        AverageRating = Math.Round(stat.AverageRating, 1),
+                        ReviewCount = stat.ReviewCount
+                    });
+                }
+            }
+            return result;
+        }
+
         public async Task<List<TopRawMaterialsDto>> GetTopRawMaterialsAsync(int count = 5)
         {
             // 1. نجيب الإحصائيات الخاصة بالمواد الخام
