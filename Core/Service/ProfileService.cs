@@ -126,7 +126,7 @@ namespace Service
 
         public async Task<IEnumerable< ReviewsProfile>> GetAllReviewsCreatedByUser(string userId)
         {
-            
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
             var user = await _userManager.FindByIdAsync(userId);
             
             if (user == null)
@@ -134,20 +134,23 @@ namespace Service
 
           var reviews=  await _userInteractionRepository.GetAllReviewThatCreatedBySpecificUser(user.Id);
 
-            return reviews.Select(p=>new ReviewsProfile
+            return reviews.Select(p => new ReviewsProfile
             {
                 ItemId = p.ProductId ?? p.RawMaterialId ?? 0,
-                UserId= p.TargetUserId,
-                Review =p.Review,
-               Rating=p.Rating,
+                UserId = p.TargetUserId,
+                Review = p.Review,
+                Rating = p.Rating,
+                ItemName = p.Product is not null ?
+                 (isArabic ? p.Product.NameAr : p.Product.NameEn) 
+                :( isArabic ? p.RawMaterial?.NameAr : p.RawMaterial?.NameEn),
                 ItemImage = p.Product?.ImageUrl
                 ?? p.RawMaterial?.ImageUrl
-                ?? p.TargetUser?.ProfileImage 
+                ?? p.TargetUser?.ProfileImage
                 ?? "default-image.png",
                 CategoryName =
-    p.Product?.Category?.NameEn
-    ?? p.RawMaterial?.Category?.NameEn,
-                ReviewId =p.Id
+                    p.Product?.Category?.NameEn
+                    ?? p.RawMaterial?.Category?.NameEn,
+                ReviewId = p.Id
             });
         }
     }
