@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
 using Shared.Order;
@@ -15,7 +16,7 @@ namespace Presentation
         private readonly IOrderService _orderService;
         public OrdersController(IServiceManager serviceManager) =>
             _orderService = serviceManager.orderService;
-
+        [Authorize]
         [HttpPost("CreateOrder")]
         public async Task<ActionResult<OrderToReturnDto>> CreateOrder(string userEmail, int deliveryMethodId, string basketId, AddressBookDto shippingAddress)
         {
