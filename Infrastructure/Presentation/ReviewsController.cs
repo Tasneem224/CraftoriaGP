@@ -93,6 +93,13 @@ namespace Presentation
             var stats = await _reviewService.GetUserStatsAsync(targetUserId);
             return SendSuccessResponse(stats);
         }
+        [HttpGet("GetCountCustomerReviews")]
+        public async Task<IActionResult> GetCountCustomerReviews(string customerId)
+        {
+            var stats = await _reviewService.GetCountCustomerReviews(customerId);
+            return SendSuccessResponse(stats);
+        }
+
     }
 
 }

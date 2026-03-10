@@ -17,5 +17,7 @@ namespace ServiceAbstraction
         Task<ReviewStatsDto> GetUserStatsAsync(string userId);
         Task<ReviewStatsDto> GetProductStatsAsync(int productId);
         Task<ReviewStatsDto> GetRawMaterialStatsAsync(int rawMaterialId);
+        Task<int> GetCountCustomerReviews(string customerReviewId);
+        
     }
 }

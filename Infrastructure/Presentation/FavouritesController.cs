@@ -32,8 +32,9 @@ namespace Presentation
                 return Unauthorized();
 
             var result = await _favService.ToggleFavouriteAsync( productId);
-            return Ok(new { message = result });
+            return SendSuccessResponse(result);
         }
+
 
         [Authorize]
         [HttpGet("MyFavourites")]
@@ -45,7 +46,7 @@ namespace Presentation
                 return Unauthorized();
 
             var result = await _favService.GetUserFavouritesAsync();
-            return Ok(result);
+            return SendSuccessResponse(result);
         }
 
     }

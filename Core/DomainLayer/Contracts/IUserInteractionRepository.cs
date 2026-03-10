@@ -34,6 +34,8 @@ namespace DomainLayer.Contracts
         Task<List<TopRatedStat>> GetTopProductStatsAsync(int count);
         Task<List<TopRatedStat>> GetTopSellerStatsAsync(int count);
         Task<List<TopRatedStat>> GetTopRawMaterialStatsAsync(int count);
+
+        Task<int> GetCountCustomerReviews(string  customerReviewId);
         Task<List<TopRatedStat>> GetTopSellerStatsByRoleUserIdsAsync(int count, List<string> userIds);
     }
 }

@@ -12,8 +12,9 @@ namespace Shared.Profile
         public short? Rating { get; set; } = default!;
         public string ItemImage { get; set; }= default!;
         public int ItemId { get; set; } = default!;
+        public string? ItemName { get; set; } = default!;
         public string? UserId { get; set; } = default!;
         public int ReviewId { get; set; } = default!;
-        public string CategoryName { get; set; } = default!;
+        public string? CategoryName { get; set; } = default!;
     }
 }

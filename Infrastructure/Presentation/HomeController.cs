@@ -64,16 +64,9 @@ namespace Presentation
             var result = await _serviceManager.TopRatedService.GetTopRawMaterialsAsync(count);
             return Ok(result);
         }
+
         [HttpGet("Search")]
         public async Task<IActionResult> Search([FromQuery] string query)
-        {
-            if (string.IsNullOrWhiteSpace(query)) return BadRequest("Search query cannot be empty");
-
-            var results = await _serviceManager.ProductService.SearchProductsAsync(query);
-            return Ok(results);
-        }
-
-
-
+        => SendSuccessResponse((await _serviceManager.ProductService.SearchProductsAsync(query)));
     }
 }

@@ -80,7 +80,6 @@ namespace Service
             _unitOfWork.UserInteractions.Remove(interaction);
             await _unitOfWork.SaveChanges();
         }
-
         public async Task<List<ReviewDto>> GetProductReviewsAsync(int productId)
         {
             var reviews = await _unitOfWork.UserInteractions.GetAllReviewsOfProducBytIdAsync(productId);
@@ -93,6 +92,8 @@ namespace Service
         }
         public async Task<List<AllReviewsOfTargetUser>> GetUserReviewsAsync(string targetUserId)
         {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
             var reviews =  _unitOfWork
                   .GetRepository<UserInteraction, int>()
                   .GetAllQueryable()
@@ -102,17 +103,19 @@ namespace Service
                   ).Select(x => new AllReviewsOfTargetUser
                                    {
                             InteractionId = x.Id,//review id
-
+                            
                             ReviewerId = x.UserId,
 
                               ReviewerName = x.User.FirstName+" " + x.User.SecondName ?? "مستخدم",
-                      Rating = x.Rating ?? 0,
+                           Rating = x.Rating ?? 0,
 
                             ReviewerImage=x.User!.ProfileImage,
                             ReviewComment = x.Review,
                             ItemId= x.ProductId?? x.RawMaterialId,
-                            CreatedAt = x.InteractionDate
-                        }).ToList();
+                            CreatedAt = x.InteractionDate,
+                            
+                            ItemName= x.Product != null ?isArabic?  x.Product.NameAr:x.Product.NameEn : x.RawMaterial != null ? isArabic? x.RawMaterial.NameAr :x.RawMaterial.NameEn: "Unknown Item"
+                  }).ToList();
             return reviews;
         }
         public async Task<ReviewStatsDto> GetUserStatsAsync(string userId)
@@ -149,7 +152,7 @@ namespace Service
             };
         }
 
-
+       
 
         private List<ReviewDto> MapToDto(IEnumerable<UserInteraction> list)
         {
@@ -159,6 +162,7 @@ namespace Service
                 ReviewerId = x.UserId,
                 ReviewerName = x.User?.FirstName + x.User?.SecondName ?? "مستخدم",
                 Rating = x.Rating ?? 0,
+                
                 ReviewComment = x.Review,
                 CreatedAt = x.InteractionDate
             }).ToList();
@@ -179,6 +183,11 @@ namespace Service
             }
 
             return interaction;
+        }
+
+        public Task<int> GetCountCustomerReviews(string customerReviewId)
+        {
+            return (_unitOfWork.UserInteractions.GetCountCustomerReviews(customerReviewId));
         }
     }
 }
