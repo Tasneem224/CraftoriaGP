@@ -21,11 +21,10 @@ namespace Service.Mapping_Profiles
                    CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar"
                    ? s.ItemNameAr
                    : s.ItemNameEn))
-
                .ForMember(d => d.Category, o => o.MapFrom(s =>
                 CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar"
-                ? s.Category.NameAr
-                : s.Category.NameEn));
+                ?s.CategoryNameAr
+                :s.CategoryNameEn));
 
 
             CreateMap<CartItemDto, CartItem>();

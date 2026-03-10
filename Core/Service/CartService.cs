@@ -30,6 +30,7 @@ namespace Service
 
         public async Task<CartDto> AddItemToCartAsync(string cartId, int  itemId)
         {
+            bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
             var product = await _unitOfWork.GetRepository<Product, int>()
                 .GetAllQueryable() 
                 .Include(p => p.Category) 
@@ -51,7 +52,9 @@ namespace Service
                 Price = product?.Price ?? material.Price,
                 Quantity = 1,
                 PictureURL = product?.ImageUrl ?? material?.ImageUrl,
-                Category = product?.Category?.NameEn ?? material?.Category?.NameEn,
+                
+                CategoryNameAr=product?.Category?.NameAr ?? material?.Category?.NameAr,
+                CategoryNameEn= (product?.Category?.NameEn ?? material?.Category?.NameEn),
                 CategoryId = product?.CategoryId ?? material?.CategoryId ?? 0
             };
 
