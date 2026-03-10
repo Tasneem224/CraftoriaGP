@@ -3,6 +3,7 @@ using DomainLayer.Contracts;
 using DomainLayer.Exceptions;
 using DomainLayer.Models.CartModule;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.RawMaterials;
 using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
 using Shared.BasketModule;
@@ -34,19 +35,24 @@ namespace Service
                 .Include(p => p.Category) 
                 .FirstOrDefaultAsync(p => p.Id == itemId);
 
-            if (product == null) throw new ItemNotFound($"{itemId}");
+            var material = await _unitOfWork.GetRepository<RawMaterial, int>()
+                .GetAllQueryable() 
+                .Include(p => p.Category) 
+                .FirstOrDefaultAsync(p => p.Id == itemId);
+
+            if (product == null && material == null) throw new ItemNotFound($"{itemId}");
 
             var cart = await GetOrCreateCartAsync(cartId);
             var item = new CartItem
             {
-                Id = product.Id,
-                ItemNameAr = product.NameAr,
-                ItemNameEn = product.NameEn,
-                Price = product.Price,
+                Id = itemId,
+                ItemNameAr = product?.NameAr ?? material?.NameAr,
+                ItemNameEn = product?.NameEn ?? material?.NameEn,
+                Price = product?.Price ?? material.Price,
                 Quantity = 1,
-                PictureURL = product.ImageUrl,
-                Category = product.Category.NameEn,
-                CategoryId = product.CategoryId
+                PictureURL = product?.ImageUrl ?? material?.ImageUrl,
+                Category = product?.Category?.NameEn ?? material?.Category?.NameEn,
+                CategoryId = product?.CategoryId ?? material?.CategoryId ?? 0
             };
 
             ApplyItemToCart(cart, item);
@@ -58,22 +64,19 @@ namespace Service
            
         }
 
-        public async Task<CartDto> UpdateQuantityAsync(string cartId, int productId, bool isIncrement)
+        public async Task<CartDto> UpdateQuantityAsync(string cartId, int itemId, bool isIncrement)
         {
             var cart = await _cacheRepository.GetAsync<CustomerCart>(cartId);
             if (cart == null) throw new  CartNotFoundException(cartId);
 
-            HandleQuantityUpdate(cart, productId, isIncrement);
-            var item = cart.cartItems.FirstOrDefault(x => x.Id == productId);
+            HandleQuantityUpdate(cart, itemId, isIncrement);
+            var item = cart.cartItems.FirstOrDefault(x => x.Id == itemId);
             if (item != null)
             {
-                var product = await _unitOfWork.GetRepository<Product, int>().GetByIdAsync(productId);
-                if (product != null)
-                {
-                    item.ItemNameAr = product.NameAr;
-                    item.ItemNameEn = product.NameEn;
-                    item.Price = product.Price;
-                }
+                var productObj = await _unitOfWork.GetRepository<Product, int>().GetByIdAsync(itemId);
+                var materialObj = productObj == null ? await _unitOfWork.GetRepository<RawMaterial, int>().GetByIdAsync(itemId) : null;
+
+                dynamic product = (dynamic)productObj ?? (dynamic)materialObj ;
             }
             await _cacheRepository.AddOrUpdateAsync(cartId, cart);
             return _mapper.Map<CartDto>(cart);
@@ -129,9 +132,9 @@ namespace Service
             }
         }
 
-        private void HandleQuantityUpdate(CustomerCart cart, int productId, bool isIncrement)
+        private void HandleQuantityUpdate(CustomerCart cart, int itemId, bool isIncrement)
         {
-            var item = cart.cartItems.FirstOrDefault(x => x.Id == productId);
+            var item = cart.cartItems.FirstOrDefault(x => x.Id == itemId);
 
             if (item == null) return;
 
@@ -144,9 +147,8 @@ namespace Service
                 item.Quantity--;
 
                 if (item.Quantity <= 0)
-                {
-                    cart.cartItems.Remove(item);
-                }
+                        cart.cartItems.Remove(item);
+                
             }
         }
 
