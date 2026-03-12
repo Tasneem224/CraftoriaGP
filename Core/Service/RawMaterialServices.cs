@@ -87,7 +87,7 @@ namespace Service
                 var result = await _cloudinary.UploadAsync(dto.ImageFile);
                 return result;
             }
-
+            
             async Task<string> TranslateWithTimer()
             {
                 string targetLang = isArabic ? "en" : "ar";

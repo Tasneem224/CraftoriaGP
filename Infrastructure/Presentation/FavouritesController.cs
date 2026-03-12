@@ -26,6 +26,7 @@ namespace Presentation
         [HttpPost("Toggle")]
         public async Task<IActionResult> Toggle([FromQuery] int productId)
         {
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))

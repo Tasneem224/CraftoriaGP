@@ -10,5 +10,6 @@ namespace Shared.Search
     {
         public int Id { get; set; }
         public string Name { get; set; } = default!;
+        public string Image { get; set; } = default!;
     }
 }

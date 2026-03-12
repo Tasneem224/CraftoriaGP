@@ -52,11 +52,16 @@ namespace Service
         public async Task<List<FavouriteItemDto>> GetUserFavouritesAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+            var sellerId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(sellerId))
+                throw new UnauthorizedAccessException(isArabic ? "يجب تسجيل الدخول أولاً" : "Unauthorized: Please login");
 
             var userId = AuthFun(isArabic);
            
             var favs = await _unitOfWork.Favourites.GetFavouritesByUserIdAsync(userId);
             return favs.
+                
                 Select(f => new FavouriteItemDto{
                 Id = f.Product.Id,
                 Name =isArabic? f.Product.NameAr:f.Product.NameEn,

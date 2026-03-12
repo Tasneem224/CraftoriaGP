@@ -22,11 +22,11 @@ namespace Persistance.Repositories
         public async Task<List<Favourite>> GetFavouritesByUserIdAsync(string userId)
         {
             return await _context.Favourites
-                .Where(f => f.UserId == userId)
-                .Include(f => f.Product) // مهم جداً عشان يجيب بيانات المنتج
-                .ToListAsync();
+               .Where(f => f.UserId == userId)
+        .Include(f => f.Product)
+            .ThenInclude(p => p.Category) // ده السطر السحري اللي هيمنع الـ NullReference
+        .ToListAsync();
         }
-
         public async Task<Favourite?> GetFavouriteAsync(string userId, int productId)
         {
             return await _context.Favourites

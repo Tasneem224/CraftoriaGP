@@ -268,7 +268,8 @@ namespace Service
                 .Select(x => new ReturnSearchDto 
                 {
                     Id = x.Product.Id,
-                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn
+                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
+                    Image=x.Product.ImageUrl ?? "",
                 })
               .ToList();
 
