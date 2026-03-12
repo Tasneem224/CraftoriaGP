@@ -40,6 +40,24 @@ namespace Presentation
             return Ok(result);
         }
 
+
+        [HttpGet("top-sellers-by-role")]
+        
+        public async Task<IActionResult> GetTopSellersByRole([FromQuery] string role, [FromQuery] int count = 5)
+        {
+            // التأكد إن الـ role مبعوت
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                // حددنا النوع بـ <object> عشان ميعملش نفس الإيرور
+                return SendErrorResponse("يجب تحديد نوع المستخدم (Role)", null, 400);
+            }
+
+            // التعديل هنا: استخدمنا _serviceManager
+            var result = await _serviceManager.TopRatedService.GetTopSellersByRoleAsync(role, count);
+
+            // إرجاع الداتا بنجاح
+            return SendSuccessResponse(result, "Do Successfully");
+        }
         [HttpGet("top-raw-materials")]
         public async Task<IActionResult> GetTopRawMaterials([FromQuery] int count = 5)
         {

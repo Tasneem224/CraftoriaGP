@@ -126,6 +126,23 @@ namespace Persistance.Repositories
                 .Take(count)
                 .ToListAsync();
         }
+        // الميثود الجديدة للفلترة بالـ IDs
+        public async Task<List<TopRatedStat>> GetTopSellerStatsByRoleUserIdsAsync(int count, List<string> userIds)
+        {
+            return await _context.UserInteractions
+                .Where(x => x.TargetUserId != null && x.Rating.HasValue && userIds.Contains(x.TargetUserId))
+                .GroupBy(x => x.TargetUserId)
+                .Select(g => new TopRatedStat
+                {
+                    SellerId = g.Key,
+                    AverageRating = g.Average(x => x.Rating.Value),
+                    ReviewCount = g.Count()
+                })
+                .OrderByDescending(x => x.AverageRating)
+                .Take(count)
+                .ToListAsync();
+        }
+
         public async Task<List<TopRatedStat>> GetTopRawMaterialStatsAsync(int count)
         {
             return await _context.UserInteractions
