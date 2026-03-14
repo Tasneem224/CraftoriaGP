@@ -1,20 +1,27 @@
 ﻿using DomainLayer.Contracts;
+using DomainLayer.Exceptions;
 using DomainLayer.Models;
+using DomainLayer.Models.Identity;
 using DomainLayer.Models.session;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
 using Shared.Session;
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
 
 namespace Service
 {
     public class SessionService : ISessionService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
+       
 
-        public SessionService(IUnitOfWork unitOfWork)
+        public SessionService(IUnitOfWork unitOfWork,UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            
         }
 
         // 1. إضافة خدمة (خبير)
@@ -137,8 +144,11 @@ namespace Service
                 ExpertServiceId = service.Id,
                 ExpertAvailabilityId = availability.Id,
                 AmountPaid = service.Price,
-                Status = SessionStatus.Pending,
-                PaymentStatus = PaymentStatus.Pending
+                // ✅ التغيير الوحيد — مباشرة Confirmed من غير payment
+                Status = SessionStatus.Confirmed,
+                PaymentStatus = PaymentStatus.Pending   // هتتغير لما تربطي Gateway
+                //Status = SessionStatus.Pending,
+                //PaymentStatus = PaymentStatus.Pending
             };
 
             await _unitOfWork.Sessions.AddAsync(session);
@@ -254,6 +264,101 @@ namespace Service
             return upcomingSessions;
         }
 
-        
+        public async Task<ExpertDetailsResponse> GetExpertDetailsAsync(string expertId)
+        {
+            var user = await _userManager.FindByIdAsync(expertId);
+            if (user == null)
+            {
+                throw new UserNotFoundException("this user is not found");
+            }
+            return new ExpertDetailsResponse
+            {
+                Name = user.DisplayName ?? user.FirstName,
+                Description = user.Bio ?? "NO Description Availabe!",
+                ImageUrl = user.ProfileImage ?? "No Image for this user"
+
+            };
+        }
+
+        public async Task<int> NumberOfSessionsForExpertAsync(string expertId)
+        {
+            // هنا بنعد من جدول الـ Sessions مش المواعيد المتاحة
+            return await _unitOfWork.Sessions.GetAllQueryable()
+                .Where(s => s.ExpertId == expertId
+                       && s.Status == SessionStatus.Confirmed // نعد المحجوز والمؤكد بس
+                       && s.Availability.Date >= DateTime.UtcNow.Date) // وتكون لسه مجتش
+                .CountAsync();
+        }
+
+        // جلسات الخبير القديمة (Past)
+        public async Task<IEnumerable<ExpertPastSessionDto>> GetExpertPastSessionsAsync(string expertId)
+        {
+            bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
+
+            var pastSessions = await _unitOfWork.Sessions.GetExpertPastSessionsAsync(expertId);
+
+            return pastSessions.Select(s => new ExpertPastSessionDto
+            {
+                SessionId = s.Id,
+                BeginnerName = s.Beginner?.DisplayName ?? s.Beginner?.FirstName ?? "Unknown",
+                ServiceName = isArabic ? s.Service?.TitleAr : s.Service?.TitleEn,
+                Date = s.Availability.Date,
+
+                // بنبني الـ string زي "3:00 PM • 60 min" عشان يتعرض في الـ UI
+                Duration = $"{s.Availability.StartTime:hh\\:mm tt} • {s.Service?.DurationInMinutes} min",
+
+                Status = GetLocalizedSessionStatus(s.Status, isArabic),
+                AmountPaid = s.AmountPaid
+            });
+        }
+
+        public async Task<IEnumerable<CustomerPastSessionDto>> GetCustomerPastSessionsAsync(string customerId)
+        {
+            bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
+
+            var pastSessions = await _unitOfWork.Sessions
+                                    .GetCustomerPastSessionsAsync(customerId);
+
+            return pastSessions.Select(s => new CustomerPastSessionDto
+            {
+                SessionId = s.Id,
+                ExpertId = s.ExpertId,
+                ExpertName = s.Expert?.DisplayName ?? s.Expert?.FirstName ?? "Unknown",
+                ExpertImageUrl = s.Expert?.ProfileImage ?? string.Empty,
+                ServiceName = isArabic ? s.Service?.TitleAr : s.Service?.TitleEn,
+                Date = s.Availability.Date,
+                TimeAndDuration = $"{s.Availability.StartTime:hh\\:mm tt} • {s.Service?.DurationInMinutes} min",
+                Status = GetLocalizedSessionStatus(s.Status, isArabic),
+                AmountPaid = s.AmountPaid
+            });
+        }
+
+        public async Task<object> GetExpertSessionRequestsAsync(string expertId)
+        {
+            bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
+
+            return await _unitOfWork.Sessions.GetAllQueryable()
+                .Include(s => s.Service)
+                .Include(s => s.Availability)
+                .Include(s => s.Beginner)
+                .Where(s => s.ExpertId == expertId
+                         && s.Status == SessionStatus.Confirmed       // مدفوعة ومؤكدة
+                         && string.IsNullOrEmpty(s.MeetingLink)       // لسه محتاجة لينك
+                         && s.Availability.Date >= DateTime.UtcNow.Date)
+                .OrderBy(s => s.Availability.Date)
+                .Select(s => new
+                {
+                    SessionId = s.Id,
+                    BeginnerName = s.Beginner.DisplayName ?? s.Beginner.FirstName,
+                    BeginnerImage = s.Beginner.ProfileImage,
+                    ServiceName = isArabic ? s.Service.TitleAr : s.Service.TitleEn,
+                    Date = s.Availability.Date,
+                    StartTime = s.Availability.StartTime,
+                })
+                .ToListAsync();
+        }
+
+
+
     }
 }

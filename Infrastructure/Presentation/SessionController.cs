@@ -141,5 +141,34 @@ namespace Presentation
             var result = await _sessionService.GetExpertUpcomingSessionsAsync(expertId);
             return SendSuccessResponse(result);
         }
+
+        [HttpGet("expert/details")]
+        public async Task<IActionResult> GetExpertDetails(string expertId)
+        {
+            //var expertId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            return SendSuccessResponse(await _sessionService.GetExpertDetailsAsync(expertId));
+        }
+
+        [HttpGet("expert/{expertId}/sessions/past")]
+        public async Task<IActionResult> GetExpertPastSessions(string expertId)
+        {
+            var result = await _sessionService.GetExpertPastSessionsAsync(expertId);
+            return SendSuccessResponse(result);
+        }
+
+        [HttpGet("customer/{customerId}/sessions/past")]
+        public async Task<IActionResult> GetCustomerPastSessions(string customerId)
+        {
+            var result = await _sessionService.GetCustomerPastSessionsAsync(customerId);
+            return SendSuccessResponse(result);
+        }
+
+        [HttpGet("expert/{expertId}/sessions/requests")]
+        public async Task<IActionResult> GetExpertSessionRequests(string expertId)
+        {
+            var result = await _sessionService.GetExpertSessionRequestsAsync(expertId);
+            return SendSuccessResponse(result);
+        }
     }
 }
