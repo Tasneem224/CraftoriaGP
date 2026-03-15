@@ -30,6 +30,8 @@ namespace Service
                 ExpertId = expertId,
                 TitleAr = dto.TitleAr,
                 TitleEn = dto.TitleEn,
+                DescriptionAr = dto.DescriptionAr, // ✅ جديد
+                DescriptionEn = dto.DescriptionEn, // ✅ جديد
                 Price = dto.Price,
                 DurationInMinutes = dto.DurationInMinutes
             };
@@ -70,6 +72,8 @@ namespace Service
                 {
                     Id = s.Id,
                     Title = isArabic ? s.TitleAr : s.TitleEn,
+                    Description = isArabic ? s.DescriptionAr : s.DescriptionEn, // ✅
+
                     Price = s.Price,
                     DurationInMinutes = s.DurationInMinutes
                 })

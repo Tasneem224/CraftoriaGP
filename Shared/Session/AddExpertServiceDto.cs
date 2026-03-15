@@ -19,6 +19,8 @@ namespace Shared.Session
         public decimal Price { get; set; }
         [Required]
         public int DurationInMinutes { get; set; }
+        public string? DescriptionAr { get; set; } // ✅ جديد
+        public string? DescriptionEn { get; set; } // ✅ جديد
 
 
     }
