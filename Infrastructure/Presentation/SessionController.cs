@@ -170,5 +170,27 @@ namespace Presentation
             var result = await _sessionService.GetExpertSessionRequestsAsync(expertId);
             return SendSuccessResponse(result);
         }
+        // إنهاء الجلسة
+        [HttpPut("sessions/{sessionId}/complete")]
+        [Authorize]
+        public async Task<IActionResult> CompleteSession(int sessionId)
+        {
+            var beginnerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _sessionService.CompleteSessionAsync(sessionId, beginnerId);
+
+            if (!result) return SendErrorResponse("لا يمكن إنهاء الجلسة الآن أو الجلسة غير موجودة", null, 400);
+
+            return SendSuccessResponse<object>(null, "تم إنهاء الجلسة بنجاح");
+        }
+
+        // عدد الجلسات للداشبورد
+        [HttpGet("expert/sessions/count")]
+        [Authorize(Roles = "Expert")]
+        public async Task<IActionResult> GetExpertSessionsCount()
+        {
+            var expertId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _sessionService.NumberOfSessionsForExpertAsync(expertId);
+            return SendSuccessResponse(new { SessionsCount = result });
+        }
     }
 }

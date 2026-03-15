@@ -35,5 +35,6 @@ namespace DomainLayer.Models.session
         public SessionStatus Status { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
         public string? MeetingLink { get; set; } // الرابط ممكن يكون نل لحد ما الخبير يحطه
+        public TimeSpan EndTime { get; set; }
     }
 }
