@@ -47,7 +47,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("LocalConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -91,7 +91,9 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
+            builder.Services.AddScoped<IEtsyScrapperService, EtsyScrapperService>();
+            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+            builder.Services.AddScoped<IFavouriteRepository, FavouriteRepository>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnection")!);
@@ -127,6 +129,7 @@ namespace CraftoriaApp
             {
                 var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeding>();
                 await seeder.IdentityDataSeedingAsync();
+                await seeder.SeedOneThousandUsers();
             }
             using (var scope = app.Services.CreateScope())
             {

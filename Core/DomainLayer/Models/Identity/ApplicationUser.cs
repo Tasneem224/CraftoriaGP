@@ -26,7 +26,7 @@ namespace DomainLayer.Models.Identity
         public string? Bio { get; set; } = string.Empty;
         public string? OtpCode { get; set; }
         public DateTime? OtpExpiration { get; set; }
-
+        public bool IsGenerated { get; set; } = false;
         #region Artisan
         public decimal? CommissionRate { get; set; }//by default is 10%
         public string? Specialization { get; set; } = default!;

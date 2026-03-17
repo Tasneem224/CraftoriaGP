@@ -16,6 +16,7 @@ namespace DomainLayer.Contracts
         Task AddAsync(TEntity entity);
         void Update(TEntity entity);
         void Remove(TEntity entity);
+        Task<TEntity?> GetFirstOrDefaultAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate);
         IQueryable<TEntity> GetAllQueryable();
 
 

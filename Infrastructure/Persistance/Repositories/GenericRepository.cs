@@ -41,6 +41,10 @@ namespace Persistance.Repositories
             _dbContext.Set<TEntity>().Update(entity);
 
         }
+        public async Task<TEntity?> GetFirstOrDefaultAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbContext.Set<TEntity>().FirstOrDefaultAsync(predicate);
+        }
 
         public IQueryable<TEntity> GetAllQueryable()
         {

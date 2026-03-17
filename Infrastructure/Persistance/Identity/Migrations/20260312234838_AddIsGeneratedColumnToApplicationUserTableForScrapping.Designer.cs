@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistance.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Persistance.Data.Contexts;
 namespace Persistance.Identity.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    partial class StoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260312234838_AddIsGeneratedColumnToApplicationUserTableForScrapping")]
+    partial class AddIsGeneratedColumnToApplicationUserTableForScrapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,9 +42,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("NameAr")
@@ -79,9 +79,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("NameAr")
@@ -158,9 +155,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<int>("ProductId")
@@ -311,9 +305,6 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
@@ -387,9 +378,6 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<string>("NameAr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -420,39 +408,6 @@ namespace Persistance.Identity.Migrations
                     b.UseTpcMappingStrategy();
                 });
 
-            modelBuilder.Entity("DomainLayer.Models.Items.ItemTags", b =>
-                {
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ItemId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("ItemTags");
-                });
-
             modelBuilder.Entity("DomainLayer.Models.Items.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -468,9 +423,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -514,9 +466,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
@@ -568,9 +517,6 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -602,9 +548,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset>("OrderDate")
@@ -656,9 +599,6 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
@@ -708,9 +648,6 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -746,9 +683,6 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("Price")
@@ -806,9 +740,6 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsGenerated")
-                        .HasColumnType("bit");
-
                     b.Property<string>("MeetingLink")
                         .HasColumnType("nvarchar(max)");
 
@@ -832,6 +763,21 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("ExpertServiceId");
 
                     b.ToTable("Sessions");
+                });
+
+            modelBuilder.Entity("ItemTag", b =>
+                {
+                    b.Property<int>("itemsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("tagsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("itemsId", "tagsId");
+
+                    b.HasIndex("tagsId");
+
+                    b.ToTable("ItemTags", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -958,25 +904,6 @@ namespace Persistance.Identity.Migrations
                     b.Navigation("TargetUser");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.Items.ItemTags", b =>
-                {
-                    b.HasOne("DomainLayer.Models.Items.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DomainLayer.Models.Items.Tag", "Tag")
-                        .WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Order.Order", b =>
@@ -1115,6 +1042,21 @@ namespace Persistance.Identity.Migrations
                     b.Navigation("Expert");
 
                     b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("ItemTag", b =>
+                {
+                    b.HasOne("DomainLayer.Models.Items.Item", null)
+                        .WithMany()
+                        .HasForeignKey("itemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DomainLayer.Models.Items.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("tagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>

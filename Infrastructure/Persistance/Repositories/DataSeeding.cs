@@ -1,4 +1,5 @@
-﻿using DomainLayer.Contracts;
+﻿using Bogus;
+using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -106,6 +107,57 @@ namespace Persistance.Repositories
             {
 
                 throw;
+            }
+        }
+
+        public async Task SeedOneThousandUsers()
+        {
+          
+            if (_userManager.Users.Any(u => u.IsGenerated)) return;
+
+            var faker = new Faker<ApplicationUser>()
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.SecondName, f => f.Name.LastName())
+                .RuleFor(u => u.DisplayName, (f, u) => u.FirstName + " " + u.SecondName)
+                .RuleFor(u => u.UserName, (f, u) => f.Internet.UserName(u.FirstName, u.SecondName))
+                .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.FirstName, u.SecondName))
+                .RuleFor(u => u.Gender, f => f.PickRandom<Gender>())
+                .RuleFor(u => u.IsGenerated, true);
+
+            for (int i = 0; i < 1000; i++)
+            {
+                var user = faker.Generate();
+                string roleToAssign;
+
+                if (i < 100)
+                {
+                    user.YearsOfExperience = new Random().Next(5, 15);
+                    user.Specialization = "Handmade Crafts Expert";
+                    roleToAssign = "Expert";
+                }
+                else if (i < 300) 
+                {
+                    user.Bio = "Global supplier of high-quality raw materials.";
+                    roleToAssign = "Supplier";
+                }
+                else if (i < 600) 
+                {
+                    user.Bio = "Beginner artisan looking for materials and learning.";
+                    roleToAssign = "Beginner";
+                }
+                else 
+                {
+                    user.Bio = "Art enthusiast and buyer of handmade products.";
+                    roleToAssign = "Customer";
+                }
+
+                var result = await _userManager.CreateAsync(user, "Password123!");
+
+                if (result.Succeeded)
+                {
+                   
+                    await _userManager.AddToRoleAsync(user, roleToAssign);
+                }
             }
         }
     }

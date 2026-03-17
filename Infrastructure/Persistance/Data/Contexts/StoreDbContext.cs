@@ -22,6 +22,7 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<ItemTags> ItemTags { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<Address_Book> Adress_Shipping { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -53,7 +54,10 @@ namespace Persistance.Data.Contexts
 
             // 2. تطبيق الـ Configuration Classes (السطر ده كفاية جداً لكل الملفات اللي في الـ Assembly)
             builder.ApplyConfigurationsFromAssembly(typeof(StoreDbContext).Assembly);
-
+            builder.Entity<Item>()    // غيرنا دي لـ Item بدل Product
+    .HasMany(i => i.tags)
+    .WithMany(t => t.items)
+    .UsingEntity<ItemTags>();
             // 3. ضبط الـ Decimal Properties (عشان نلغي الـ Warnings الصفراء)
             builder.Entity<ApplicationUser>()
                 .Property(u => u.CommissionRate)

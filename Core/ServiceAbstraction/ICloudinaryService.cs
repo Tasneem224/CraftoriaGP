@@ -11,5 +11,6 @@ namespace ServiceAbstraction
     {
         public Task<string> UploadAsync(IFormFile file);
         public string DeleteAsync(string publicId);
+        public Task<string> UploadFromUrlAsync(string url, string publicId);
     }
 }

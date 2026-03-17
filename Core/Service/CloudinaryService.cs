@@ -29,7 +29,21 @@ namespace Service
             _cloudinary = new Cloudinary(cloudinaryUrl);
             _cloudinary.Api.Secure = true;
         }
+        public async Task<string> UploadFromUrlAsync(string url, string publicId)
+        {
+            if (string.IsNullOrEmpty(url)) return string.Empty;
 
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(url), // كلاوديناري يدعم الروابط مباشرة
+                PublicId = $"etsy_products/{publicId}",
+                Overwrite = true,
+                Folder = "products"
+            };
+
+            var result = await _cloudinary.UploadAsync(uploadParams);
+            return result.SecureUrl.ToString(); // سيعيد رابط الصورة الجديد من Cloudinary
+        }
         public string DeleteAsync(string publicId)
         {
             var deleteParams = new DeletionParams(publicId);

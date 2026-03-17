@@ -33,11 +33,16 @@ namespace Service
             var products = await productRepo.GetAllAsync();
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
+
             var categories = await categoryRepo.GetAllAsync();
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
 
-            return ReturnListDto(isArabic, products, categoriesDict);
+            var rawProductList = ReturnListDto(isArabic, products, categoriesDict);
+
+            var randomizedProducts = rawProductList.OrderBy(x => Random.Shared.Next());
+
+            return randomizedProducts;
         }
         public async Task<ReturnProductDto> GetProductByIdAsync(int id)
         {
