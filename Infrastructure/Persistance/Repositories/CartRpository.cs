@@ -26,9 +26,22 @@ namespace Persistance.Repositories
             return default;
         }
 
+        public async Task<int> Count(string id)
+        {
+            var result = await _database.StringGetAsync(id);
+
+            if (result.IsNullOrEmpty)
+            {
+                return 0;
+            }
+
+            var basket = JsonSerializer.Deserialize <CustomerCart>(result);
+            return basket?.cartItems?.Count ?? 0;
+        }
+
         public async Task<bool> DeleteAsync(string id)=> await _database.KeyDeleteAsync(id);
         
-
+        
         public async Task<T?> GetAsync<T>(string id)
 
         {

@@ -13,6 +13,7 @@ namespace ServiceAbstraction
         Task<CartDto> UpdateQuantityAsync(string cartId, int productId, bool isIncrement);
         Task<CartDto> RemoveItemFromCartAsync(string cartId, int productId);
         Task<CartDto> GetCartAsync(string id);
-      
+        Task<int> GetCountOfCart(string id);
+       
     }
 }

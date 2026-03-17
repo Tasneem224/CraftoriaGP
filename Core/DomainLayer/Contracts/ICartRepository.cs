@@ -12,5 +12,6 @@ namespace DomainLayer.Contracts
         Task<T?> GetAsync<T>(string id);
         Task<T?> AddOrUpdateAsync<T>(string id,T entity, TimeSpan? timeToLive = null);
         Task<bool> DeleteAsync(string id);
+        Task<int> Count(string id);
     }
 }
