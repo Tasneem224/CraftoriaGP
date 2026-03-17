@@ -276,6 +276,45 @@ namespace Service
                     return searchResults;
                 }
 
+        public async Task<List<ReturnSearchDto>> SearchInSpecificCategoryAsync(string query,int CategoryId)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<ReturnSearchDto>();
+            var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
+            var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
+            var normalizedQuery1 = query.Trim().ToLower();
+            var normalizedQuery = normalizedQuery1.NormalizeArabicText();
+
+            var allProducts = await _unitOfWork.GetRepository<Product, int>()
+                
+               .GetAllQueryable()
+               .Include(p => p.Category)
+               .Include(p => p.Seller)
+               .Include(t => t.tags)
+               .Where(p=>p.CategoryId==CategoryId)
+               .ToListAsync();
+            var searchResults = allProducts
+           .Select(p => {
+               var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
+               var searchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn} {tagsText}".ToLower().NormalizeArabicText();
+
+               var score = Fuzz.WeightedRatio(normalizedQuery, searchableText);
+
+               return new { Product = p, Score = score, SearchableText = searchableText };
+           })
+           .Where(
+             x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
+           .OrderByDescending(x => x.Score)
+             .Select(x => new ReturnSearchDto
+             {
+                 Id = x.Product.Id,
+                 Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
+                 Image = x.Product.ImageUrl ?? "",
+             })
+           .ToList();
+
+            return searchResults;
+
+        }
 
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
         {
