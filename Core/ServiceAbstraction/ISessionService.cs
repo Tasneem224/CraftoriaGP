@@ -25,5 +25,13 @@ namespace ServiceAbstraction
         // ميثود تسمح للخبير بإضافة أو تحديث رابط الاجتماع لجلسة معينة
         Task<bool> UpdateMeetingLinkAsync(int sessionId, string expertId, string meetingLink);
         Task<object> GetExpertUpcomingSessionsAsync(string expertId);
+        Task<ExpertDetailsResponse> GetExpertDetailsAsync(string expertId);
+        Task<int>NumberOfSessionsForExpertAsync(string expertId);
+        Task<IEnumerable<ExpertPastSessionDto>> GetExpertPastSessionsAsync(string expertId);
+        Task<IEnumerable<CustomerPastSessionDto>> GetCustomerPastSessionsAsync(string customerId);
+        Task<object> GetExpertSessionRequestsAsync(string expertId);
+        Task<bool> CompleteSessionAsync(int sessionId, string beginnerId);
+        
+
     }
 }

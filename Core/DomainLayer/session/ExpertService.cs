@@ -19,6 +19,9 @@ namespace DomainLayer.Models.session
 
         public string TitleAr { get; set; }
         public string TitleEn { get; set; }
+        public string? DescriptionAr { get; set; } // ✅ جديد
+        public string? DescriptionEn { get; set; } // ✅ جديد
+
         public decimal Price { get; set; }
         public int DurationInMinutes { get; set; }
     }

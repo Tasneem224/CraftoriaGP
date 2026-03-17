@@ -34,8 +34,8 @@ namespace Presentation
         public async Task<ActionResult> DeleteAsync(string cartId,int ItemId) =>
               SendSuccessResponse(await _serviceManager.CartService.RemoveItemFromCartAsync(cartId, ItemId),"Cart was Deleted successfully");
 
-
-        
+        [HttpGet("GetCountOfCart")]
+        public async Task<ActionResult> Count(string id) => SendSuccessResponse(await _serviceManager.CartService.GetCountOfCart(id));     
     }
 }
  

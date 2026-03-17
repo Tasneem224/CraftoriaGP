@@ -11,5 +11,7 @@ namespace DomainLayer.Contracts
     {
         // ميثود خاصة لجلب حجوزات العميل مع البيانات المرتبطة
         Task<IEnumerable<Session>> GetCustomerSessionsWithDetailsAsync(string customerId);
+        Task<IEnumerable<Session>> GetExpertPastSessionsAsync(string expertId);
+        Task<IEnumerable<Session>> GetCustomerPastSessionsAsync(string beginnerId);
     }
 }

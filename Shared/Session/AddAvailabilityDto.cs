@@ -13,7 +13,6 @@ namespace Shared.Session
         public DateTime Date { get; set; }
         [Required]
         public TimeSpan StartTime { get; set; }
-        [Required]
-        public TimeSpan EndTime { get; set; }
+        
     }
 }

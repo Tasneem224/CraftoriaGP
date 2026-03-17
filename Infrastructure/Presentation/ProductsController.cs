@@ -88,6 +88,8 @@ namespace Presentation.Controllers
             return SendSuccessResponse(result, "Categories are returned successfully");
 
         }
-       
+        [HttpGet("SearchForProductsInCategory")]
+        public async Task<IActionResult> SearchForProductsInCategory(string query ,int categoryId)
+            => SendSuccessResponse(await _productService.SearchInSpecificCategoryAsync(query,categoryId));
     }
 }

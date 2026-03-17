@@ -26,5 +26,29 @@ namespace Persistance.Repositories
                 .Where(s => s.BeginnerId == beginnerId)
                 .ToListAsync();
         }
+        // ✅ جديد — جلسات الخبير اللي خلصت (Past)
+        public async Task<IEnumerable<Session>> GetExpertPastSessionsAsync(string expertId)
+        {
+            return await _context.Sessions
+                .Include(s => s.Service)
+                .Include(s => s.Availability)
+                .Include(s => s.Beginner)       // اسم المبتدئ اللي حجز
+                .Where(s => s.ExpertId == expertId
+                         && s.Availability.Date < DateTime.UtcNow.Date) // تاريخ قبل النهارده = Past
+                .OrderByDescending(s => s.Availability.Date)            // الأحدث أولاً
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Session>> GetCustomerPastSessionsAsync(string beginnerId)
+        {
+            return await _context.Sessions
+                .Include(s => s.Service)
+                .Include(s => s.Availability)
+                .Include(s => s.Expert)        // عشان نجيب اسم الخبير وبياناته
+                .Where(s => s.BeginnerId == beginnerId
+                         && s.Availability.Date < DateTime.UtcNow.Date)
+                .OrderByDescending(s => s.Availability.Date)
+                .ToListAsync();
+        }
     }
 }

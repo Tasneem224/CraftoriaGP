@@ -155,5 +155,10 @@ namespace Service
             }
         }
 
+        public async Task<int> GetCountOfCart(string id)
+        {
+            var cart = await _cacheRepository.Count(id);
+            return cart;
+        }
     }
 }

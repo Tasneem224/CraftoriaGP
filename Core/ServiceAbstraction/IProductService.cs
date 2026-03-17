@@ -20,6 +20,7 @@ namespace ServiceAbstraction
         Task<bool> DeleteProductAsync(int id);
         Task<int> GetProductsCountByUserIdAsync(string userId);
         Task<List<ReturnSearchDto>> SearchProductsAsync(string query);
+        Task<List<ReturnSearchDto>> SearchInSpecificCategoryAsync(string query,int CategoryId);
 
     }
 }
