@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainLayer.Models.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,6 @@ namespace DomainLayer.Contracts
     {
         Task IdentityDataSeedingAsync();
         Task SeedOneThousandUsers();
+        Task SeedReviews();
     }
 }

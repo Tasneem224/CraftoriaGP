@@ -130,6 +130,7 @@ namespace CraftoriaApp
                 var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeding>();
                 await seeder.IdentityDataSeedingAsync();
                 await seeder.SeedOneThousandUsers();
+                await seeder.SeedReviews();
             }
             using (var scope = app.Services.CreateScope())
             {

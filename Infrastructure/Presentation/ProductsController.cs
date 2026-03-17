@@ -32,7 +32,6 @@ namespace Presentation.Controllers
             var products = await _productService.GetAllProductsOfSpecifiUserAsync(userId);
             return Ok(products);
         }
-        [RedisCache(120)]
         [HttpGet("GetProductDetailsById")]
         public async Task<IActionResult> GetById(int id)
         {
