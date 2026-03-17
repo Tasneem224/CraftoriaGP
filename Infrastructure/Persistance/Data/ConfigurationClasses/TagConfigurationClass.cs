@@ -19,9 +19,7 @@ namespace Persistance.Data.ConfigurationClasses
                     .IsRequired()
                     .HasMaxLength(50);
 
-            builder.HasMany(i => i.items)
-                    .WithMany(t => t.tags)
-                    .UsingEntity(j => j.ToTable("ItemTags"));
+           
         }
     }
 }

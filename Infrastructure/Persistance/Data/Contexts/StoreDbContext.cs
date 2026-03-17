@@ -67,6 +67,17 @@ namespace Persistance.Data.Contexts
                 .Property(s => s.AmountPaid)
                 .HasColumnType("decimal(18,2)");
 
+            builder.Entity<Item>()
+    .HasMany(i => i.tags)
+    .WithMany(t => t.items)
+    .UsingEntity<ItemTags>(
+        j => j.HasOne(it => it.Tag)
+              .WithMany()
+              .HasForeignKey(it => it.TagId),
+        j => j.HasOne(it => it.Item)
+              .WithMany()
+              .HasForeignKey(it => it.ItemId)
+    );
             // 4. Inheritance Strategy
             builder.Entity<Item>().UseTpcMappingStrategy();
 

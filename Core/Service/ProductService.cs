@@ -242,18 +242,38 @@ namespace Service
             if (string.IsNullOrWhiteSpace(query)) return new List<ReturnSearchDto>();
 
             var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
-            var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
-            var normalizedQuery1 = query.Trim().ToLower();
-            var normalizedQuery= normalizedQuery1.NormalizeArabicText();
+            var normalizedQuery = query.Trim().ToLower().NormalizeArabicText();
 
-            var allProducts = await _unitOfWork.GetRepository<Product, int>()
+            // 1. هنجيب الأول المنتجات اللي فيها جزء من الكلمة (عشان نقلل الداتا اللي بتيجي من الداتا بيز)
+            // استخدام AsSplitQuery بيحل مشكلة بطء الـ Includes لو في داتا كتير
+            var initialProducts = await _unitOfWork.GetRepository<Product, int>()
                 .GetAllQueryable()
                 .Include(p => p.Category)
-                .Include(p => p.Seller) 
-                .Include(t=>t.tags)
+                .Include(p => p.Seller)
+                .Include(t => t.tags)
+                .AsSplitQuery() // 👈 التعديل الأول: بيسرع سحب الداتا جداً
+                .Where(p => p.NameAr.Contains(normalizedQuery) ||
+                            p.NameEn.Contains(normalizedQuery) ||
+                            p.DescriptionAr!.Contains(normalizedQuery) ||
+                            p.DescriptionEn!.Contains(normalizedQuery) ||
+                            p.tags.Any(t => t.Name.Contains(normalizedQuery))) // 👈 التعديل التاني: فلترة مبدئية في الداتا بيز
                 .ToListAsync();
 
-            var searchResults = allProducts
+            // 2. لو ملقناش حاجة بالفلترة المبدئية، هنجيب كل المنتجات عشان الفازي سيرش (زي ما كنتي عاملة)
+            // لو لقيتي إن الفلترة المبدئية دي كفاية، ممكن تلغي الـ Fallback ده عشان تحسني الأداء أكتر.
+            if (!initialProducts.Any())
+            {
+                initialProducts = await _unitOfWork.GetRepository<Product, int>()
+                   .GetAllQueryable()
+                   .Include(p => p.Category)
+                   .Include(p => p.Seller)
+                   .Include(t => t.tags)
+                   .AsSplitQuery()
+                   .ToListAsync();
+            }
+
+            // 3. تطبيق الـ Fuzzy Search في الميموري على الداتا اللي جاتلنا
+            var searchResults = initialProducts
               .Select(p => {
                   var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
                   var searchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn} {tagsText}".ToLower().NormalizeArabicText();
@@ -262,20 +282,18 @@ namespace Service
 
                   return new { Product = p, Score = score, SearchableText = searchableText };
               })
-              .Where(
-                x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
+              .Where(x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
               .OrderByDescending(x => x.Score)
-                .Select(x => new ReturnSearchDto 
-                {
-                    Id = x.Product.Id,
-                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
-                    Image=x.Product.ImageUrl ?? "",
-                })
+              .Select(x => new ReturnSearchDto
+              {
+                  Id = x.Product.Id,
+                  Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
+                  Image = x.Product.ImageUrl ?? "",
+              })
               .ToList();
 
-                    return searchResults;
-                }
-
+            return searchResults;
+        }
         public async Task<List<ReturnSearchDto>> SearchInSpecificCategoryAsync(string query,int CategoryId)
         {
             if (string.IsNullOrWhiteSpace(query)) return new List<ReturnSearchDto>();
@@ -290,6 +308,7 @@ namespace Service
                .Include(p => p.Category)
                .Include(p => p.Seller)
                .Include(t => t.tags)
+               
                .Where(p=>p.CategoryId==CategoryId)
                .ToListAsync();
             var searchResults = allProducts

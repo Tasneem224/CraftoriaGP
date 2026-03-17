@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistance.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Persistance.Data.Contexts;
 namespace Persistance.Identity.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    partial class StoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317114533_solveTagsError")]
+    partial class solveTagsError
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,6 +42,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("NameAr")
@@ -76,6 +82,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("NameAr")
@@ -154,6 +163,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -210,6 +222,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -299,6 +314,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
@@ -372,6 +390,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NameAr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -422,6 +443,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -447,6 +471,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -490,6 +517,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
@@ -541,6 +571,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -572,6 +605,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset>("OrderDate")
@@ -623,6 +659,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
@@ -669,6 +708,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("bit");
+
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -710,6 +752,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("Price")
@@ -768,6 +813,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGenerated")
                         .HasColumnType("bit");
 
                     b.Property<string>("MeetingLink")
