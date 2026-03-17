@@ -173,27 +173,27 @@ namespace Service
         }
 
         // 7. إنهاء الجلسة وتحويلها لـ Completed
-        public async Task<bool> CompleteSessionAsync(int sessionId, string beginnerId)
+        public async Task<object> CompleteSessionAsync(int sessionId, string userId)
         {
             var session = await _unitOfWork.Sessions
                 .GetAllQueryable()
                 .Include(s => s.Availability)
                 .FirstOrDefaultAsync(s => s.Id == sessionId
-                                       && s.BeginnerId == beginnerId);
+                                       && (s.BeginnerId == userId  // ✅ البيجينر
+                                        || s.ExpertId == userId)); // ✅ أو الخبير
 
-            if (session == null) return false;
+            if (session == null)
+                return new { Success = false, Message = "الجلسة غير موجودة" };
 
-            // ✅ نتأكد إن الوقت فعلاً خلص
-           // var sessionEnd = session.Availability.Date.ToDateTime(session.EndTime);
-            // ✅ كده
             var sessionEnd = session.Availability.Date.Date + session.EndTime;
-            if (DateTime.UtcNow < sessionEnd) return false;
+            if (DateTime.UtcNow < sessionEnd)
+                return new { Success = false, Message = "لم تنته الجلسة بعد" };
 
             session.Status = SessionStatus.Completed;
             _unitOfWork.Sessions.Update(session);
             await _unitOfWork.SaveChanges();
 
-            return true;
+            return new { Success = true, Message = "تم إنهاء الجلسة بنجاح" };
         }
 
         // 8. الدفع الوهمي — هيتشال لما تربطي Gateway

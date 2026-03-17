@@ -30,8 +30,8 @@ namespace ServiceAbstraction
         Task<IEnumerable<ExpertPastSessionDto>> GetExpertPastSessionsAsync(string expertId);
         Task<IEnumerable<CustomerPastSessionDto>> GetCustomerPastSessionsAsync(string customerId);
         Task<object> GetExpertSessionRequestsAsync(string expertId);
-        Task<bool> CompleteSessionAsync(int sessionId, string beginnerId);
-        
+        Task<object> CompleteSessionAsync(int sessionId, string userId);
+
 
     }
 }
