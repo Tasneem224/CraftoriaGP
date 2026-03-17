@@ -35,7 +35,7 @@ namespace Persistance.Repositories
                 return 0;
             }
 
-            var basket = JsonSerializer.Deserialize <CustomerCart>(result);
+            var basket = JsonSerializer.Deserialize<CustomerCart>(result);
             return basket?.cartItems?.Count ?? 0;
         }
 
