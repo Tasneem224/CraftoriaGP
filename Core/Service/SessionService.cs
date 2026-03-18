@@ -45,6 +45,21 @@ namespace Service
         // 2. إضافة ميعاد متاح (خبير) — بدون EndTime، بتتحسب وقت الحجز
         public async Task<object> AddAvailabilityAsync(string expertId, AddAvailabilityDto dto)
         {
+            var availabilityRepo = _unitOfWork.GetRepository<ExpertAvailability, int>();
+
+            // 🛑 1. التحقق من عدم وجود ميعاد متطابق (نفس الخبير، نفس اليوم، نفس الساعة)
+            bool isTimeSlotExists = await availabilityRepo.GetAllQueryable()
+                .AnyAsync(a => a.ExpertId == expertId
+                            && a.Date == dto.Date.Date
+                            && a.StartTime == dto.StartTime);
+
+            if (isTimeSlotExists)
+            {
+                // بنرمي Exception عشان الـ Controller يمسكه ويرجعه كـ Error 400 للـ Frontend
+                throw new Exception("هذا الموعد مضاف بالفعل من قبل.");
+            }
+
+            // ✅ 2. لو الميعاد مش موجود، نضيفه عادي جداً
             var availability = new ExpertAvailability
             {
                 ExpertId = expertId,
@@ -54,7 +69,7 @@ namespace Service
                 IsAvailable = true
             };
 
-            await _unitOfWork.GetRepository<ExpertAvailability, int>().AddAsync(availability);
+            await availabilityRepo.AddAsync(availability);
             await _unitOfWork.SaveChanges();
 
             return new { Message = "تم إضافة الموعد بنجاح", AvailabilityId = availability.Id };

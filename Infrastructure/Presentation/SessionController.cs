@@ -43,10 +43,20 @@ namespace Presentation
         {
             if (!ModelState.IsValid) return SendErrorResponse("بيانات غير صالحة", ModelState, 422);
 
-            var expertId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _sessionService.AddAvailabilityAsync(expertId, dto);
+            try
+            {
+                var expertId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return SendSuccessResponse(result, "تم إضافة الموعد بنجاح");
+                // لو الميعاد متكرر، السطر ده هيرمي Exception ومش هيكمل
+                var result = await _sessionService.AddAvailabilityAsync(expertId, dto);
+
+                return SendSuccessResponse(result, "تم إضافة الموعد بنجاح");
+            }
+            catch (Exception ex)
+            {
+                // 🛑 هنمسك الإيرور اللي رميناه من الـ Service (زي "هذا الموعد مضاف بالفعل") ونرجعه
+                return SendErrorResponse(ex.Message, null, 400);
+            }
         }
 
         #endregion
