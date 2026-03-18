@@ -79,7 +79,7 @@ namespace Presentation.Controllers
             var result = await _categoryService.GetAllProductCategoriesAsync();
             return SendSuccessResponse(result, "Categories are returned successfully");
         }
-        [RedisCache(120)]
+        //[RedisCache(120)]
 
         [HttpGet("GetAllProductsOfSpecificCategory")]
         public async Task<IActionResult> GetAllProductCategoriesById(int id)

@@ -2,6 +2,7 @@
 using DomainLayer.Exceptions;
 using DomainLayer.Models.Categories;
 using DomainLayer.Models.Identity;
+using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using FuzzySharp;
 using Microsoft.AspNetCore.Authorization;
@@ -16,12 +17,13 @@ using Shared.ProductModule;
 using Shared.Search;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace Service
 {
-    public class ProductService(ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
+    public class ProductService(IUserInteractionService _userInteractionService,ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
     {
 
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
@@ -203,7 +205,7 @@ namespace Service
             var categories = await categoryRepo.GetAllAsync();
 
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
-            return ReturnListDto(isArabic, products, categoriesDict);
+            return ReturnListDtoSimple(isArabic, products, categoriesDict);
 
         }
         public async Task<int> GetProductsCountByUserIdAsync(string userId)
@@ -219,23 +221,29 @@ namespace Service
 
                 return query.Count(p => p.SellerId == userId);
             }
-
         public async Task<IEnumerable<ReturnProductsOfCategory>> GetAllProductsOfSpecificCategory(int id)
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
-            var repo = _unitOfWork.GetRepository<Product, int>();
-            var query = await repo.GetAllAsync();
-            return query
-                    .Where(p => p.CategoryId == id)
-                    .Select(p => new ReturnProductsOfCategory
-                    {
-                        Id = p.Id,
-                        Image = p.ImageUrl ?? "",
-                        Name = isArabic ? p.NameAr : p.NameEn,
-                        Description = isArabic ? p.DescriptionAr! : p.DescriptionEn!,
-                        Price = p.Price
-                    }).ToList();
+            // 1. نبدأ من جدول المنتجات مباشرة
+            var query = _unitOfWork.GetRepository<Product, int>().GetAllQueryable();
+
+            return await query
+                .AsNoTracking()
+                .Where(p => p.CategoryId == id)
+                .Select(p => new ReturnProductsOfCategory
+                {
+                    Id = p.Id,
+                    Image = p.ImageUrl ?? "",
+                    Name = isArabic ? p.NameAr : p.NameEn,
+                    Price = p.Price,
+                    // 2. حساب التقييم مباشرة في الداتا بيز (Subquery)
+                    // بافتراض إن عندك علاقة Navigation Property اسمها UserInteractions جوه موديل الـ Product
+                    Rating = p.Interactions.Any()
+                     ? (short)Math.Round(p.Interactions.Average(r => (double)r.Rating))
+                     : (short)0
+                })
+                .ToListAsync();
         }
         public async Task<List<ReturnSearchDto>> SearchProductsAsync(string query)
         {
@@ -244,97 +252,108 @@ namespace Service
             var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
             var normalizedQuery = query.Trim().ToLower().NormalizeArabicText();
 
-            // 1. هنجيب الأول المنتجات اللي فيها جزء من الكلمة (عشان نقلل الداتا اللي بتيجي من الداتا بيز)
-            // استخدام AsSplitQuery بيحل مشكلة بطء الـ Includes لو في داتا كتير
+            // 1. فلترة مبدئية في الداتا بيز عشان منسحبش آلاف المنتجات للميموري عالفاضي
             var initialProducts = await _unitOfWork.GetRepository<Product, int>()
                 .GetAllQueryable()
-                .Include(p => p.Category)
-                .Include(p => p.Seller)
+                .AsNoTracking() // 👈 بيسرع القراءة جداً لأنه مش بيعمل Tracking للتغييرات
                 .Include(t => t.tags)
-                .AsSplitQuery() // 👈 التعديل الأول: بيسرع سحب الداتا جداً
                 .Where(p => p.NameAr.Contains(normalizedQuery) ||
                             p.NameEn.Contains(normalizedQuery) ||
-                            p.DescriptionAr!.Contains(normalizedQuery) ||
-                            p.DescriptionEn!.Contains(normalizedQuery) ||
-                            p.tags.Any(t => t.Name.Contains(normalizedQuery))) // 👈 التعديل التاني: فلترة مبدئية في الداتا بيز
+                            p.tags.Any(t => t.Name.Contains(normalizedQuery)))
                 .ToListAsync();
 
-            // 2. لو ملقناش حاجة بالفلترة المبدئية، هنجيب كل المنتجات عشان الفازي سيرش (زي ما كنتي عاملة)
-            // لو لقيتي إن الفلترة المبدئية دي كفاية، ممكن تلغي الـ Fallback ده عشان تحسني الأداء أكتر.
+            // 2. لو مفيش نتائج بالفلترة المباشرة، بنسحب الكل للفازي سيرش (اختياري حسب حجم الداتا عندك)
             if (!initialProducts.Any())
             {
                 initialProducts = await _unitOfWork.GetRepository<Product, int>()
                    .GetAllQueryable()
-                   .Include(p => p.Category)
-                   .Include(p => p.Seller)
+                   .AsNoTracking()
                    .Include(t => t.tags)
-                   .AsSplitQuery()
                    .ToListAsync();
             }
 
-            // 3. تطبيق الـ Fuzzy Search في الميموري على الداتا اللي جاتلنا
+            // 3. 🔥 التعديل السحري: جلب كل التقييمات للمنتجات اللي معانا "مرة واحدة" (Batch Fetching)
+            var productIds = initialProducts.Select(p => p.Id).ToList();
+            var ratingsDict = await _unitOfWork.GetRepository<UserInteraction, int>()
+                .GetAllQueryable()
+                .AsNoTracking()
+                // بنفلتر فقط الـ Interactions اللي ليها ProductId مش بـ Null وموجود في القائمة بتاعتنا
+                .Where(r => r.ProductId.HasValue && productIds.Contains(r.ProductId.Value))
+                .GroupBy(r => r.ProductId)
+                .Select(g => new
+                {
+                    // g.Key هنا هو الـ ProductId
+                    ProductId = g.Key.Value,
+                    Avg = g.Average(r => (double)r.Rating)
+                })
+                .ToDictionaryAsync(x => x.ProductId, x => x.Avg);
+            // 4. تطبيق الفازي سيرش وبناء الـ DTO في الميموري
             var searchResults = initialProducts
-              .Select(p => {
-                  var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
-                  var searchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn} {tagsText}".ToLower().NormalizeArabicText();
+                .Select(p => {
+                    var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
+                    var searchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn} {tagsText}".ToLower().NormalizeArabicText();
+                    var score = Fuzz.WeightedRatio(normalizedQuery, searchableText);
 
-                  var score = Fuzz.WeightedRatio(normalizedQuery, searchableText);
-
-                  return new { Product = p, Score = score, SearchableText = searchableText };
-              })
-              .Where(x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
-              .OrderByDescending(x => x.Score)
-              .Select(x => new ReturnSearchDto
-              {
-                  Id = x.Product.Id,
-                  Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
-                  Image = x.Product.ImageUrl ?? "",
-              })
-              .ToList();
+                    return new { Product = p, Score = score, SearchableText = searchableText };
+                })
+                .Where(x => x.Score >= 60 || x.SearchableText.Contains(normalizedQuery))
+                .OrderByDescending(x => x.Score)
+                .Select(x => new ReturnSearchDto
+                {
+                    Id = x.Product.Id,
+                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
+                    Image = x.Product.ImageUrl ?? "",
+                    Price = x.Product.Price,
+                    // بنجيب الريتنج من القاموس اللي حضرناه فوق، وبكده هيظهر صح ومش هياخد وقت
+                    Rating = ratingsDict.TryGetValue(x.Product.Id, out var avg) ? (short)Math.Round(avg) : (short)0
+                })
+                .ToList();
 
             return searchResults;
         }
-        public async Task<List<ReturnSearchDto>> SearchInSpecificCategoryAsync(string query,int CategoryId)
+        public async Task<List<ReturnSearchDto>> SearchInSpecificCategoryAsync(string query, int CategoryId)
         {
             if (string.IsNullOrWhiteSpace(query)) return new List<ReturnSearchDto>();
+
             var isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
-            var culture = isArabic ? new CultureInfo("ar-EG") : new CultureInfo("en-US");
-            var normalizedQuery1 = query.Trim().ToLower();
-            var normalizedQuery = normalizedQuery1.NormalizeArabicText();
+            var normalizedQuery = query.Trim().ToLower().NormalizeArabicText();
 
-            var allProducts = await _unitOfWork.GetRepository<Product, int>()
-                
-               .GetAllQueryable()
-               .Include(p => p.Category)
-               .Include(p => p.Seller)
-               .Include(t => t.tags)
-               
-               .Where(p=>p.CategoryId==CategoryId)
-               .ToListAsync();
-            var searchResults = allProducts
-           .Select(p => {
-               var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
-               var searchableText = $"{p.NameAr} {p.NameEn} {p.DescriptionAr} {p.DescriptionEn} {tagsText}".ToLower().NormalizeArabicText();
+            // 1. فلترة داخل الداتا بيز أولاً (Database Side)
+            var products = await _unitOfWork.GetRepository<Product, int>()
+                .GetAllQueryable()
+                .AsNoTracking()
+                .Include(t => t.tags)
+                .AsSplitQuery() // مهم جداً طالما فيه Include لـ Tags
+                .Where(p => p.CategoryId == CategoryId &&
+                           (p.NameAr.Contains(normalizedQuery) ||
+                            p.NameEn.Contains(normalizedQuery) ||
+                            p.tags.Any(t => t.Name.Contains(normalizedQuery))))
+                .ToListAsync();
 
-               var score = Fuzz.WeightedRatio(normalizedQuery, searchableText);
-
-               return new { Product = p, Score = score, SearchableText = searchableText };
-           })
-           .Where(
-             x => x.Score >= 70 || x.SearchableText.Contains(normalizedQuery))
-           .OrderByDescending(x => x.Score)
-             .Select(x => new ReturnSearchDto
-             {
-                 Id = x.Product.Id,
-                 Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
-                 Image = x.Product.ImageUrl ?? "",
-             })
-           .ToList();
+            // 2. لو الداتا اللي رجعت كتير، ممكن نعمل Fuzzy Search هنا (Memory Side)
+            var searchResults = products
+                .Select(p => {
+                    var tagsText = p.tags != null ? string.Join(" ", p.tags.Select(t => t.Name)) : "";
+                    var searchableText = $"{p.NameAr} {p.NameEn} {tagsText}".ToLower().NormalizeArabicText();
+                    var score = Fuzz.WeightedRatio(normalizedQuery, searchableText);
+                    return new { Product = p, Score = score };
+                })
+                .Where(x => x.Score >= 60) // قللنا الـ Score شوية عشان نزود النتائج
+                .OrderByDescending(x => x.Score)
+                .Select(x => new ReturnSearchDto
+                {
+                    Id = x.Product.Id,
+                    Name = isArabic ? x.Product.NameAr : x.Product.NameEn,
+                    Image = x.Product.ImageUrl ?? "",
+                    Price = x.Product.Price,
+                    Rating  = x.Product.Interactions.Any()
+                     ? (short)Math.Round(x.Product.Interactions.Average(r => (double)r.Rating))
+                     : (short)0
+                })
+                .ToList();
 
             return searchResults;
-
         }
-
         private async Task<(string DescAr, string DescEn)> TranslateDescription(UpdateProductDto dataFromRequest, bool isArabic)
         {
             string DescAr;
@@ -496,6 +515,19 @@ namespace Service
             : (isArabic ? "غير معروف" : "Unknown")
             }).ToList();
         }
+        private static IEnumerable<ReturnProductDto> ReturnListDtoSimple(bool isArabic, IEnumerable<Product> products, Dictionary<int, ProductCategory> categoriesDict)
+        {
+            return products.Select(p => new ReturnProductDto
+            {
+                Id = p.Id,
+                Name = isArabic ? p.NameAr : p.NameEn,
+                Price = p.Price,
+                ImageUrl = p.ImageUrl,
+                Quantity=p.Quantity
+                
+            }).ToList();
+        }
+    
 
     }
 }

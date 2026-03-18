@@ -288,7 +288,6 @@ namespace Service
                         Id = p.Id,
                         Image = p.ImageUrl ?? "",
                         Name = isArabic ? p.NameAr : p.NameEn,
-                        Description = isArabic! ? p.DescriptionAr! : p.DescriptionEn!,
                         Price = p.Price
                     }).ToList();
         }

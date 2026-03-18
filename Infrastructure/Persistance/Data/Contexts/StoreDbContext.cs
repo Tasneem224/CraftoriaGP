@@ -80,7 +80,7 @@ namespace Persistance.Data.Contexts
     );
             // 4. Inheritance Strategy
             builder.Entity<Item>().UseTpcMappingStrategy();
-
+            builder.ApplyConfigurationsFromAssembly(typeof(StoreDbContext).Assembly);
             // 5. الـ Favourite Configuration (يفضل تنقليها لكلاس منفصل لاحقاً بس شغالة هنا)
             builder.Entity<Favourite>()
                 .HasIndex(f => new { f.UserId, f.ProductId })

@@ -11,5 +11,7 @@ namespace Shared.Search
         public int Id { get; set; }
         public string Name { get; set; } = default!;
         public string Image { get; set; } = default!;
+        public decimal Price { get; set; } = default!;
+        public decimal Rating { get; set; } = default!;
     }
 }
