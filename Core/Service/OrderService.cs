@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Service
 {
@@ -85,7 +86,49 @@ namespace Service
 
             return orders.Select(order => MapOrderToDto(order)).ToList();
         }
+        public async Task<IEnumerable<AddressBookDto>> GetUserAddressesAsync(string userEmail)
+        {
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            if (user == null) throw new Exception("User not found");
 
+            var query = _unitOfWork.GetRepository<Address_Book, Guid>().GetAllQueryable();
+
+            return await query
+                .Where(a => a.AppUserId == user.Id)
+                .Select(a => new AddressBookDto
+                {
+                    FullName = a.FullName,
+                    StreetDetails = a.StreetDetails,
+                    PhoneNumber = a.PhoneNumber,
+                    City = a.City,
+                    Region = a.Region
+                })
+                .ToListAsync();
+        }
+        public async Task<AddressBookDto> AddUserAddressAsync(string userEmail, AddressBookDto addressDto)
+        {
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            if (user == null) throw new Exception("User not found");
+
+            var newAddressEntry = new Address_Book
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = user.Id,
+                FullName = addressDto.FullName,
+                StreetDetails = addressDto.StreetDetails,
+                PhoneNumber = addressDto.PhoneNumber,
+                City = addressDto.City,
+                Region = addressDto.Region,
+                State = "N/A"
+            };
+
+            await _unitOfWork.GetRepository<Address_Book, Guid>().AddAsync(newAddressEntry);
+            var result = await _unitOfWork.SaveChanges();
+
+            if (result <= 0) throw new Exception("Failed to save address to address book");
+
+            return addressDto;
+        }
         private async Task<List<OrderItem>> PrepareOrderItemsAsync(CustomerCart basket)
         {
             var orderItems = new List<OrderItem>();

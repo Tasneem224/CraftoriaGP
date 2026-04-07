@@ -12,7 +12,7 @@ namespace Persistance.Data.ConfigurationClasses
     public abstract class BaseEntityConfigurationClass<TEntity, TKey> : IEntityTypeConfiguration<TEntity>
     where TEntity : BaseEntity<TKey>
     {
-        public void Configure(EntityTypeBuilder<TEntity> builder)
+        public virtual void Configure(EntityTypeBuilder<TEntity> builder)
         {
             builder.Property(e => e.CreatedAt)
                            .HasDefaultValueSql("GETDATE()"); 

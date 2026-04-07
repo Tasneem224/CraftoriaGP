@@ -34,8 +34,10 @@ namespace Persistance.Data.ConfigurationClasses
                    .OnDelete(DeleteBehavior.Restrict);
 
             // ضبط الـ Decimal لخانة السعر (AmountPaid)
+            //builder.Property(s => s.AmountPaid)
+                   //.HasColumnType("decimal(18,2)");
             builder.Property(s => s.AmountPaid)
-                   .HasColumnType("decimal(18,2)");
+                   .HasColumnType("numeric(18,2)");
         }
     }
 }

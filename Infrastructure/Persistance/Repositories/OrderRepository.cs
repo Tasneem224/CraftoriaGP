@@ -29,7 +29,7 @@ namespace Persistance.Repositories
                 .OrderByDescending(o => o.OrderDate) // عشان الأحدث يظهر الأول
                 .ToListAsync();
         }
-
+        
 
     }
 }
