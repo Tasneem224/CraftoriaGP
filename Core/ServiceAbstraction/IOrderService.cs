@@ -12,5 +12,7 @@ namespace ServiceAbstraction
         Task<OrderToReturnDto?> CreateOrderAsync(string userEmail, int deliveryMethodId, string basketId, AddressBookDto shippingAddress);
         Task<IReadOnlyList<OrderToReturnDto>> GetOrdersForUserAsync(string userEmail);
         Task<OrderToReturnDto?> GetOrderByIdAsync(Guid id, string userEmail);
+        Task<IEnumerable<AddressBookDto>> GetUserAddressesAsync(string userEmail);
+        Task<AddressBookDto> AddUserAddressAsync(string userEmail, AddressBookDto addressDto);
     }
 }

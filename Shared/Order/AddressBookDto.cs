@@ -14,5 +14,6 @@ namespace Shared.Order
         public string City { get; set; } = default!;
         public string StreetDetails { get; set; } = default!;
         public string Region { get; set; } = default!;
+        
     }
 }

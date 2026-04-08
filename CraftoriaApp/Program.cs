@@ -1,4 +1,4 @@
-
+﻿
 using AutoMapper;
 using CloudinaryDotNet;
 using CraftoriaApp.CustomeMiddleWares;
@@ -55,6 +55,18 @@ namespace CraftoriaApp
                     )
                 );
             });
+            //builder.Services.AddDbContext<StoreDbContext>(options =>
+            //{
+            //    options.UseNpgsql(
+            //        builder.Configuration.GetConnectionString("PostgresConnection"),
+            //        npgsqlOptions =>
+            //        {
+            //            npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+
+            //            npgsqlOptions.MigrationsHistoryTable("__PostgresMigrationHistory");
+            //        }
+            //    );
+            //});
 
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<IdentityRole>()
@@ -123,10 +135,45 @@ namespace CraftoriaApp
 
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             var app = builder.Build();
+
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var services = scope.ServiceProvider;
+            //    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+
+            //    try
+            //    {
+            //        var context = services.GetRequiredService<StoreDbContext>();
+
+            //        // 1️⃣ الخطوة الأولى: إنشاء الجداول فوراً (لو مش موجودة)
+            //        // لازم دي تكون أول خطوة قبل أي عملية Seeding
+            //        await context.Database.EnsureCreatedAsync();
+            //        Console.WriteLine("✅ Database structure is ready (EnsureCreated).");
+
+            //        // 2️⃣ الخطوة الثانية: ملء بيانات الـ Identity (Users, Roles)
+            //        var seeder = services.GetRequiredService<IDataSeeding>();
+            //        await seeder.IdentityDataSeedingAsync();
+            //        await seeder.SeedCustomersDataAsync();
+
+            //        // 3️⃣ الخطوة الثالثة: ملء بيانات الـ Categories والمنتجات
+            //        var catSeeder = services.GetRequiredService<ICategoriesSeeding>();
+            //        await catSeeder.ProductCategoryDataSeedingAsync();
+            //        await catSeeder.RawMaterialsCategoryDataSeedingAsync();
+
+            //        Console.WriteLine("✅ All Data Seeding completed successfully!");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        var logger = loggerFactory.CreateLogger<Program>();
+            //        logger.LogError(ex, "❌ An error occurred during database setup or seeding.");
+            //    }
+            //}
+
             using (var scope = app.Services.CreateScope())
             {
                 var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeding>();
                 await seeder.IdentityDataSeedingAsync();
+                //await seeder.SeedCustomersDataAsync();
             }
             using (var scope = app.Services.CreateScope())
             {
@@ -134,7 +181,6 @@ namespace CraftoriaApp
                 await seeder.ProductCategoryDataSeedingAsync();
                 await seeder.RawMaterialsCategoryDataSeedingAsync();
             }
-
             app.UseMiddleware<CustomeExceptionHandlerMiddleWare>();
             var supportedCultures = new[] { "en", "ar" };
             var localizationOptions = new RequestLocalizationOptions()
