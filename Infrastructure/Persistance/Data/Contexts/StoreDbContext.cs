@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models;
 using DomainLayer.Models.Categories;
+using DomainLayer.Models.ChatBot;
 using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
@@ -23,6 +24,7 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<ChatBotMessages> ChatBotMessages { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<Address_Book> AddressBooks { get; set; }
         public DbSet<Order> Orders { get; set; }

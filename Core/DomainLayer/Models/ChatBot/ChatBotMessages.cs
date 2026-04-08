@@ -14,8 +14,8 @@ namespace DomainLayer.Models.ChatBot
         public string UserId { get; set; }
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; } = null!;
-        public string Content { get; set; }
-        public string role { get; set; }
+        public string Content { get; set; }= String.Empty;
+        public string Role { get; set; } = String.Empty;
         public DateTime CreatedAt { get; set; }
     }
 }

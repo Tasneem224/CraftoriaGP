@@ -20,6 +20,7 @@ namespace Persistance.Data.ConfigurationClasses
         .OnDelete(DeleteBehavior.Cascade);
 
          builder.HasIndex(m => m.UserId);
+            builder.Property(m => m.CreatedAt).HasDefaultValueSql("GETDATE()");
         }
     }
 }

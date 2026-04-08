@@ -9,12 +9,9 @@ namespace DomainLayer.Contracts
 {
     public interface IChatBotSessionRepository
     {
-        Task<ChatBotSession> CreateAsync(string userId);
-        Task<ChatBotSession?> GetByIdAsync(Guid sessionId);
-        Task SaveMessageAsync(ChatBotMessages message);
-        Task<List<ChatBotMessages>> GetHistoryAsync(Guid sessionId);
-
-
+        Task<ChatBotMessages> AddMessages(string message,string userId,string Role);
+        Task<List< ChatBotMessages>> GetLast5Messages(string userId);
+        Task<List<ChatBotMessages>> PaginationMessages(string userId,int pageNumber,int pageSize);
     }
 
 }
