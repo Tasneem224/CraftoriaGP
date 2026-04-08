@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DomainLayer.Models.Notifications
+{
+    public enum NotificationType
+    {
+        OrderUpdate,
+        ChatMessage,
+        AppUpdate,
+        SpecialOffer
+    }
+}

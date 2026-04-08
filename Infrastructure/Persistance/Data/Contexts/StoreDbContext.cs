@@ -4,6 +4,8 @@ using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.Messages;
+using DomainLayer.Models.Notifications;
 using DomainLayer.Models.Order;
 using DomainLayer.Models.RawMaterials;
 using DomainLayer.Models.session;
@@ -22,6 +24,8 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<Address_Book> Adress_Shipping { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -93,6 +97,19 @@ namespace Persistance.Data.Contexts
                 .OnDelete(DeleteBehavior.NoAction);
 
             // 🚨 ملاحظة: تم حذف السطر المكرر لـ ApplyConfigurations و ReferenceAssembly
+
+            // تظبيط علاقات الرسائل عشان نمنع الـ Cascade Delete
+            builder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
 

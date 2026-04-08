@@ -1,5 +1,7 @@
 ﻿using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.Messages;
+using DomainLayer.Models.Notifications;
 using DomainLayer.Models.RawMaterials;
 using DomainLayer.Models.session;
 using Microsoft.AspNetCore.Identity;
@@ -73,6 +75,22 @@ namespace DomainLayer.Models.Identity
         // 2. (Seller Reviews)
         [InverseProperty(nameof(UserInteraction.TargetUser))]
         public ICollection<UserInteraction> ReceivedReviews { get; set; }
+
+        #region Messages_And_Notifications
+
+        // الرسائل اللي اليوزر بعتها
+        [InverseProperty(nameof(Message.Sender))]
+        public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
+
+        // الرسائل اللي اليوزر استقبلها
+        [InverseProperty(nameof(Message.Receiver))]
+        public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+
+        // إشعارات اليوزر
+        [InverseProperty(nameof(Notification.User))]
+        public virtual ICollection<Notification> UserNotifications { get; set; } = new List<Notification>();
+
+        #endregion
 
     }
 }
