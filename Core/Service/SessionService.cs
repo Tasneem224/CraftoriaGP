@@ -97,6 +97,10 @@ namespace Service
         // 5. جلب جلسات البيجينر Upcoming مع JoinStatus
         public async Task<object> GetCustomerSessionsAsync(string customerId)
         {
+            // استخدم التوقيت المحلي للسيرفر (Local) عشان يطابق المواعيد اللي الخبراء دخلوها غالباً
+            var now = DateTime.Now;
+            var today = now.Date; // هيرجع التاريخ فقط بدون وقت (00:00:00)
+            var currentTime = now.TimeOfDay; // هيرجع الوقت الحالي (ساعات ودقائق وثواني)
             bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
 
             var sessions = await _unitOfWork.Sessions
@@ -104,8 +108,10 @@ namespace Service
                 .Include(s => s.Service)
                 .Include(s => s.Availability)
                 .Include(s => s.Expert)
-                .Where(s => s.BeginnerId == customerId
-                         && s.Status == SessionStatus.Confirmed) // Upcoming = Confirmed بس
+                .Where(s => s.BeginnerId == customerId  && s.Status == SessionStatus.Confirmed) // Upcoming = Confirmed بس
+                  // الفلتر الذكي: التاريخ لسه مجاش، أو التاريخ هو النهاردة بس وقت النهاية لسه مخلصش
+                .Where(s => s.Availability.Date > today ||
+                   (s.Availability.Date == today && s.EndTime > currentTime))
                 .ToListAsync();
 
             return sessions.Select(s => new
@@ -254,12 +260,17 @@ namespace Service
         {
             bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
 
+            var now = DateTime.Now;
+            var today = now.Date;
+            var currentTime = now.TimeOfDay;
+
             var upcomingSessions = await _unitOfWork.Sessions.GetAllQueryable()
                 .Include(s => s.Service)
                 .Include(s => s.Availability)
                 .Include(s => s.Beginner)
-                .Where(s => s.ExpertId == expertId
-                         && s.Status == SessionStatus.Confirmed) // ✅ Confirmed = Upcoming
+                .Where(s => s.ExpertId == expertId && s.Status == SessionStatus.Confirmed)
+                .Where(s => s.Availability.Date > today ||
+                           (s.Availability.Date == today && s.EndTime > currentTime))
                 .OrderBy(s => s.Availability.Date)
                 .ThenBy(s => s.Availability.StartTime)
                 .Select(s => new
@@ -269,7 +280,7 @@ namespace Service
                     ServiceName = isArabic ? s.Service.TitleAr : s.Service.TitleEn,
                     Date = s.Availability.Date,
                     StartTime = s.Availability.StartTime,
-                    EndTime = s.EndTime,  // ✅ من الـ Session
+                    EndTime = s.EndTime,
                     Status = GetLocalizedSessionStatus(s.Status, isArabic),
                     MeetingLink = s.MeetingLink ?? "لم يتم إضافة رابط بعد",
                     NeedsAction = string.IsNullOrEmpty(s.MeetingLink)
@@ -309,12 +320,18 @@ namespace Service
         {
             bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
 
+            var now = DateTime.Now;
+            var today = now.Date;
+            var currentTime = now.TimeOfDay;
+
             var pastSessions = await _unitOfWork.Sessions.GetAllQueryable()
                 .Include(s => s.Service)
                 .Include(s => s.Availability)
                 .Include(s => s.Beginner)
-                .Where(s => s.ExpertId == expertId
-                         && s.Status == SessionStatus.Completed) // ✅ Completed بس
+                .Where(s => s.ExpertId == expertId)
+                .Where(s => s.Status == SessionStatus.Completed ||
+                          (s.Status == SessionStatus.Confirmed &&
+                           (s.Availability.Date < today || (s.Availability.Date == today && s.EndTime <= currentTime))))
                 .OrderByDescending(s => s.Availability.Date)
                 .ToListAsync();
 
@@ -335,12 +352,19 @@ namespace Service
         {
             bool isArabic = CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "ar";
 
+            var now = DateTime.Now;
+            var today = now.Date;
+            var currentTime = now.TimeOfDay;
+
             var pastSessions = await _unitOfWork.Sessions.GetAllQueryable()
                 .Include(s => s.Service)
                 .Include(s => s.Availability)
                 .Include(s => s.Expert)
-                .Where(s => s.BeginnerId == customerId
-                         && s.Status == SessionStatus.Completed) // ✅ Completed بس
+                .Where(s => s.BeginnerId == customerId)
+                // الفلتر: الحالة Completed صراحة OR الحالة Confirmed بس الوقت عدى خلاص
+                .Where(s => s.Status == SessionStatus.Completed ||
+                          (s.Status == SessionStatus.Confirmed &&
+                           (s.Availability.Date < today || (s.Availability.Date == today && s.EndTime <= currentTime))))
                 .OrderByDescending(s => s.Availability.Date)
                 .ToListAsync();
 
@@ -357,7 +381,6 @@ namespace Service
                 AmountPaid = s.AmountPaid
             });
         }
-
         // 16. Requests للخبير — الجلسات المؤكدة اللي لسه محتاجة لينك
         public async Task<object> GetExpertSessionRequestsAsync(string expertId)
         {
