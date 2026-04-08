@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Interaction;
+﻿using DomainLayer.Models.ChatBot;
+using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
 using DomainLayer.Models.session;
@@ -74,5 +75,6 @@ namespace DomainLayer.Models.Identity
         [InverseProperty(nameof(UserInteraction.TargetUser))]
         public ICollection<UserInteraction> ReceivedReviews { get; set; }
 
+        public ICollection<ChatBotMessages> ChatBotMessages { get; set; }
     }
 }
