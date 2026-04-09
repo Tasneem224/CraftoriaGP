@@ -44,6 +44,8 @@ namespace Service
                 Id = message.Id,
                 Content = message.Content,
                 SenderId = message.SenderId,
+                SenderName = "Me" ,// أو هاتي اسم السندر لو محتاجاه
+                ReceiverId = message.ReceiverId, // ضيفي السطر ده عشان ميبقاش Null
                 SentAt = message.SentAt
             };
 
