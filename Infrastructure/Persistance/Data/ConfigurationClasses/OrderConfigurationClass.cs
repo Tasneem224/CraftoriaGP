@@ -17,7 +17,7 @@ namespace Persistance.Data.ConfigurationClasses
                 
              
                 //builder.Property(o => o.Subtotal).HasColumnType("decimal(18,2)");
-                builder.Property(o => o.Subtotal).HasColumnType("numeric(18,2)");
+                builder.Property(o => o.Subtotal).HasColumnType("decimal(18,2)");
                 builder.HasMany(o => o.OrderItems).WithOne().OnDelete(DeleteBehavior.Cascade);
 
                 builder.Property(o => o.orderPaymentStatus).HasConversion(p => p.ToString(), p => Enum.Parse<OrderPaymentStatus>(p));

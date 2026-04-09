@@ -17,7 +17,8 @@ namespace Persistance.Repositories
         public IFavouriteRepository Favourites { get; }
         public ISessionRepository Sessions { get; } // الـ Repo الجديد
         public IOrderRepository Orders { get; } 
-        public IChatBotSessionRepository ChatBotSessions { get; }
+
+        public IChatBotSessionRepository ChatBot { get; }
 
         public UnitOfWork(StoreDbContext context)
         {
@@ -26,7 +27,7 @@ namespace Persistance.Repositories
             Favourites = new FavouriteRepository(context);
             Sessions = new SessionRepository(context); // عمل الـ Instance
             Orders= new OrderRepository(context); 
-            ChatBotSessions = new ChatBotSessionRepository(context);
+            ChatBot = new ChatBotSessionRepository(context);
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
