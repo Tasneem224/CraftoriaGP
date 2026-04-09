@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
+using Presentation.Hubs;
 using Service;
 using Service.Mapping_Profiles;
 using Service.MappingProfiles;
@@ -47,7 +48,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("localConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -77,6 +78,9 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ITopRatedService, TopRatedService>();
             builder.Services.AddScoped<ISessionService, SessionService>();
+
+            builder.Services.AddScoped<IMessageService, MessageService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
 
@@ -125,6 +129,25 @@ namespace CraftoriaApp
                    IssuerSigningKey = new SymmetricSecurityKey(
                        Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // السطر ده هو "كلمة السر"
+                        // بيخلي الـ API يدور على الـ Token في الـ Query String لو الطلب رايح للـ Hub
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+
+
             });
             builder.Services.AddScoped<ITranslationService, TranslationService>();
 
@@ -134,6 +157,8 @@ namespace CraftoriaApp
                 throw new Exception("Cloudinary configuration is missing");
 
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+
+            builder.Services.AddSignalR();
             var app = builder.Build();
 
             //using (var scope = app.Services.CreateScope())
@@ -210,6 +235,7 @@ namespace CraftoriaApp
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.MapHub<ChatHub>("/chathub");
 
 
             app.MapControllers();

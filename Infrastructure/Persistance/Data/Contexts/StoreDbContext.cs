@@ -131,15 +131,16 @@ namespace Persistance.Data.Contexts
             // 🚨 ملاحظة: تم حذف السطر المكرر لـ ApplyConfigurations و ReferenceAssembly
 
             // تظبيط علاقات الرسائل عشان نمنع الـ Cascade Delete
+            // تظبيط علاقات الرسائل مع اليوزر
             builder.Entity<Message>()
                 .HasOne(m => m.Sender)
-                .WithMany()
+                .WithMany(u => u.SentMessages) // <-- هنا عرفناه على اللستة بتاعة المرسل
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Message>()
                 .HasOne(m => m.Receiver)
-                .WithMany()
+                .WithMany(u => u.ReceivedMessages) // <-- وهنا عرفناه على اللستة بتاعة المستقبل
                 .HasForeignKey(m => m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
         }

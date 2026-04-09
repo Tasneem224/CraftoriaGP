@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Models.Identity;
+using DomainLayer.Models.Items;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Models.Messages
 {
-    public class Message
+    public class Message: BaseEntity<int>
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
         public string SenderId { get; set; }
         public string ReceiverId { get; set; }
         public string Content { get; set; }

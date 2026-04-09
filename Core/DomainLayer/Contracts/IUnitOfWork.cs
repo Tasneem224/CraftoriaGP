@@ -14,6 +14,8 @@ namespace DomainLayer.Contracts
         IFavouriteRepository Favourites { get; }
         ISessionRepository Sessions { get; } // الـ Repo الجديد
         IOrderRepository Orders { get; }
+        IMessageRepository Messages { get; }
+        INotificationRepository Notifications { get; }
 
         Task<int> SaveChanges();
 
