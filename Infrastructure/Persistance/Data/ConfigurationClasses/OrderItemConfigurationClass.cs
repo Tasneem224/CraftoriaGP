@@ -20,7 +20,7 @@ namespace Persistance.Data.ConfigurationClasses
             builder.Property(oi => oi.Id)
                    .UseIdentityColumn(); // يجبر SQL Server على توليد الرقم تلقائياً
             //builder.Property<decimal>(o => o.Price).HasColumnType("decimal(18,2)");
-            builder.Property<decimal>(o => o.Price).HasColumnType("numeric(18,2)");
+            builder.Property<decimal>(o => o.Price).HasColumnType("decimal(18,2)");
             builder.OwnsOne(o => o.Item, item =>
             {
                 item.WithOwner(); // ده بيأكد إنه تابع للـ OrderItem وموش محتاج Key لوحده

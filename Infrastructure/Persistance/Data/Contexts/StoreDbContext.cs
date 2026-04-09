@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models;
 using DomainLayer.Models.Categories;
+using DomainLayer.Models.ChatBot;
 using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
@@ -27,6 +28,7 @@ namespace Persistance.Data.Contexts
     {
         public DbSet<Message> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ChatBotMessages> ChatBotMessages { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<Address_Book> AddressBooks { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -46,23 +48,20 @@ namespace Persistance.Data.Contexts
             base.OnModelCreating(builder);
 
 
-            // 1. Identity Tables Configuration
-            builder.Entity<ApplicationUser>().ToTable("Users");
-            builder.Entity<IdentityRole>().ToTable("Roles");
-            builder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
+
 
             // تجاهل الجداول الإضافية لـ Identity عشان الـ Warnings اللي كانت بتظهر
             builder.Entity<ApplicationUser>().ToTable("Users");
             builder.Entity<IdentityRole>().ToTable("Roles");
-            builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+            builder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
             builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
             builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
-            //builder.Ignore<IdentityUserClaim<string>>();
-            //builder.Ignore<IdentityUserToken<string>>();
-            //builder.Ignore<IdentityUserLogin<string>>();
-            //builder.Ignore<IdentityRoleClaim<string>>();
+            builder.Ignore<IdentityUserClaim<string>>();
+            builder.Ignore<IdentityUserToken<string>>();
+            builder.Ignore<IdentityUserLogin<string>>();
+            builder.Ignore<IdentityRoleClaim<string>>();
 
             // 2. تطبيق الـ Configuration Classes (السطر ده كفاية جداً لكل الملفات اللي في الـ Assembly)
             builder.ApplyConfigurationsFromAssembly(typeof(StoreDbContext).Assembly);
@@ -103,6 +102,7 @@ namespace Persistance.Data.Contexts
                 .WithMany()
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
+        }
 
             // 2. Value Converter لكل الـ decimals
             var decimalConverter = new ValueConverter<decimal, decimal>(

@@ -37,7 +37,7 @@ namespace Persistance.Data.ConfigurationClasses
             //builder.Property(s => s.AmountPaid)
                    //.HasColumnType("decimal(18,2)");
             builder.Property(s => s.AmountPaid)
-                   .HasColumnType("numeric(18,2)");
+                   .HasColumnType("decimal(18,2)");
         }
     }
 }

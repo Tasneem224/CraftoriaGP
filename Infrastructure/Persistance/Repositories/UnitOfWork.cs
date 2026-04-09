@@ -20,6 +20,7 @@ namespace Persistance.Repositories
         public IMessageRepository Messages { get; }
         public INotificationRepository Notifications { get; }
 
+        public IChatBotSessionRepository ChatBot { get; }
 
         public UnitOfWork(StoreDbContext context)
         {
@@ -30,6 +31,8 @@ namespace Persistance.Repositories
             Orders= new OrderRepository(context);
             Messages = new MessageRepository(context);
             Notifications = new NotificationRepository(context);
+            Orders= new OrderRepository(context); 
+            ChatBot = new ChatBotSessionRepository(context);
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();

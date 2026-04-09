@@ -16,6 +16,8 @@ namespace DomainLayer.Contracts
         IOrderRepository Orders { get; }
         IMessageRepository Messages { get; }
         INotificationRepository Notifications { get; }
+        IChatBotSessionRepository ChatBot { get; }
+
 
         Task<int> SaveChanges();
 

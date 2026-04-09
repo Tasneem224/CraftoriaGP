@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Interaction;
+﻿using DomainLayer.Models.ChatBot;
+using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.Messages;
 using DomainLayer.Models.Notifications;
@@ -92,5 +93,6 @@ namespace DomainLayer.Models.Identity
 
         #endregion
 
+        public ICollection<ChatBotMessages> ChatBotMessages { get; set; }
     }
 }
