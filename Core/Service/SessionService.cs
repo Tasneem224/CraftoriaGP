@@ -339,6 +339,7 @@ namespace Service
             {
                 SessionId = s.Id,
                 BeginnerName = s.Beginner?.DisplayName ?? s.Beginner?.FirstName ?? "Unknown",
+                BeginnerImageUrl = s.Beginner?.ProfileImage ?? string.Empty, // ✅ أضيفي السطر ده
                 ServiceName = isArabic ? s.Service?.TitleAr : s.Service?.TitleEn,
                 Date = s.Availability.Date,
                 Duration = $"{s.Availability.StartTime:hh\\:mm tt} • {s.Service?.DurationInMinutes} min",
