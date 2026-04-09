@@ -119,6 +119,8 @@ namespace Service
                 SessionId = s.Id,
                 ExpertId = s.ExpertId,
                 ExpertName = s.Expert?.DisplayName ?? s.Expert?.FirstName,
+                ExpertImageUrl = s.Expert?.ProfileImage ?? string.Empty, // ✅ أضيفي السطر ده
+
                 ServiceName = isArabic ? s.Service?.TitleAr : s.Service?.TitleEn,
                 Date = s.Availability?.Date,
                 StartTime = s.Availability?.StartTime,
@@ -277,12 +279,13 @@ namespace Service
                 {
                     SessionId = s.Id,
                     BeginnerName = s.Beginner.DisplayName ?? s.Beginner.FirstName,
+                    BeginnerImageUrl = s.Beginner.ProfileImage ?? string.Empty, // ✅ أضيفي السطر ده
                     ServiceName = isArabic ? s.Service.TitleAr : s.Service.TitleEn,
                     Date = s.Availability.Date,
                     StartTime = s.Availability.StartTime,
                     EndTime = s.EndTime,
                     Status = GetLocalizedSessionStatus(s.Status, isArabic),
-                    MeetingLink = s.MeetingLink ?? "لم يتم إضافة رابط بعد",
+                    MeetingLink = s.MeetingLink ?? "the link of meeting has not added yet",
                     NeedsAction = string.IsNullOrEmpty(s.MeetingLink)
                 })
                 .ToListAsync();
