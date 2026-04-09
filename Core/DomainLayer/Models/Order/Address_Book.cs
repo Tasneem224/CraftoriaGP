@@ -15,7 +15,7 @@ namespace DomainLayer.Models.Order
         public string StreetDetails { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public string City { get; set; } = default!;
-        public string? State { get; set; } = default!;
+        public string State { get; set; } = default!;
         public string Region { get; set; } = default!;
     }
 }

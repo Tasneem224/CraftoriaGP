@@ -55,6 +55,7 @@ namespace CraftoriaApp
                     )
                 );
             });
+
             //builder.Services.AddDbContext<StoreDbContext>(options =>
             //{
             //    options.UseNpgsql(
@@ -67,7 +68,28 @@ namespace CraftoriaApp
             //        }
             //    );
             //});
+            // 1. قبل builder.Build()
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin() // بيسمح لأي مكان يكلم السيرفر
+                               .AllowAnyMethod() // بيسمح بكل العمليات (GET, POST, etc)
+                               .AllowAnyHeader(); // بيسمح بكل الهيدرز بما فيها الـ Authorization
+                    });
+            });
+            builder.Services.AddHttpClient<IChatBotService, ChatBotService>(client =>
+            {
+                client.BaseAddress = new Uri("https://ml-api-727549809675.me-central1.run.app/");
 
+         
+                client.Timeout = TimeSpan.FromMinutes(3);
+
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+
+            // تسجيل الـ Service نفسها كـ Scoped
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreDbContext>();
@@ -135,7 +157,7 @@ namespace CraftoriaApp
 
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             var app = builder.Build();
-
+            app.UseCors("AllowAll"); // 👈 لازم السطر ده يكون قبل UseAuthentication و UseAuthorization
             //using (var scope = app.Services.CreateScope())
             //{
             //    var services = scope.ServiceProvider;

@@ -16,7 +16,7 @@ namespace Persistance.Data.ConfigurationClasses
             {
             //builder.Property<decimal>(d => d.Price).HasColumnType("decimal(18,2)");
             builder.Property(d => d.Price)
-        .HasColumnType("numeric(18,2)"); // بدل decimal(18,2)
+        .HasColumnType("decimal(18,2)"); // بدل decimal(18,2)
         }
         }
 }
