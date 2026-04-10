@@ -215,10 +215,6 @@ namespace Service
 
                             return await _emailVerificationRepo.VerifyOtpAsync(emailOTP.Email, emailOTP.OtpCode);
             }
-
-
-
-
             private void exceptionConditionForProfileAndPortfolio(string? profileImagePath, string portfolioPath)
         {
             if (profileImagePath is not null)
@@ -267,7 +263,7 @@ namespace Service
                     issuer: _configuration["JWTOptions:issuer"],
                     audience: _configuration["JWTOptions:audience"],
                     claims: claims,
-                    expires: DateTime.Now.AddHours(1),
+                    expires: DateTime.UtcNow.AddDays(4),
                     signingCredentials: creds
                     );
                 return new JwtSecurityTokenHandler().WriteToken(token);

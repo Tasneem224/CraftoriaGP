@@ -10,7 +10,7 @@ namespace Presentation
     {
         [HttpPost("Register")]
 
-                public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
+        public async Task<IActionResult> Registeration(RegisterDto _customerRegisterDto)
                 {
 
             
@@ -42,8 +42,6 @@ namespace Presentation
 
             return SendSuccessResponse(result, "OTP sent successfully");
         }
-
-    
 
         [HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
@@ -80,7 +78,6 @@ namespace Presentation
             // return Ok(new { message = result });
             return SendSuccessResponse(result, "Password reset successfully");
         }
-
 
         [HttpPost("VerifyEmail")]
         public async Task<IActionResult> VerifyEmail(VerifyEmailDTO verifyEmailDTO)
