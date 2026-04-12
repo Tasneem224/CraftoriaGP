@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Exceptions
 {
-    public sealed class BadRequestException(string message="error"):Exception
+    public sealed class BadRequestException:Exception
     { 
-        public BadRequestException():this("error")
+        public BadRequestException():base()
+        { 
+
+        }
+        public BadRequestException(string message):base(message)
         { 
 
         }

@@ -19,36 +19,19 @@ namespace Presentation
             _chatService = chatService;
         }
 
-        /// <summary>
-        /// إرسال رسالة جديدة للـ AI
-        /// </summary>
         [HttpPost("ask")]
         public async Task<IActionResult> Ask([FromBody] string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-                return BadRequest("الرسالة لا يمكن أن تكون فارغة.");
+        =>
+ 
+            SendSuccessResponse( await _chatService.AskLlamaAsync(message),"chat bot recive messages and reply to it successfuly");
 
-            // سحب الـ UserId من الـ Claims (بتاعة الـ Token)
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null) return Unauthorized();
-
-            // نداء السيرفيس اللي بتكلم البايثون وبتحفظ في الداتابيز
-            var reply = await _chatService.AskLlamaAsync(userId, message);
-
-            return Ok(new { response = reply });
-        }
-
-        /// <summary>
-        /// جلب تاريخ الشات (مع Pagination)
-        /// </summary>
+  
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int size = 10)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
 
-            var history = await _chatService.GetChatHistoryAsync(userId, page, size);
+            var history = await _chatService.GetChatHistoryAsync(page, size);
             return Ok(history);
         }
 

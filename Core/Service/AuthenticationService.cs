@@ -107,7 +107,7 @@ namespace Service
 
                     };
                 }
-                throw new UnauthorizedAException();
+                throw new UnauthorizedException();
             }
             public async Task<string> ForgotPasswordAsync(string email)
         {
