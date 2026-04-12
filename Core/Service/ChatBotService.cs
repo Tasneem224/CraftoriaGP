@@ -2,6 +2,7 @@
 using DomainLayer.Exceptions;
 using DomainLayer.Exceptions.DomainLayer.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Org.BouncyCastle.Asn1.Cmp;
 using ServiceAbstraction;
 using Shared.ChatBot;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,59 +22,22 @@ namespace Service
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ChatBotService(IUnitOfWork unitOfWork, HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ChatBotService(IUnitOfWork unitOfWork, HttpClient httpClient,IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
         }
-     
-        public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize)
-        {
-            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar") || Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar");
-
-         
-            var userId = _httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null) throw new UnauthorizedException(isArabic ? "" : "You must be authorized");
-
-            var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, pageNumber, pageSize);
-
-            return messages.Select(m => new ChatBotMessagesDto
-            {
-                UserId = m.UserId,
-                Role = m.Role,
-                Content = m.Content,
-                CreatedAt = m.CreatedAt
-            }).ToList();
-        }
-
-        public async Task<string> GetWelcomeMessageAsync()
-        {
-            var userId=_httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, 1, 1);
-
-            if (!messages.Any())
-            {
-                string welcome = "أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟";
-                await _unitOfWork.ChatBot.AddMessages(welcome, userId, "assistant");
-                await _unitOfWork.SaveChanges();
-                return welcome;
-            }
-            return string.Empty;
-        }
-
-    
         public async Task<string> AskLlamaAsync(string message)
         {
-            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar") || Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar");
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
             if (string.IsNullOrWhiteSpace(message))
-                throw new BadRequestException(isArabic ? "الرسالة لا يمكن أن تكون فارغة." : "");
+                throw new BadRequestException(isArabic?"الرسالة لا يمكن أن تكون فارغة.":"message must not be empty");
 
-            var userId = _httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null) throw new UnauthorizedException(isArabic ? "" : "You must be authorized");
+            if (userId == null) throw new UnauthorizedAException();
 
             await _unitOfWork.ChatBot.AddMessages(message, userId, "user");
             await _unitOfWork.SaveChanges();
@@ -105,10 +68,46 @@ namespace Service
             }
             else if ((int)response.StatusCode == 503)
             {
-                return isArabic ? "الموديل بيحمل (Lazy Loading)، ثواني وجرب تاني." : "";
+                return "الموديل بيحمل (Lazy Loading)، ثواني وجرب تاني.";
             }
 
-            return isArabic ? "عذراً، حصلت مشكلة في التواصل مع البوت." : "";
+            return "عذراً، حصلت مشكلة في التواصل مع البوت.";
         }
+
+        public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize)
+        {
+                        var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, pageNumber, pageSize);
+
+            return messages.Select(m => new ChatBotMessagesDto
+            {
+                UserId = m.UserId,
+                Role = m.Role,
+                Content = m.Content,
+                CreatedAt = m.CreatedAt
+            }).ToList();
+        }
+
+        public async Task<string> GetWelcomeMessageAsync()
+        {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, 1, 1);
+
+            if (!messages.Any())
+            {
+                string welcome = isArabic?"أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟":"";
+                await _unitOfWork.ChatBot.AddMessages(welcome, userId, "assistant");
+                await _unitOfWork.SaveChanges();
+                return welcome;
+            }
+            return string.Empty;
+        }
+
     }
 }
