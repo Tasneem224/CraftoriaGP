@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
@@ -21,9 +22,26 @@ namespace Presentation
         }
 
         [HttpPost("ask")]
-        public async Task<IActionResult> Ask([FromBody] string message)
-       =>SendSuccessResponse(await _chatService.AskLlamaAsync(message));
+        public async Task Ask([FromBody] string message, CancellationToken cancellationToken)
+        {
+            Response.ContentType = "text/event-stream";
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("Connection", "keep-alive");
+            Response.Headers.Append("X-Accel-Buffering", "no"); // مهم جداً للـ Hosting
 
+            try
+            {
+                await Response.WriteAsync("data: Connecting...\n\n", cancellationToken);
+                await Response.Body.FlushAsync(cancellationToken);
+
+                await foreach (var chunk in _chatService.AskLlamaStreamingAsync(message, cancellationToken))
+                {
+                    await Response.WriteAsync($"data: {chunk}\n\n", cancellationToken);
+                    await Response.Body.FlushAsync(cancellationToken); // إرسال فوري
+                }
+            }
+            catch (OperationCanceledException) { }
+        }
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int size = 10)
         =>SendSuccessResponse(await _chatService.GetChatHistoryAsync(page, size));

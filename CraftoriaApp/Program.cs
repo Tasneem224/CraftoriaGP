@@ -159,6 +159,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+           
 
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {

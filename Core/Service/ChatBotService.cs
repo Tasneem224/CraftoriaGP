@@ -10,8 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Service
@@ -28,52 +30,99 @@ namespace Service
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<string> AskLlamaAsync(string message)
+        public async IAsyncEnumerable<string> AskLlamaStreamingAsync(string message, [EnumeratorCancellation] CancellationToken ct)
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+            var userId = _httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString();
 
-            if (string.IsNullOrWhiteSpace(message))
-                throw new BadRequestException(isArabic?"الرسالة لا يمكن أن تكون فارغة.":"message must not be empty");
-
-            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null) throw new UnauthorizedAException();
-
+            // 1. حفظ رسالة المستخدم
             await _unitOfWork.ChatBot.AddMessages(message, userId, "user");
             await _unitOfWork.SaveChanges();
 
-            var history = await _unitOfWork.ChatBot.GetLast5Messages(userId);
-            var context = string.Join("\n", history.Select(m => $"{m.Role}: {m.Content}"));
-            var fullMessage = $"{context}\nuser: {message}";
-
             var chatRequest = new
             {
-                message = fullMessage,
-                max_tokens = 256,
+                message = message,
+                max_tokens = 512,
                 temperature = 0.4
             };
-            var response = await _httpClient.PostAsJsonAsync("chat/message", chatRequest);
 
-            if (response.IsSuccessStatusCode)
+            var request = new HttpRequestMessage(HttpMethod.Post, "chat/message")
             {
-                var result = await response.Content.ReadFromJsonAsync<ChatResponseDto>();
+                Content = JsonContent.Create(chatRequest)
+            };
 
-                if (result != null)
+            if (!string.IsNullOrEmpty(token))
+                request.Headers.Add("Authorization", token);
+
+            HttpResponseMessage? response = null;
+            string? errorMessage = null;
+
+            try
+            {
+                // محاولة إرسال الطلب
+                response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    await _unitOfWork.ChatBot.AddMessages(result.Response, userId, "assistant");
-                    await _unitOfWork.SaveChanges();
-
-                    return result.Response;
+                    errorMessage = isArabic
+                        ? "عذراً، الموديل غير متاح حالياً، برجاء المحاولة لاحقاً."
+                        : "Sorry, the model is currently unavailable. Please try again later.";
                 }
             }
-            else if ((int)response.StatusCode == 503)
+            catch (Exception)
             {
-                return "الموديل بيحمل (Lazy Loading)، ثواني وجرب تاني.";
+                errorMessage = isArabic
+                    ? "حدث خطأ في الاتصال بسيرفر البوت."
+                    : "A connection error occurred with the chatbot server.";
             }
 
-            return "عذراً، حصلت مشكلة في التواصل مع البوت.";
-        }
+            // لو فيه خطأ، ابعتي الرسالة واخرجي من الميثود (خارج الـ try-catch)
+            if (errorMessage != null)
+            {
+                yield return errorMessage;
+                yield break;
+            }
 
+            // 3. قراءة الـ Stream (خارج الـ try-catch الرئيسي)
+            using var stream = await response!.Content.ReadAsStreamAsync(ct);
+            using var reader = new StreamReader(stream);
+            string fullAiResponse = "";
+
+            while (!reader.EndOfStream && !ct.IsCancellationRequested)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                string? contentToEmit = null;
+
+                if (line.StartsWith("data: "))
+                {
+                    var json = line.Substring(6);
+                    if (json == "[DONE]") break;
+
+                    try
+                    {
+                        var chunk = JsonSerializer.Deserialize<ChatStreamResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        contentToEmit = chunk?.Choices?[0]?.Delta?.Content;
+                    }
+                    catch { continue; }
+                }
+
+                if (!string.IsNullOrEmpty(contentToEmit))
+                {
+                    fullAiResponse += contentToEmit;
+                    yield return contentToEmit;
+                }
+            }
+
+            // 4. حفظ الرد النهائي
+            if (!string.IsNullOrEmpty(fullAiResponse))
+            {
+                await _unitOfWork.ChatBot.AddMessages(fullAiResponse, userId, "assistant");
+                await _unitOfWork.SaveChanges();
+            }
+        }
         public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize)
         {
                         var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
