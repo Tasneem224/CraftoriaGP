@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.Exceptions
 {
-    public sealed class BadRequestException:Exception
+    public sealed class BadRequestException(string message="error"):Exception
     { 
-        public BadRequestException()
+        public BadRequestException():this("error")
         { 
 
         }
