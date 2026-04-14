@@ -24,20 +24,23 @@ namespace Presentation
         [HttpPost("ask")]
         public async Task Ask([FromBody] string message, CancellationToken cancellationToken)
         {
+            // بنجيب التوكن من الـ Header بتاع الطلب الحالي
+            var token = Request.Headers["Authorization"].ToString();
+
             Response.ContentType = "text/event-stream";
             Response.Headers.Append("Cache-Control", "no-cache");
-            Response.Headers.Append("Connection", "keep-alive");
-            Response.Headers.Append("X-Accel-Buffering", "no"); // مهم جداً للـ Hosting
+            Response.Headers.Append("X-Accel-Buffering", "no");
 
             try
             {
                 await Response.WriteAsync("data: Connecting...\n\n", cancellationToken);
                 await Response.Body.FlushAsync(cancellationToken);
 
-                await foreach (var chunk in _chatService.AskLlamaStreamingAsync(message, cancellationToken))
+                // بنبعت التوكن للـ Service
+                await foreach (var chunk in _chatService.AskLlamaStreamingAsync(message, token, cancellationToken))
                 {
                     await Response.WriteAsync($"data: {chunk}\n\n", cancellationToken);
-                    await Response.Body.FlushAsync(cancellationToken); // إرسال فوري
+                    await Response.Body.FlushAsync(cancellationToken);
                 }
             }
             catch (OperationCanceledException) { }

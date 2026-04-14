@@ -10,7 +10,7 @@ namespace ServiceAbstraction
 {
     public interface IChatBotService
     {
-        IAsyncEnumerable<string> AskLlamaStreamingAsync(string message, [EnumeratorCancellation] CancellationToken ct);
+        IAsyncEnumerable<string> AskLlamaStreamingAsync(string message, string token, [EnumeratorCancellation] CancellationToken ct);
         Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize);
         Task<string> GetWelcomeMessageAsync();
 
