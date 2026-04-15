@@ -16,6 +16,12 @@ namespace DomainLayer.Contracts
         IOrderRepository Orders { get; }
         IChatBotSessionRepository ChatBot { get; }
 
+        /// <summary>
+        /// Chat-message repository — provides all inbox / conversation / read-receipt
+        /// queries that go beyond the capabilities of the generic repository.
+        /// </summary>
+        IMessageRepository Messages { get; }
+
 
         Task<int> SaveChanges();
 

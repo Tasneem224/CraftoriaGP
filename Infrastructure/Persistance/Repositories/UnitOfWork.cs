@@ -19,6 +19,8 @@ namespace Persistance.Repositories
         public IOrderRepository Orders { get; } 
 
         public IChatBotSessionRepository ChatBot { get; }
+        public IMessageRepository Messages { get; }
+
 
         public UnitOfWork(StoreDbContext context)
         {
@@ -28,7 +30,7 @@ namespace Persistance.Repositories
             Sessions = new SessionRepository(context); // عمل الـ Instance
             Orders= new OrderRepository(context); 
             ChatBot = new ChatBotSessionRepository(context);
-
+            Messages = new MessageRepository(context);
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
 
