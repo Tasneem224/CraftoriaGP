@@ -9,10 +9,9 @@ namespace ServiceAbstraction
 {
     public interface IChatBotService
     {
-        Task<string> AskLlamaAsync(string userId, string message);
-        Task<List<ChatBotMessagesDto>> GetChatHistoryAsync(string userId, int pageNumber, int pageSize);
-        Task<string> GetWelcomeMessageAsync(string userId);
-        Task<bool> UnloadModelAsync();
+        Task<string> AskLlamaAsync(string message);
+        Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize);
+        Task<string> GetWelcomeMessageAsync();
 
     }
 }

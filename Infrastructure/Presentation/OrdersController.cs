@@ -41,7 +41,7 @@ namespace Presentation
 
             return SendSuccessResponse(await _orderService.orderService.GetOrderByIdAsync(orderId, email));
         }
-        [HttpGet("GetUserAdresses")]
+        [HttpGet("GetUserAddresses")]
         public async Task<ActionResult> GetUserAdresses()
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
@@ -50,7 +50,7 @@ namespace Presentation
 
         }
         [HttpPost("AddAddress")]
-        public async Task<ActionResult> AddAddress(AddressBookDto addressDto) {
+        public async Task<ActionResult> AddAddress([FromBody] AddressBookDto addressDto) {
             var email = User.FindFirstValue(ClaimTypes.Email);
 
             return SendSuccessResponse(await _orderService.orderService.AddUserAddressAsync(email, addressDto));

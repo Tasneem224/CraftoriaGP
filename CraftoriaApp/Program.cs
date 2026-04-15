@@ -40,8 +40,42 @@ namespace CraftoriaApp
             });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            //builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "Craftoria API",
+                    Version = "v1"
+                });
 
+                // 1. إضافة تعريف الـ Security (بنعرف Swagger إن فيه حاجة اسمها Bearer Token)
+                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Enter your JWT token in this format: Bearer {your_token_here}"
+                });
+
+                // 2. تفعيل الـ Security Requirement (عشان يربط الـ Token بكل الطلبات)
+                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+            });
             builder.Services.AddDbContext<StoreDbContext>(options =>
 
             {
@@ -147,6 +181,20 @@ namespace CraftoriaApp
                    IssuerSigningKey = new SymmetricSecurityKey(
                        Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        // السطر ده هيطبع لك السبب الحقيقي في الـ Output بتاع Visual Studio
+                        Console.WriteLine("❌ Token failed: " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("✅ Token validated successfully!");
+                        return Task.CompletedTask;
+                    }
+                };
             });
             builder.Services.AddScoped<ITranslationService, TranslationService>();
 

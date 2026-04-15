@@ -79,13 +79,13 @@ namespace Service
                 }).ToList()
             };
         }
-        public async Task<IReadOnlyList<OrderToReturnDto>> GetOrdersForUserAsync(string userEmail)
-        {
+            public async Task<IReadOnlyList<OrderToReturnDto>> GetOrdersForUserAsync(string userEmail)
+            {
             
-            var orders = await _unitOfWork.Orders.GetOrdersForUserWithItemsAsync(userEmail);
+                var orders = await _unitOfWork.Orders.GetOrdersForUserWithItemsAsync(userEmail);
 
-            return orders.Select(order => MapOrderToDto(order)).ToList();
-        }
+                return orders.Select(order => MapOrderToDto(order)).ToList();
+            }
         public async Task<IEnumerable<AddressBookDto>> GetUserAddressesAsync(string userEmail)
         {
             var user = await _userManager.FindByEmailAsync(userEmail);
