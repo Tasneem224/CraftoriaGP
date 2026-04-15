@@ -83,7 +83,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("localConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
