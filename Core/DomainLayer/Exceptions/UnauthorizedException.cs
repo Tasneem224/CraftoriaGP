@@ -10,13 +10,13 @@ namespace DomainLayer.Exceptions
 
     namespace DomainLayer.Exceptions
     {
-        public sealed class UnauthorizedAException : Exception
+        public sealed class UnauthorizedException : Exception
         {
            
-            public UnauthorizedAException() : base("invalid email or password")
+            public UnauthorizedException() : base("invalid email or password")
             {
             }
-            public UnauthorizedAException(string message)
+            public UnauthorizedException(string message)
        : base(message) 
             {
             }
