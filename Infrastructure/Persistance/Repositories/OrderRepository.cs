@@ -20,6 +20,15 @@ namespace Persistance.Repositories
                 .Include(o => o.DeliveryMethod)
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
+
+        public async Task<Order?> GetOrderByPaymentIntentIdAsync(string paymentIntentId)
+        {
+            return await _Context.Orders
+                    .Include(o => o.OrderItems) // مهم جداً عشان الـ Loop اللي في السيرفيس يشتغل
+                    .Include(o => o.DeliveryMethod)
+                    .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+        }
+
         public async Task<IEnumerable<Order>> GetOrdersForUserWithItemsAsync(string email)
         {
             return await _Context.Orders

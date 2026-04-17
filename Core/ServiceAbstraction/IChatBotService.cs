@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,8 +10,8 @@ namespace ServiceAbstraction
 {
     public interface IChatBotService
     {
-        Task<string> AskLlamaAsync(string message);
-        Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize);
+        IAsyncEnumerable<string> AskLlamaStreamingAsync(string message, string token, [EnumeratorCancellation] CancellationToken ct);
+        Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( );
         Task<string> GetWelcomeMessageAsync();
 
     }

@@ -24,15 +24,15 @@ namespace Persistance.Repositories
         {
             var newMessage = new ChatBotMessages
             {
-                                Content=message,
-                                UserId=userId,
-                                Role= Role  
+                Content = message,
+                UserId = userId,
+                Role = Role,
+                CreatedAt = DateTime.UtcNow // تأكدي من إضافة الوقت لضمان دقة الترتيب لاحقاً
             };
             await _context.ChatBotMessages.AddAsync(newMessage);
             await _context.SaveChangesAsync();
             return newMessage;
         }
-
         public async Task<List<ChatBotMessages>> GetLast5Messages(string userId)
         {
             var messages = await _context.ChatBotMessages
@@ -46,7 +46,14 @@ namespace Persistance.Repositories
 
             return messages ?? new List<ChatBotMessages>();
         }
-
+        public async Task<List<ChatBotMessages>> GetAllMessagesAsync(string userId)
+        {
+            return await _context.ChatBotMessages
+                .Where(m => m.UserId == userId)
+                .AsNoTracking()
+                .OrderBy(m => m.CreatedAt) // هنا رتبتها من الأقدم للأحدث عشان تظهر كـ Chat منطقي
+                .ToListAsync();
+        }
         public async Task<List<ChatBotMessages>> PaginationMessages(string userId, int pageNumber, int pageSize)
         {
             var messages= await _context.ChatBotMessages

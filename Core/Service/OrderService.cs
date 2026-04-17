@@ -6,6 +6,7 @@ using DomainLayer.Models.Items;
 using DomainLayer.Models.Order;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Service.Factory;
 using ServiceAbstraction;
 using Shared.Order;
 using System;
@@ -17,7 +18,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Service
 {
-    public class OrderService(UserManager<ApplicationUser> _userManager,ICartRepository _cartRepository,IUnitOfWork _unitOfWork,ICartService _cartService) : IOrderService
+    public class OrderService(PaymentServiceFactory _paymentFactory,UserManager<ApplicationUser> _userManager,ICartRepository _cartRepository,IUnitOfWork _unitOfWork,ICartService _cartService) : IOrderService
     {
         public async Task<OrderToReturnDto?> CreateOrderAsync(string userEmail, int deliveryMethodId, string basketId, AddressBookDto shippingAddress)
         {
@@ -129,6 +130,79 @@ namespace Service
 
             return addressDto;
         }
+        public async Task<string> CreatePaymentAsync(Guid orderId, string method)
+        {
+            // 1. جلب الأوردر (الـ Service هي اللي بتكلم الـ UnitOfWork)
+            var order = await _unitOfWork.Orders.GetOrderByIdWithItemsAsync(orderId);
+            if (order == null) throw new Exception("Order not found");
+
+            // 2. الـ Mapping (تحويل الـ Entity لـ DTO)
+            var orderToPaymentDto = new OrderToPaymentDto
+            {
+                OrderId = order.Id,
+                UserEmail = order.UserEmail,
+                TotalAmount = order.GetTotal(),
+                FullName = order.ShippingAddress.FullName,
+                Phone = order.ShippingAddress.PhoneNumber,
+                City = order.ShippingAddress.City,
+                Street = order.ShippingAddress.StreetDetails,
+                Items = order.OrderItems.Select(oi => new OrderItemPaymentDto
+                {
+                    ProductName = oi.Item.ItemName,
+                    Price = oi.Price,
+                    Quantity = oi.Quantity
+                }).ToList()
+            };
+
+            // 3. استخدام الـ Factory (السيرفيس هي اللي بتستخدمه)
+            var paymentService = _paymentFactory.GetPaymentService(method);
+
+            // 4. تنفيذ الدفع
+            return await paymentService.CreatePaymentSession(orderToPaymentDto);
+        }
+        public async Task UpdateOrderStatusAndWallets(string paymentIntentId)
+        {
+            // 1. جلب الأوردر بالـ PaymentIntentId (لازم الـ Repo يكون بيدعم الميثود دي)
+            var order = await _unitOfWork.Orders.GetOrderByPaymentIntentIdAsync(paymentIntentId);
+
+            if (order == null) throw new Exception("Order not found for this PaymentIntent");
+
+            // 2. تحديث حالة الأوردر (الدفع تم بنجاح)
+            order.orderPaymentStatus = OrderPaymentStatus.Received;
+            order.orderStatus = OrderStatus.Confirmed;
+
+            // 3. توزيع الأرباح على محافظ التجار (Looping through order items)
+            foreach (var item in order.OrderItems)
+            {
+                // بنجيب ريبوزيتوري المحفظة
+                var walletRepo = _unitOfWork.GetRepository<VendorWallet, int>();
+
+                // بندور على محفظة التاجر (Seller) صاحب المنتج ده
+                var wallet = await walletRepo.GetAllQueryable()
+                    .FirstOrDefaultAsync(w => w.VendorId == item.VendorId);
+
+                if (wallet == null)
+                {
+                    // لو التاجر لسه ملوش محفظة في السيستم بنكريت واحدة
+                    wallet = new VendorWallet
+                    {
+                        VendorId = item.VendorId,
+                        Balance = 0,
+                        LastUpdated = DateTime.UtcNow
+                    };
+                    await walletRepo.AddAsync(wallet);
+                }
+
+                // الحتة السحرية: بنزود رصيد التاجر بالـ 70% اللي حسبناها وسيفناها وقت الأوردر
+                wallet.Balance += item.VendorNetEarnings;
+                wallet.LastUpdated = DateTime.UtcNow;
+
+                walletRepo.Update(wallet);
+            }
+
+            // 4. حفظ كل التغييرات (الأوردر والمحافظ) في Transaction واحدة
+            await _unitOfWork.SaveChanges();
+        }
         private async Task<List<OrderItem>> PrepareOrderItemsAsync(CustomerCart basket)
         {
             var orderItems = new List<OrderItem>();
@@ -140,6 +214,10 @@ namespace Service
 
                 if (productItem.Quantity < item.Quantity)
                     throw new Exception($"المنتج {productItem.NameEn} خلص!");
+
+                var lineTotal = productItem.Price * item.Quantity;
+                var commission = lineTotal * 0.30m;
+                var netEarnings = lineTotal - commission;
 
                 productItem.Quantity -= item.Quantity;
                 _unitOfWork.GetRepository<Product, int>().Update(productItem);
@@ -153,7 +231,10 @@ namespace Service
                         ItemPictureUrl = productItem.ImageUrl
                     },
                     Price = productItem.Price,
-                    Quantity = item.Quantity
+                    Quantity = item.Quantity,
+                    VendorId = productItem.SellerId, 
+                    AppCommission = commission,      
+                    VendorNetEarnings = netEarnings  
                 });
             }
             return orderItems;
@@ -176,6 +257,8 @@ namespace Service
                 },
                 DeliveryMethod = deliveryMethod,
                 OrderItems = items,
+                CommissionAmount = items.Sum(i => i.AppCommission), // مجموع الـ 30% من كل المنتجات
+                VendorNetEarnings = items.Sum(i => i.VendorNetEarnings), // مجموع الـ 70% اللي هيروح للتجار
                 Subtotal = subtotal,
                 DeliveryMethodId = deliveryMethod.Id
             };

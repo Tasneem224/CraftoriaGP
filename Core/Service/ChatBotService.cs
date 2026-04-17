@@ -2,6 +2,7 @@
 using DomainLayer.Exceptions;
 using DomainLayer.Exceptions.DomainLayer.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Org.BouncyCastle.Asn1.Cmp;
 using ServiceAbstraction;
 using Shared.ChatBot;
@@ -12,7 +13,9 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace Service
 {
@@ -22,23 +25,70 @@ namespace Service
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ChatBotService(IUnitOfWork unitOfWork, HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ChatBotService(IUnitOfWork unitOfWork, HttpClient httpClient,IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
         }
-     
-        public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize)
+        public async IAsyncEnumerable<string> AskLlamaStreamingAsync(string message, string token, [EnumeratorCancellation] CancellationToken ct)
         {
-            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar") || Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar");
+            // بنجهز الطلب زي ما الـ Swagger بتاعها طالب بالظبط
+            var requestBody = new { message = message, max_tokens = 256, temperature = 0.4 };
+            // التعديل: خلي المسار "chat/message" فقط بدون أي إضافات في الأول
+            var request = new HttpRequestMessage(HttpMethod.Post, "chat/message")
+            {
+                Content = JsonContent.Create(new
+                {
+                    message = message,
+                    max_tokens = 256,
+                    temperature = 0.4
+                })
+            };
 
-         
-            var userId = _httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(token))
+                request.Headers.Add("Authorization", token);
 
-            if (userId == null) throw new UnauthorizedException(isArabic ? "" : "You must be authorized");
+        
+                var response = await _httpClient.SendAsync(request, ct);
 
-            var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, pageNumber, pageSize);
+                if (response.IsSuccessStatusCode)
+                {
+                    // بنقرأ الرد كنص خام الأول عشان لو فيه مشكلة تبان
+                    var rawJson = await response.Content.ReadAsStringAsync(ct);
+
+                    // فكي التشفير يدوي عشان تتأكدي إن الداتا موجودة
+                    var result = JsonSerializer.Deserialize<MLResponse>(rawJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (result != null && !string.IsNullOrEmpty(result.response))
+                    {
+                        var words = result.response.Split(' ');
+                        foreach (var word in words)
+                        {
+                            yield return word + " ";
+                            await Task.Delay(40, ct);
+                        }
+                    }
+                    else
+                    {
+                        yield return "DEBUG: الـ ML رد بـ JSON بس الـ response فاضي! الرد كان: " + rawJson;
+                    }
+                }
+                else
+                {
+                    yield return $"خطأ من سيرفر الـ ML: {response.StatusCode}";
+                
+            }
+        }
+        public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync()
+        {
+            try
+            {
+
+
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var messages = await _unitOfWork.ChatBot.GetAllMessagesAsync(userId);
 
             return messages.Select(m => new ChatBotMessagesDto
             {
@@ -47,16 +97,30 @@ namespace Service
                 Content = m.Content,
                 CreatedAt = m.CreatedAt
             }).ToList();
-        }
+            }
+            catch (Exception ex)
+            {
 
+          
+                // هنا بنرمي الـ Exception الحقيقي عشان الـ Controller يمسكه
+                var realMessage = ex.InnerException?.InnerException?.Message
+                                  ?? ex.InnerException?.Message
+                                  ?? ex.Message;
+
+                throw new Exception("Database Error: " + realMessage);
+            }
+        }
         public async Task<string> GetWelcomeMessageAsync()
         {
-            var userId=_httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, 1, 1);
 
             if (!messages.Any())
             {
-                string welcome = "أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟";
+                string welcome = isArabic?"أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟" : "Welcome! I'm Lama, your AI assistant. How can I help you today?";
                 await _unitOfWork.ChatBot.AddMessages(welcome, userId, "assistant");
                 await _unitOfWork.SaveChanges();
                 return welcome;
@@ -64,51 +128,5 @@ namespace Service
             return string.Empty;
         }
 
-    
-        public async Task<string> AskLlamaAsync(string message)
-        {
-            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar") || Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar");
-
-            if (string.IsNullOrWhiteSpace(message))
-                throw new BadRequestException(isArabic ? "الرسالة لا يمكن أن تكون فارغة." : "");
-
-            var userId = _httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null) throw new UnauthorizedException(isArabic ? "" : "You must be authorized");
-
-            await _unitOfWork.ChatBot.AddMessages(message, userId, "user");
-            await _unitOfWork.SaveChanges();
-
-            var history = await _unitOfWork.ChatBot.GetLast5Messages(userId);
-            var context = string.Join("\n", history.Select(m => $"{m.Role}: {m.Content}"));
-            var fullMessage = $"{context}\nuser: {message}";
-
-            var chatRequest = new
-            {
-                message = fullMessage,
-                max_tokens = 256,
-                temperature = 0.4
-            };
-            var response = await _httpClient.PostAsJsonAsync("chat/message", chatRequest);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<ChatResponseDto>();
-
-                if (result != null)
-                {
-                    await _unitOfWork.ChatBot.AddMessages(result.Response, userId, "assistant");
-                    await _unitOfWork.SaveChanges();
-
-                    return result.Response;
-                }
-            }
-            else if ((int)response.StatusCode == 503)
-            {
-                return isArabic ? "الموديل بيحمل (Lazy Loading)، ثواني وجرب تاني." : "";
-            }
-
-            return isArabic ? "عذراً، حصلت مشكلة في التواصل مع البوت." : "";
-        }
     }
 }

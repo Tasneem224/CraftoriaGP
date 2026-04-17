@@ -28,6 +28,7 @@ namespace Persistance.Data.Contexts
         public DbSet<Message> Messages { get; set; }
 
         public DbSet<ChatBotMessages> ChatBotMessages { get; set; }
+        public DbSet<VendorWallet> vendorWallets { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<Address_Book> AddressBooks { get; set; }
         public DbSet<Order> Orders { get; set; }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DomainLayer.Exceptions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
 using System;
@@ -20,47 +22,36 @@ namespace Presentation
         }
 
         [HttpPost("ask")]
-        public async Task<IActionResult> Ask([FromBody] string message)
-        =>
- 
-            SendSuccessResponse( await _chatService.AskLlamaAsync(message),"chat bot recive messages and reply to it successfuly");
-
-
-  
-        [HttpGet("history")]
-        public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int size = 10)
+        public async Task Ask([FromBody] string message, CancellationToken cancellationToken)
         {
+            // بنجيب التوكن من الـ Header بتاع الطلب الحالي
+            var token = Request.Headers["Authorization"].ToString();
 
-            var history = await _chatService.GetChatHistoryAsync(page, size);
-            return Ok(history);
+            Response.ContentType = "text/event-stream";
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("X-Accel-Buffering", "no");
+
+            try
+            {
+                await Response.WriteAsync("data: Connecting...\n\n", cancellationToken);
+                await Response.Body.FlushAsync(cancellationToken);
+
+                // بنبعت التوكن للـ Service
+                await foreach (var chunk in _chatService.AskLlamaStreamingAsync(message, token, cancellationToken))
+                {
+                    await Response.WriteAsync($"data: {chunk}\n\n", cancellationToken);
+                    await Response.Body.FlushAsync(cancellationToken);
+                }
+            }
+            catch (OperationCanceledException) { }
         }
+        [HttpGet("history")]
+        public async Task<IActionResult> GetHistory()
+       => SendSuccessResponse(await _chatService.GetChatHistoryAsync());
 
-        /// <summary>
-        /// رسالة ترحيب لليوزر الجديد
-        /// </summary>
-        //[HttpGet("welcome")]
-        //public async Task<IActionResult> GetWelcome()
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    if (userId == null) return Unauthorized();
-
-        //    var welcomeMsg = await _chatService.GetWelcomeMessageAsync(userId);
-        //    return Ok(new { message = welcomeMsg });
-        //}
-
-        /// <summary>
-        /// تفريغ رامات الـ GPU (Memory Management)
-        /// </summary>
-        //[HttpPost("unload")]
-        //public async Task<IActionResult> UnloadModel()
-        //{
-        //    // ممكن تخليها للـ Admin بس لو حابة [Authorize(Roles = "Admin")]
-        //    var success = await _chatService.UnloadModelAsync();
-
-        //    if (success)
-        //        return Ok("تم تفريغ ذاكرة الـ GPU بنجاح.");
-
-        //    return StatusCode(500, "فشل تفريغ الذاكرة.");
-        //}
+        [HttpGet("welcome")]
+        public async Task<IActionResult> GetWelcome()
+        =>SendSuccessResponse(await _chatService.GetWelcomeMessageAsync());
+        
     }
 }

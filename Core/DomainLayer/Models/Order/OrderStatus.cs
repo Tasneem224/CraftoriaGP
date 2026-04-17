@@ -8,6 +8,10 @@ namespace DomainLayer.Models.Order
         Pending,          
         [EnumMember(Value = "InPreparation")]
         InPreparation,    
+        [EnumMember(Value = "Confirmed")]
+        Confirmed,
+        [EnumMember(Value = "Received")]
+        Received,
         [EnumMember(Value = "Shipped")]
         Shipped,          
         [EnumMember(Value = "Delivered")]

@@ -17,6 +17,7 @@ using Persistance.Repositories;
 using Presentation.Hubs;
 using Presentation.Services;
 using Service;
+using Service.Factory;
 using Service.Mapping_Profiles;
 using Service.MappingProfiles;
 using ServiceAbstraction;
@@ -157,7 +158,10 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ITopRatedService, TopRatedService>();
             builder.Services.AddScoped<ISessionService, SessionService>();
-
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<PaymobService>();
+            builder.Services.AddScoped<StripeService>();
+            builder.Services.AddScoped<PaymentServiceFactory>();
 
 
 
@@ -183,6 +187,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+           
 
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {

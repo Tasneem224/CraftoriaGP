@@ -15,7 +15,12 @@ namespace DomainLayer.Models.Order
         public OrderPaymentStatus orderPaymentStatus { get; set; } = OrderPaymentStatus.Pending;
         public OrderStatus orderStatus { get; set; }= OrderStatus.Pending;
         public DeliveryMethod DeliveryMethod { get; set; } = default!;
-        
+        public decimal CommissionAmount { get; set; }
+
+        public decimal VendorNetEarnings
+        {
+            get; set;
+        } = default!;
         public int? DeliveryMethodId { get; set; }
         public decimal Subtotal { get; set; }
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.UtcNow;

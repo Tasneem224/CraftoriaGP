@@ -1,4 +1,5 @@
-﻿using DomainLayer.Models.Items;
+﻿using DomainLayer.Models.Identity;
+using DomainLayer.Models.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace DomainLayer.Contracts
         IMessageRepository Messages { get; }
 
 
+        IGenericRepository<VendorWallet, int> VendorWallets { get; }
         Task<int> SaveChanges();
 
     }
