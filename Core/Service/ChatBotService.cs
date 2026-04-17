@@ -85,6 +85,7 @@ namespace Service
             try
             {
 
+
             var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var messages = await _unitOfWork.ChatBot.GetAllMessagesAsync(userId);
