@@ -80,13 +80,14 @@ namespace Service
                 
             }
         }
-        public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync( int pageNumber, int pageSize)
+        public async Task<List<ChatBotMessagesDto>> GetChatHistoryAsync()
         {
-                        var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+            try
+            {
 
             var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var messages = await _unitOfWork.ChatBot.PaginationMessages(userId, pageNumber, pageSize);
+            var messages = await _unitOfWork.ChatBot.GetAllMessagesAsync(userId);
 
             return messages.Select(m => new ChatBotMessagesDto
             {
@@ -95,8 +96,19 @@ namespace Service
                 Content = m.Content,
                 CreatedAt = m.CreatedAt
             }).ToList();
-        }
+            }
+            catch (Exception ex)
+            {
 
+          
+                // هنا بنرمي الـ Exception الحقيقي عشان الـ Controller يمسكه
+                var realMessage = ex.InnerException?.InnerException?.Message
+                                  ?? ex.InnerException?.Message
+                                  ?? ex.Message;
+
+                throw new Exception("Database Error: " + realMessage);
+            }
+        }
         public async Task<string> GetWelcomeMessageAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
@@ -107,7 +119,7 @@ namespace Service
 
             if (!messages.Any())
             {
-                string welcome = isArabic?"أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟":"";
+                string welcome = isArabic?"أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟" : "Welcome! I'm Lama, your AI assistant. How can I help you today?";
                 await _unitOfWork.ChatBot.AddMessages(welcome, userId, "assistant");
                 await _unitOfWork.SaveChanges();
                 return welcome;

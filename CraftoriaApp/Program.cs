@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
 using Service;
+using Service.Factory;
 using Service.Mapping_Profiles;
 using Service.MappingProfiles;
 using ServiceAbstraction;
@@ -81,7 +82,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("LocalConnection"),
+                    builder.Configuration.GetConnectionString("Connection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -133,7 +134,10 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IFavouriteService, FavouriteService>();
             builder.Services.AddScoped<ITopRatedService, TopRatedService>();
             builder.Services.AddScoped<ISessionService, SessionService>();
-
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<PaymobService>();
+            builder.Services.AddScoped<StripeService>();
+            builder.Services.AddScoped<PaymentServiceFactory>();
 
 
 

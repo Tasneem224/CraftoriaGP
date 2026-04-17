@@ -8,7 +8,11 @@ namespace DomainLayer.Models.Order
         {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // 👈 تأكدي إن دي موجودة
         public ItemInOrderItem Item { get; set; } = default!;
-            public decimal Price { get; set; }
+        public string VendorId { get; set; } = string.Empty;
+
+        public decimal AppCommission { get; set; }
+        public decimal VendorNetEarnings { get; set; }
+        public decimal Price { get; set; }
             public int Quantity { get; set; }
         }
     

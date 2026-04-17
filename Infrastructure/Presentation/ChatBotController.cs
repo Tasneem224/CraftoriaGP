@@ -46,9 +46,9 @@ namespace Presentation
             catch (OperationCanceledException) { }
         }
         [HttpGet("history")]
-        public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int size = 10)
-        =>SendSuccessResponse(await _chatService.GetChatHistoryAsync(page, size));
-          
+        public async Task<IActionResult> GetHistory()
+       => SendSuccessResponse(await _chatService.GetChatHistoryAsync());
+
         [HttpGet("welcome")]
         public async Task<IActionResult> GetWelcome()
         =>SendSuccessResponse(await _chatService.GetWelcomeMessageAsync());

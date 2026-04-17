@@ -25,6 +25,7 @@ namespace Persistance.Data.Contexts
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<ChatBotMessages> ChatBotMessages { get; set; }
+        public DbSet<VendorWallet> vendorWallets { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<Address_Book> AddressBooks { get; set; }
         public DbSet<Order> Orders { get; set; }

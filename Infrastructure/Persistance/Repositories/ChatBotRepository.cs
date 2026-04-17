@@ -46,7 +46,14 @@ namespace Persistance.Repositories
 
             return messages ?? new List<ChatBotMessages>();
         }
-
+        public async Task<List<ChatBotMessages>> GetAllMessagesAsync(string userId)
+        {
+            return await _context.ChatBotMessages
+                .Where(m => m.UserId == userId)
+                .AsNoTracking()
+                .OrderBy(m => m.CreatedAt) // هنا رتبتها من الأقدم للأحدث عشان تظهر كـ Chat منطقي
+                .ToListAsync();
+        }
         public async Task<List<ChatBotMessages>> PaginationMessages(string userId, int pageNumber, int pageSize)
         {
             var messages= await _context.ChatBotMessages

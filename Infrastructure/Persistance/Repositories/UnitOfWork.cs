@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Contracts;
+using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data.Contexts;
@@ -20,6 +21,7 @@ namespace Persistance.Repositories
 
         public IChatBotSessionRepository ChatBot { get; }
 
+        public IGenericRepository<VendorWallet, int> VendorWallets { get; }
         public UnitOfWork(StoreDbContext context)
         {
             _dbContext = context;
@@ -28,6 +30,7 @@ namespace Persistance.Repositories
             Sessions = new SessionRepository(context); // عمل الـ Instance
             Orders= new OrderRepository(context); 
             ChatBot = new ChatBotSessionRepository(context);
+            VendorWallets = new GenericRepository<VendorWallet, int>(context);
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();

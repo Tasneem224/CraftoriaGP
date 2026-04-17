@@ -7,8 +7,10 @@ namespace DomainLayer.Models.Order
     {
         [EnumMember(Value = "Pending")]
         Pending,          
+        [EnumMember(Value = "Confirmed")]
+        Confirmed,          
         [EnumMember(Value = "Received")]
-        PaymentReceived,  
+        Received,            
         [EnumMember(Value = "Failed")]
         PaymentFailed,     
         [EnumMember(Value = "Refunded")]
