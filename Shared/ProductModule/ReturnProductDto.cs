@@ -20,6 +20,7 @@ namespace Shared.ProductModule
 
         public string SellerId { get; set; }
         public string SellerName { get; set; }
+        public double AvgRating { get; set; }
 
     }
 }
