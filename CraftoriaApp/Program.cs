@@ -117,9 +117,10 @@ namespace CraftoriaApp
                 options.AddPolicy("AllowAll",
                     builder =>
                     {
-                        builder.AllowAnyOrigin() // بيسمح لأي مكان يكلم السيرفر
+                        builder.SetIsOriginAllowed(_ => true) // بيسمح لأي مكان يكلم السيرفر
                                .AllowAnyMethod() // بيسمح بكل العمليات (GET, POST, etc)
-                               .AllowAnyHeader(); // بيسمح بكل الهيدرز بما فيها الـ Authorization
+                               .AllowAnyHeader() // بيسمح بكل الهيدرز بما فيها الـ Authorization
+                               .AllowCredentials(); // لو بتستخدم WebSockets مع JWT في الـ query string، لازم تسمح بالكريدنشالز
                     });
             });
 
@@ -140,7 +141,7 @@ namespace CraftoriaApp
             {
                 client.BaseAddress = new Uri("https://ml-api-727549809675.me-central1.run.app/");
 
-         
+
                 client.Timeout = TimeSpan.FromMinutes(3);
 
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -187,7 +188,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-           
+
 
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
@@ -206,22 +207,22 @@ namespace CraftoriaApp
 
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-               
+
             .AddJwtBearer(options =>
             {
-               options.TokenValidationParameters = new TokenValidationParameters
-               {
-                   ValidateIssuer = true,
-                   ValidateAudience = true,
-                   ValidateLifetime = true,
-                   ValidateIssuerSigningKey = true,
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
 
-                   ValidIssuer = builder.Configuration["JWTOptions:issuer"],
-                   ValidAudience = builder.Configuration["JWTOptions:audience"],
+                    ValidIssuer = builder.Configuration["JWTOptions:issuer"],
+                    ValidAudience = builder.Configuration["JWTOptions:audience"],
 
-                   IssuerSigningKey = new SymmetricSecurityKey(
-                       Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
-               };
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
+                };
 
 
                 options.Events = new JwtBearerEvents
@@ -334,21 +335,30 @@ namespace CraftoriaApp
                 });
 
             }
-                app.UseHttpsRedirection();
 
+            app.UseRouting();          // أول حاجة
+            app.UseCors("AllowAll");   // بعد UseRouting مباشرة
+           // app.UseHttpsRedirection(); ← علّق السطر ده
             app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
-            // ── SignalR Hub Route ─────────────────────────────────────────────────
-            // Clients connect to: wss://yourserver/hubs/chat?access_token=<jwt>
-            // The hub requires [Authorize] so unauthenticated connections are rejected.
-            app.MapHub<ChatHub>("/hubs/chat")
-                .RequireAuthorization();   // belt-and-suspenders on top of [Authorize]
-
+            app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();
             app.Run();
+            //app.UseHttpsRedirection();
+
+            //app.UseAuthentication();
+            //app.UseAuthorization();
+
+
+            //app.MapControllers();
+
+            //// ── SignalR Hub Route ─────────────────────────────────────────────────
+            //// Clients connect to: wss://yourserver/hubs/chat?access_token=<jwt>
+            //// The hub requires [Authorize] so unauthenticated connections are rejected.
+            //app.MapHub<ChatHub>("/hubs/chat")
+            //    .RequireAuthorization();   // belt-and-suspenders on top of [Authorize]
+
+            //app.Run();
         }
     }
 }
