@@ -23,24 +23,48 @@ using System.Text.RegularExpressions;
 
 namespace Service
 {
-    public class ProductService(IUserInteractionService _userInteractionService,ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
+    public class ProductService(IRecommendationService _mlService,IUserInteractionService _userInteractionService,ITranslationService _translationService,IHttpContextAccessor _httpContextAccessor,UserManager<ApplicationUser> _userManager, ICloudinaryService _cloudinary, IUnitOfWork _unitOfWork) : IProductService
     {
 
-        public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<ProductInfoDTO>> GetAllProductsAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
-            var productRepo =  _unitOfWork.GetRepository<Product, int>();
-                
-            var products = await productRepo.GetAllAsync();
+            var popularItems = await _mlService.GetPopularProductIdsAsync(300); 
+            var popularIds = popularItems.Select(i => i.ProductId).ToList();
+
+            var productRepo = _unitOfWork.GetRepository<Product, int>();
+            var allProducts = await productRepo.GetAllQueryable()
+                .Include(p => p.Seller)       
+                .Include(p => p.Interactions) 
+                .ToListAsync();
+            
+            var sortedProducts = allProducts
+                .OrderByDescending(p => popularIds.Contains(p.Id))
+                .ThenBy(p => popularIds.IndexOf(p.Id))
+                .ToList();
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var categories = await categoryRepo.GetAllAsync();
-
             var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
 
-            return ReturnListDto(isArabic, products, categoriesDict);
+            return ReturnListDto(isArabic, sortedProducts, categoriesDict);
         }
+        ///public async Task<IEnumerable<ReturnProductDto>> GetAllProductsAsync()
+        ///{
+        ///   var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+        ///
+        ///    var productRepo =  _unitOfWork.GetRepository<Product, int>();
+        ///
+        ///  var products = await productRepo.GetAllAsync();
+        ///
+        ///    var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
+        ///    var categories = await categoryRepo.GetAllAsync();
+        ///
+        ///   var categoriesDict = categories.ToDictionary(c => c.Id, c => c);
+        ///
+        ///    return ReturnListDto(isArabic, products, categoriesDict);
+        ///}
         public async Task<ReturnProductDto> GetProductByIdAsync(int id)
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
@@ -498,21 +522,17 @@ namespace Service
                 throw new Exception();
             }
         }
-        private static IEnumerable<ReturnProductDto> ReturnListDto(bool isArabic, IEnumerable<Product> products, Dictionary<int, ProductCategory> categoriesDict)
+        private static IEnumerable<ProductInfoDTO> ReturnListDto(bool isArabic, IEnumerable<Product> products, Dictionary<int, ProductCategory> categoriesDict)
         {
-            return products.Select(p => new ReturnProductDto
+            return products.Select(p => new ProductInfoDTO
             {
                 Id = p.Id,
                 Name = isArabic ? p.NameAr : p.NameEn,
                 Price = p.Price,
-                Quantity = p.Quantity ?? 0,
-                Description = isArabic ? p.DescriptionAr : p.DescriptionEn,
                 ImageUrl = p.ImageUrl,
-                CategoryId = p.CategoryId,
-                SellerId = p.SellerId,
-                CategoryName = categoriesDict.TryGetValue(p.CategoryId, out var category)
-            ? (isArabic ? category.NameAr : category.NameEn) 
-            : (isArabic ? "غير معروف" : "Unknown")
+                AvgRating = p.Interactions.Any()
+                     ? (short)Math.Round(p.Interactions.Average(r => (double)r.Rating))
+                     : (short)0
             }).ToList();
         }
         private static IEnumerable<ReturnProductDto> ReturnListDtoSimple(bool isArabic, IEnumerable<Product> products, Dictionary<int, ProductCategory> categoriesDict)

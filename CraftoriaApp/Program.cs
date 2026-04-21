@@ -20,6 +20,7 @@ using Service;
 using Service.Factory;
 using Service.Mapping_Profiles;
 using Service.MappingProfiles;
+using Service.Use_Case;
 using ServiceAbstraction;
 using StackExchange.Redis;
 using System.Reflection;
@@ -52,18 +53,16 @@ namespace CraftoriaApp
                     Version = "v1"
                 });
 
-                // 1. إضافة تعريف الـ Security (بنعرف Swagger إن فيه حاجة اسمها Bearer Token)
                 options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
                     Name = "Authorization",
-                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    // التغيير هنا: نوعه Http عشان Swagger يفهم إنه Bearer Scheme
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Enter your JWT token in this format: Bearer {your_token_here}"
+                    Description = "Put **ONLY** your JWT token below. Swagger will add 'Bearer ' for you."
                 });
-
-                // 2. تفعيل الـ Security Requirement (عشان يربط الـ Token بكل الطلبات)
                 options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -163,8 +162,18 @@ namespace CraftoriaApp
             builder.Services.AddScoped<PaymobService>();
             builder.Services.AddScoped<StripeService>();
             builder.Services.AddScoped<PaymentServiceFactory>();
+            builder.Services.AddHttpClient<IRecommendationService, RecommendationService>(client =>
+            {
+                // بنجيب السكشن كامل
+                var mlSettings = builder.Configuration.GetSection("MLApiSettings");
+                var baseUrl = mlSettings["BaseUrl"];
 
-
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    // ده هيظهر لك في الـ Console وأنتِ بتشغلي الـ App عشان تعرفي المشكلة فين بالظبط
+                    Console.WriteLine("CRITICAL: MLApiSettings:BaseUrl is null. Check appsettings.json format.");
+                    baseUrl = "https://ml-api-727549809675.me-central1.run.app/"; // fallback للامان
+                }
 
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             builder.Services.AddFluentValidationAutoValidation();
@@ -190,6 +199,9 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 
+                client.BaseAddress = new Uri(baseUrl);
+            });
+      
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnection")!);
@@ -232,7 +244,7 @@ namespace CraftoriaApp
                         // السطر ده هيطبع لك السبب الحقيقي في الـ Output بتاع Visual Studio
                         Console.WriteLine("❌ Token failed: " + context.Exception.Message);
                         return Task.CompletedTask;
-                    },
+                    },  
                     OnTokenValidated = context =>
                     {
                         Console.WriteLine("✅ Token validated successfully!");
@@ -255,6 +267,30 @@ namespace CraftoriaApp
                     }
                 };
             });
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddFluentValidationClientsideAdapters();
+            builder.Services.AddScoped<IEmailVerificationCodeRepository, EmailVerificationCodeRepository>();
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<IDataSeeding, DataSeeding>();
+            builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IUserInteractionRepository, UserInteractionRepository>();
+            builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
+            builder.Services.AddScoped<ICartRepository, CartRpository>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+            builder.Services.AddScoped<ICacheService, CacheService>();
+            builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+            builder.Services.AddScoped<IGetRecommendedProductsUseCase, GetRecommendedProductsUseCase>();
             builder.Services.AddScoped<ITranslationService, TranslationService>();
 
             var cloudinaryUrl = builder.Configuration["Cloudinary:CloudinaryUrl"];
@@ -265,38 +301,7 @@ namespace CraftoriaApp
             Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             var app = builder.Build();
             app.UseCors("AllowAll"); // 👈 لازم السطر ده يكون قبل UseAuthentication و UseAuthorization
-            //using (var scope = app.Services.CreateScope())
-            //{
-            //    var services = scope.ServiceProvider;
-            //    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-
-            //    try
-            //    {
-            //        var context = services.GetRequiredService<StoreDbContext>();
-
-            //        // 1️⃣ الخطوة الأولى: إنشاء الجداول فوراً (لو مش موجودة)
-            //        // لازم دي تكون أول خطوة قبل أي عملية Seeding
-            //        await context.Database.EnsureCreatedAsync();
-            //        Console.WriteLine("✅ Database structure is ready (EnsureCreated).");
-
-            //        // 2️⃣ الخطوة الثانية: ملء بيانات الـ Identity (Users, Roles)
-            //        var seeder = services.GetRequiredService<IDataSeeding>();
-            //        await seeder.IdentityDataSeedingAsync();
-            //        await seeder.SeedCustomersDataAsync();
-
-            //        // 3️⃣ الخطوة الثالثة: ملء بيانات الـ Categories والمنتجات
-            //        var catSeeder = services.GetRequiredService<ICategoriesSeeding>();
-            //        await catSeeder.ProductCategoryDataSeedingAsync();
-            //        await catSeeder.RawMaterialsCategoryDataSeedingAsync();
-
-            //        Console.WriteLine("✅ All Data Seeding completed successfully!");
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        var logger = loggerFactory.CreateLogger<Program>();
-            //        logger.LogError(ex, "❌ An error occurred during database setup or seeding.");
-            //    }
-            //}
+            
 
             using (var scope = app.Services.CreateScope())
             {

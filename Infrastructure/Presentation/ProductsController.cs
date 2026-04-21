@@ -18,12 +18,12 @@ namespace Presentation.Controllers
     public class ProductsController(IProductService _productService, ICategoryService _categoryService) : BaseApiController
     {
 
-        [RedisCache(200)]
+        //[RedisCache(200)]
         [HttpGetAttribute("GetAllProducts")]
         public async Task<IActionResult> GetAllProducts()
         {
             var products = await _productService.GetAllProductsAsync();
-            return Ok(products);
+            return SendSuccessResponse(products);
         }
 
         [HttpGet("GetProductsOfSpecificUser")]

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Service.Factory
 {
-    public class PaymentServiceFactory
+    public class PaymentServiceFactory:IPaymentServiceFactory
     {
         private readonly IServiceProvider _serviceProvider;
 

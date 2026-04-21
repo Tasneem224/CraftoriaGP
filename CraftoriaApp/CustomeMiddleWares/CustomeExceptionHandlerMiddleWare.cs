@@ -28,6 +28,11 @@ namespace CraftoriaApp.CustomeMiddleWares
             
                 catch (Exception ex)
             {
+                if (httpContext.Response.HasStarted)
+                {
+                    _logger.LogWarning("The response has already started, can't write error response.");
+                    return; // نخرج فوراً لأننا مقدرش نعدل الـ Headers
+                }
                 int statusCode = ex switch
                 {
                     BadRequestException=> StatusCodes.Status400BadRequest,
@@ -52,8 +57,8 @@ namespace CraftoriaApp.CustomeMiddleWares
                     statusCode.ToString()
                 );
 
-              
-            await httpContext.Response.WriteAsJsonAsync(response);//convert content type and Serialize response and writeasync
+                httpContext.Response.StatusCode = statusCode;
+                await httpContext.Response.WriteAsJsonAsync(response);//convert content type and Serialize response and writeasync
             }
 
 

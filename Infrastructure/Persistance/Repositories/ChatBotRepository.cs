@@ -48,11 +48,14 @@ namespace Persistance.Repositories
         }
         public async Task<List<ChatBotMessages>> GetAllMessagesAsync(string userId)
         {
-            return await _context.ChatBotMessages
+            var re= await _context.ChatBotMessages
                 .Where(m => m.UserId == userId)
                 .AsNoTracking()
-                .OrderBy(m => m.CreatedAt) // هنا رتبتها من الأقدم للأحدث عشان تظهر كـ Chat منطقي
+                .OrderBy(m => m.CreatedAt) 
                 .ToListAsync();
+            if(re.DefaultIfEmpty() is null)
+                Console.WriteLine("no");
+            return re;
         }
         public async Task<List<ChatBotMessages>> PaginationMessages(string userId, int pageNumber, int pageSize)
         {
