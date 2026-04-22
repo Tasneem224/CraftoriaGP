@@ -76,5 +76,7 @@ namespace DomainLayer.Models.Identity
         public ICollection<UserInteraction> ReceivedReviews { get; set; }
 
         public ICollection<ChatBotMessages> ChatBotMessages { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsBlocked { get; set; } 
     }
 }

@@ -13,6 +13,8 @@ namespace DomainLayer.Models.Items
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; } = default!;
         public bool IsDeleted { get; set; }
+        public bool IsVisible { get; set; }
+
 
 
     }
