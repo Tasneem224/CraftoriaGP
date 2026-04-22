@@ -37,7 +37,7 @@ namespace Service
             };
 
             await _unitOfWork.GetRepository<ExpertService, int>().AddAsync(service);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return new { Message = "تم إضافة الخدمة بنجاح", ServiceId = service.Id };
         }
@@ -55,7 +55,7 @@ namespace Service
             };
 
             await _unitOfWork.GetRepository<ExpertAvailability, int>().AddAsync(availability);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return new { Message = "تم إضافة الموعد بنجاح", AvailabilityId = availability.Id };
         }
@@ -168,7 +168,7 @@ namespace Service
             };
 
             await _unitOfWork.Sessions.AddAsync(session);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return new
             {
@@ -199,7 +199,7 @@ namespace Service
 
             session.Status = SessionStatus.Completed;
             _unitOfWork.Sessions.Update(session);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return new { Success = true, Message = "تم إنهاء الجلسة بنجاح" };
         }
@@ -217,7 +217,7 @@ namespace Service
             session.Status = SessionStatus.Confirmed;
 
             _unitOfWork.Sessions.Update(session);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return new { SessionId = session.Id, Status = "Confirmed", Message = "تم الدفع وتأكيد الحجز." };
         }
@@ -252,7 +252,7 @@ namespace Service
 
             session.MeetingLink = meetingLink;
             _unitOfWork.Sessions.Update(session);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

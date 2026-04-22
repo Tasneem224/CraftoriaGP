@@ -1,6 +1,7 @@
 ﻿using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistance.Data.Contexts;
 using System;
@@ -14,6 +15,7 @@ namespace Persistance.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly StoreDbContext _dbContext;
+        private readonly UserManager<ApplicationUser> _userManager;
         public IUserInteractionRepository UserInteractions { get; }
         public IFavouriteRepository Favourites { get; }
         public ISessionRepository Sessions { get; } // الـ Repo الجديد
@@ -22,15 +24,20 @@ namespace Persistance.Repositories
         public IChatBotSessionRepository ChatBot { get; }
 
         public IGenericRepository<VendorWallet, int> VendorWallets { get; }
-        public UnitOfWork(StoreDbContext context)
+
+        public IAdminPanelRepo AdminPanel { get; }
+
+        public UnitOfWork(StoreDbContext context,UserManager<ApplicationUser> userManager)
         {
             _dbContext = context;
-            UserInteractions = new UserInteractionRepository(context);
-            Favourites = new FavouriteRepository(context);
-            Sessions = new SessionRepository(context); // عمل الـ Instance
-            Orders= new OrderRepository(context); 
-            ChatBot = new ChatBotSessionRepository(context);
-            VendorWallets = new GenericRepository<VendorWallet, int>(context);
+            _userManager = userManager;
+            UserInteractions = new UserInteractionRepository(_dbContext);
+            Favourites = new FavouriteRepository(_dbContext);
+            Sessions = new SessionRepository(_dbContext); // عمل الـ Instance
+            Orders= new OrderRepository(_dbContext); 
+            ChatBot = new ChatBotSessionRepository(_dbContext);
+            VendorWallets = new GenericRepository<VendorWallet, int>(_dbContext);
+            AdminPanel = new AdminPanelRepo(_dbContext, _userManager);
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
@@ -47,7 +54,7 @@ namespace Persistance.Repositories
             return (repo);
         }
 
-        public async Task<int> SaveChanges()
+        public async Task<int> SaveChangesAsync()
         {
             return await _dbContext.SaveChangesAsync();
         }

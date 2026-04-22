@@ -140,7 +140,7 @@ namespace Service
 
             await _unitOfWork.GetRepository<RawMaterial, int>().AddAsync(material);
 
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             var categoryRepo = _unitOfWork.GetRepository<Raw_Category_Material, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
@@ -194,7 +194,7 @@ namespace Service
             }
 
             MaterialsRepo.Update(Materials);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             var categoryRepo = _unitOfWork.GetRepository<Raw_Category_Material, int>();
             var category = await categoryRepo.GetByIdAsync(Materials.CategoryId);
@@ -223,7 +223,7 @@ namespace Service
             }
 
             repo.Remove(material);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
         public async Task<IEnumerable<ReturnProductDto>> GetAllMaterialsOfSpecifiUserAsync(string id)

@@ -15,5 +15,8 @@ namespace Shared.Interaction
         public short Rating { get; set; }
         public string? ReviewComment { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string ItemImage { get; set; } = default!;
+        public int ItemId { get; set; }
+        public string ItemName { get; set; } = string.Empty;
     }
 }

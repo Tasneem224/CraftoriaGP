@@ -17,35 +17,36 @@ namespace DomainLayer.Contracts
     {
         #region Products
         Task<List<Product>> GetNewProductsLast30DaysAgo(int pageNumber, int pageSize);
-        Task<int> GetCountNewProductsLast30DaysAgo();
         Task<List<Product>> GetAllProductsPangination(int pageNumber, int pageSize);
-        Task<ProductCategory> AddProductCategory(ProductCategory category);
-        Task<bool> DeleteProductCategory(ProductCategory category);
-        Task<ProductCategory> UpdateProductCategory(int id, ProductCategory category);
-        Task<Product> UpdateProduct(int id, Product product);
+        Task<int> GetCountNewProductsLast30DaysAgo();
+        Task<ProductCategory> AddProductCategoryAsync(ProductCategory category);
+        Task<bool> DeleteProductCategory(int id );
+        Task<ProductCategory> UpdateProductCategoryAsync(int id, ProductCategory category);
         Task<bool> ToggleProductVisibility(int id, bool isVisible);
+        Task<int> GetCountProducts();
+
         #endregion
 
         #region Raw Materials
+        Task<int> GetCountMaterialsAsync();
 
         Task<int> GetCountNewMaterialssLast30DaysAgo();
         Task<List<RawMaterial>> GetNewMaterialssLast30DaysAgo(int pageNumber, int pageSize);
         Task<List<RawMaterial>> GetAllGetRawMaterialPagination(int pageNumber, int pageSize);
-        Task<Raw_Category_Material> AddRawMaterialCategory(Raw_Category_Material category);
-        Task<bool> DeleteRawMaterialCategory(Raw_Category_Material category);
+        Task<Raw_Category_Material> AddRawMaterialCategoryAsync(Raw_Category_Material category);
+        Task<bool> DeleteRawMaterialCategory(int id);
         Task<Raw_Category_Material> UpdateRawMaterialCategory(int id, Raw_Category_Material category);
-        Task<RawMaterial> UpdateRawMaterial(int id, RawMaterial material);
         Task<bool> ToggleRawMaterialVisibility(int id, bool isVisible);
         #endregion
 
 
         #region users
         Task<int> GetTotalUsersCount();
-        Task<List<ApplicationUser>> GetAllUsers(int pageNumber, int pageSize);
+        Task<List<ApplicationUser>> GetAllUsersAsync(int pageNumber, int pageSize);
         Task<List<ApplicationUser>> GetNewUsersLast30Days(int pageNumber, int pageSize);
-        Task<int> GetCountNewUsersLast30Days();
+        Task<int> GetCountNewUsersLast30DaysAsync();
         Task<ApplicationUser> GetUserById(string id);
-        Task<bool> DeleteUser(Guid id);
+        Task<bool> DeleteUser(string id);
         Task<bool> UpgradeUsersInRole(string id);
         Task<bool> ToggleUserBlockStatus(string userId, bool isBlocked);
         #endregion
@@ -55,14 +56,14 @@ namespace DomainLayer.Contracts
         #endregion
 
         #region Orders
-        Task<List<Order>> GetAllOrders();
+        Task<List<Order>> GetAllOrdersAsync();
         Task<Order> GetOrderDetails(Guid orderId);
-        Task<bool> UpdateOrderStatus(Guid orderId, string status);
+        Task<bool> UpdateOrderStatusAsync(Guid orderId, string status);
         #endregion
 
         #region Reviews
         Task<bool>? DeleteReview(int reviewId);
-        Task<List<UserInteraction>> GetRecentReviews(int count, int days);
+        Task<List<UserInteraction>> GetRecentReviewsAsync(int count, int days);
 
         #endregion
         #region Payments
@@ -71,7 +72,7 @@ namespace DomainLayer.Contracts
 
         Task<decimal> GrowthRate();
         Task<decimal> TotalSalesThisMonth();
-        Task<int> GetPendingOrdersCount();
+        Task<int> GetPendingOrdersCountAsync();
         Task<Dictionary<string, int>> GetSalesStatusDistribution();
         Task<List<object>> GetTopSellingProducts(int count);
     }

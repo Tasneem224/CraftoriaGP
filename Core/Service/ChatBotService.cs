@@ -186,7 +186,7 @@ namespace Service
             {
                 string welcome = isArabic?"أهلاً بك! أنا لاما، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟" : "Welcome! I'm Lama, your AI assistant. How can I help you today?";
                 await _unitOfWork.ChatBot.AddMessages(welcome, userId, "assistant");
-                await _unitOfWork.SaveChanges();
+                await _unitOfWork.SaveChangesAsync();
                 return welcome;
             }
             return string.Empty;

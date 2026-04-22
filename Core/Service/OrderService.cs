@@ -35,7 +35,7 @@ namespace Service
                     var order = await BuildOrderAsync(userEmail, deliveryMethodId, shippingAddress, orderItems);
 
                     await _unitOfWork.GetRepository<Order, Guid>().AddAsync(order);
-                    var result = await _unitOfWork.SaveChanges();
+                    var result = await _unitOfWork.SaveChangesAsync();
 
                     if (result > 0)
                     {
@@ -124,7 +124,7 @@ namespace Service
             };
 
             await _unitOfWork.GetRepository<Address_Book, Guid>().AddAsync(newAddressEntry);
-            var result = await _unitOfWork.SaveChanges();
+            var result = await _unitOfWork.SaveChangesAsync();
 
             if (result <= 0) throw new Exception("Failed to save address to address book");
 
@@ -201,7 +201,7 @@ namespace Service
             }
 
             // 4. حفظ كل التغييرات (الأوردر والمحافظ) في Transaction واحدة
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
         }
         private async Task<List<OrderItem>> PrepareOrderItemsAsync(CustomerCart basket)
         {

@@ -53,7 +53,7 @@ namespace Service
                 await _unitOfWork.UserInteractions.AddAsync(interaction);
                  
             }
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
             var user = await _userManager.FindByIdAsync(userId);
             string reviewerName = user?.UserName ?? "Unknown User";
             return new ReviewDto
@@ -78,7 +78,7 @@ namespace Service
             if (interaction.UserId != userId) throw new UnauthorizedAccessException("U can't delete this Review");
 
             _unitOfWork.UserInteractions.Remove(interaction);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
         }
         public async Task<List<ReviewDto>> GetProductReviewsAsync(int productId)
         {

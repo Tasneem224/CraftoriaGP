@@ -31,7 +31,7 @@ namespace Service
                 UserId = user.Id,
                 FirstName = user.FirstName,
                 SecondName = user.SecondName,
-                PicturUrl = user.ProfileImage!,
+                ProfileImage = user.ProfileImage!,
                 Bio = user.Bio??"",
                 Specialization = user.Specialization?? "",
                 Role = role1!,

@@ -146,7 +146,7 @@ namespace Service
                 }
             }
             await _unitOfWork.GetRepository<Product, int>().AddAsync(product);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             var categoryRepo = _unitOfWork.GetRepository<ProductCategory, int>();
             var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
@@ -173,7 +173,7 @@ namespace Service
 
             await UpdateData(dataFromRequest, isArabic, product);
             _unitOfWork.GetRepository<Product, int>().Update(product); // بيأكد للـ Tracker إن فيه تعديل
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
 
             return ReturnDto(isArabic, product, product.Category);
         }
@@ -199,7 +199,7 @@ namespace Service
             }
 
             repo.Remove(product);
-            await _unitOfWork.SaveChanges();
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
         public async Task<IEnumerable<ReturnProductDto>> GetAllProductsOfSpecifiUserAsync(string id)

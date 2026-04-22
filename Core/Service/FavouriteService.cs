@@ -33,7 +33,7 @@ namespace Service
             if (existingFav != null)
             {
                 _unitOfWork.Favourites.Remove(existingFav);
-                await _unitOfWork.SaveChanges();
+                await _unitOfWork.SaveChangesAsync();
                 return "Removed from favourites";
             }
             else
@@ -45,7 +45,7 @@ namespace Service
                 };
 
                 await _unitOfWork.Favourites.AddAsync(newFav);
-                await _unitOfWork.SaveChanges();
+                await _unitOfWork.SaveChangesAsync();
                 return isArabic? "تمت الاضافة الى المفضلة": "Added to favourites";
             }
         }

@@ -17,7 +17,8 @@ namespace DomainLayer.Contracts
         IOrderRepository Orders { get; }
         IChatBotSessionRepository ChatBot { get; }
         IGenericRepository<VendorWallet, int> VendorWallets { get; }
-        Task<int> SaveChanges();
+        IAdminPanelRepo AdminPanel { get; }
+        Task<int> SaveChangesAsync();
 
     }
 }

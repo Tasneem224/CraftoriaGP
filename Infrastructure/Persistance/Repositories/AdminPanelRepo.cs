@@ -20,7 +20,7 @@ namespace Persistance.Repositories
     public class AdminPanelRepo(StoreDbContext _context, UserManager<ApplicationUser> _userManager) : IAdminPanelRepo
     {
         #region Products
-        public async Task<ProductCategory> AddProductCategory(ProductCategory category)
+        public async Task<ProductCategory> AddProductCategoryAsync(ProductCategory category)
         {
             var product = await _context.ProductCategories.AddAsync(category);
             return product.Entity;
@@ -44,21 +44,14 @@ namespace Persistance.Repositories
                 .Take(pageSize)
                 .ToListAsync() ;
         }
-        public async Task<bool> DeleteProductCategory(ProductCategory category)
+        public async Task<bool> DeleteProductCategory(int  id)
         {
-            var exist = await _context.ProductCategories.FindAsync(category);
+            var exist = await _context.ProductCategories.FindAsync(id);
             if (exist is null) return false;
             _context.ProductCategories.Remove(exist);
             return true;
         }
-        public async Task<Product> UpdateProduct(int id, Product product)
-        {
-            var exist = await _context.Products.FindAsync(id);
-            if (exist is null) return null!;
-            _context.Entry(exist).CurrentValues.SetValues(product);
-            return exist;
-        }
-        public async Task<ProductCategory> UpdateProductCategory(int id, ProductCategory category)
+        public async Task<ProductCategory> UpdateProductCategoryAsync(int id, ProductCategory category)
         {
             var exist = await _context.ProductCategories.FindAsync(id);
             if (exist is null) return null!;
@@ -72,18 +65,23 @@ namespace Persistance.Repositories
             exist.IsVisible = isVisible;
             return true;
         }
+        public async Task<int> GetCountProducts()
+        {
+            return await _context.Products.CountAsync();
+        }
+
         #endregion
 
         #region Raw Materials
 
-        public async Task<Raw_Category_Material> AddRawMaterialCategory(Raw_Category_Material category)
+        public async Task<Raw_Category_Material> AddRawMaterialCategoryAsync(Raw_Category_Material category)
         {
             var material = await _context.RawMaterialCategories.AddAsync(category);
             return material.Entity;
         }
-        public async Task<bool> DeleteRawMaterialCategory(Raw_Category_Material category)
+        public async Task<bool> DeleteRawMaterialCategory(int id)
         {
-            var exist = await _context.RawMaterialCategories.FindAsync(category);
+            var exist = await _context.RawMaterialCategories.FindAsync(id);
             if (exist is null) return false;
             _context.RawMaterialCategories.Remove(exist);
             return true;
@@ -135,15 +133,19 @@ namespace Persistance.Repositories
             exist.IsVisible = isVisible;
             return true;
         }
+        public async Task<int> GetCountMaterialsAsync()
+        {
+            return await _context.RawMaterials.CountAsync();
+        }
         #endregion
 
         #region Users
-        public async Task<List<ApplicationUser>> GetAllUsers(int pageNumber, int pageSize)
+        public async Task<List<ApplicationUser>> GetAllUsersAsync(int pageNumber, int pageSize)
             => await _userManager.Users
             .Skip((pageNumber - 1) * pageSize)
               .Take(pageSize)
                .ToListAsync();
-        public Task<int> GetCountNewUsersLast30Days()
+        public Task<int> GetCountNewUsersLast30DaysAsync()
         {
             var last30Days = DateTime.UtcNow.AddDays(-30);
             return _userManager.Users.Where(u => u.CreatedAt >= last30Days).CountAsync();
@@ -156,11 +158,11 @@ namespace Persistance.Repositories
         }
         public async Task<int> GetTotalUsersCount()
         => await _userManager.Users.CountAsync();
-        public async Task<bool> DeleteUser(Guid id)
+        public async Task<bool> DeleteUser(string id)
         {
-            var exist = _userManager.Users.FirstOrDefault(u => u.Id == id.ToString());
+            var exist =await _userManager.FindByIdAsync(id);
             if (exist is null) return false;
-            await _userManager.DeleteAsync(exist);
+            await  _userManager.DeleteAsync(exist);
             return true;
         }
         public async Task<bool> UpgradeUsersInRole(string id)
@@ -202,7 +204,7 @@ namespace Persistance.Repositories
             _context.UserInteractions.Remove(_context.UserInteractions.Find(reviewId) ?? throw new Exception("Review not found"));
             return true;
         }
-        public async Task<List<UserInteraction>> GetRecentReviews(int count, int days = 100)
+        public async Task<List<UserInteraction>> GetRecentReviewsAsync(int count, int days = 100)
         {
             var fromDate = DateTime.UtcNow.AddDays(-days);
 
@@ -216,16 +218,16 @@ namespace Persistance.Repositories
         #endregion
 
         #region Orders
-        public async Task<List<Order>> GetAllOrders()
+        public async Task<List<Order>> GetAllOrdersAsync()
              => await _context.Orders.Include(o => o.OrderItems).ThenInclude(i => i.Item).ToListAsync();
         public async Task<Order> GetOrderDetails(Guid orderId)
           => await _context.Orders.Where(o => o.Id == orderId)
                 .Include(o => o.OrderItems)
                 .ThenInclude(i => i.Item)
                 .FirstOrDefaultAsync() ?? throw new Exception("Order not found");
-        public async Task<int> GetPendingOrdersCount() =>
+        public async Task<int> GetPendingOrdersCountAsync() =>
             await _context.Orders.Where(o => o.orderStatus == OrderStatus.Pending).CountAsync();
-        public async Task<bool> UpdateOrderStatus(Guid orderId, string status)
+        public async Task<bool> UpdateOrderStatusAsync(Guid orderId, string status)
         {
             var exist = await _context.Orders.FindAsync(orderId);
             if (exist is null) return false;
