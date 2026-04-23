@@ -24,6 +24,7 @@ namespace Service
         private readonly Lazy<IOrderService> _LazyOrderService = new Lazy<IOrderService>(() => new OrderService(_paymentFactory,_userManager, cartRepository, unitOfWork,cartService));
         private readonly Lazy<IProductService> _LazyProductService = new Lazy<IProductService>(() => new ProductService(_mlService,userInteractionService, _translationService, _httpContextAccessor, _userManager,_cloudinaryService,unitOfWork));
         private readonly Lazy<ITopRatedService> _LazyTopRatedService = new Lazy<ITopRatedService>(() => new TopRatedService(unitOfWork,_userManager));
+        private readonly Lazy<IAdminPanelService> _LazyAdminPanelService = new Lazy<IAdminPanelService>(() => new AdminPanelService(_cloudinaryService,unitOfWork,_userManager));
         
 
         public IProductService ProductService => _LazyProductService.Value;
@@ -33,5 +34,9 @@ namespace Service
         public IAuthenticationService AuthenticationService => _LazyAuthenticationService.Value;
         public ICartService CartService => _LazyCartService.Value;
         public ITopRatedService TopRatedService => _LazyTopRatedService.Value;
+
+        public IAdminPanelService AdminPanelService => _LazyAdminPanelService.Value;
+
+        public ICategoryService CategoryService => throw new NotImplementedException();
     }
 }

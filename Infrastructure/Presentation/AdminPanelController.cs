@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Presentation.Controllers;
 using ServiceAbstraction;
+using Shared.Admin_Panel;
 using Shared.Category;
 using System;
 using System.Collections.Generic;
@@ -25,7 +27,7 @@ namespace Presentation
 
         [HttpGet("products/count")]
         public async Task<IActionResult> GetProductsCount()
-            => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountProducts());
+            => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountProductsAsync());
 
         [HttpGet("products/count/new")]
         public async Task<IActionResult> GetNewProductsCount()
@@ -36,11 +38,11 @@ namespace Presentation
             => SendSuccessResponse(await _serviceManager.AdminPanelService.ToggleProductVisibility(id, isVisible));
 
         [HttpPost("products/AddProductCategory")]
-        public async Task<IActionResult> AddProductCategory(ReturnCategoryDto category)
+        public async Task<IActionResult> AddProductCategory(AddAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.AddProductCategoryAsync(category));
 
         [HttpPut("products/UpdateProductCategory")]
-        public async Task<IActionResult> UpdateProductCategory(ReturnCategoryDto category)
+        public async Task<IActionResult> UpdateProductCategory(UpdateAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.UpdateProductCategoryAsync( category));
 
         [HttpDelete("products/DeleteProductCategory")]
@@ -70,11 +72,11 @@ namespace Presentation
             => SendSuccessResponse(await _serviceManager.AdminPanelService.ToggleRawMaterialVisibility(id, isVisible));
 
         [HttpPost("materials/AddMaterialCategory")]
-        public async Task<IActionResult> AddMaterialCategory(ReturnCategoryDto category)
+        public async Task<IActionResult> AddMaterialCategory(AddAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.AddRawMaterialCategoryAsync(category));
 
         [HttpPut("materials/UpdateMaterialCategory")]
-        public async Task<IActionResult> UpdateMaterialCategory(int id, ReturnCategoryDto category)
+        public async Task<IActionResult> UpdateMaterialCategory( UpdateAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.UpdateRawMaterialCategory( category));
 
         [HttpDelete("materials/DeleteMaterialCategory")]
@@ -127,7 +129,7 @@ namespace Presentation
 
         [HttpPut("orders/UpdateOrderStatus")]
         public async Task<IActionResult> UpdateOrderStatus(Guid orderId, string status)
-            => SendSuccessResponse(await _serviceManager.AdminPanelService.UpdateOrderStatus(orderId, status));
+            => SendSuccessResponse(await _serviceManager.AdminPanelService.UpdateOrderStatusAsync(orderId, status));
         #endregion
 
         #region Reviews

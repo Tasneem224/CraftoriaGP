@@ -33,7 +33,7 @@ namespace Service
 
             var cat = new ProductCategory
             {
-                Id = category.Id,
+
                 NameAr = category.NameAr,
                 NameEn = category.NameEn,
                 image = portfolioPath,
