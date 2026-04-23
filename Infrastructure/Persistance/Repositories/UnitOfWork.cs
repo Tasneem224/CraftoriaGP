@@ -17,7 +17,11 @@ namespace Persistance.Repositories
         private readonly StoreDbContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         public IUserInteractionRepository UserInteractions { get; }
+
+
         public IFavouriteRepository Favourites { get; }
+
+
         public ISessionRepository Sessions { get; } // الـ Repo الجديد
         public IOrderRepository Orders { get; } 
 
@@ -26,7 +30,6 @@ namespace Persistance.Repositories
 
         public IGenericRepository<VendorWallet, int> VendorWallets { get; }
 
-<<<<<<< HEAD
         public IAdminPanelRepo AdminPanel { get; }
 
         public UnitOfWork(StoreDbContext context,UserManager<ApplicationUser> userManager)
@@ -40,18 +43,9 @@ namespace Persistance.Repositories
             ChatBot = new ChatBotSessionRepository(_dbContext);
             VendorWallets = new GenericRepository<VendorWallet, int>(_dbContext);
             AdminPanel = new AdminPanelRepo(_dbContext, _userManager);
-=======
-        public UnitOfWork(StoreDbContext context)
-        {
-            _dbContext = context;
-            UserInteractions = new UserInteractionRepository(context);
-            Favourites = new FavouriteRepository(context);
-            Sessions = new SessionRepository(context); // عمل الـ Instance
-            Orders= new OrderRepository(context); 
-            ChatBot = new ChatBotSessionRepository(context);
-            Messages = new MessageRepository(context);
-            VendorWallets = new GenericRepository<VendorWallet, int>(context);
->>>>>>> Dev
+            Messages = new MessageRepository(_dbContext);
+
+
 
         }
         private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
