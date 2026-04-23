@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Presentation.Controllers;
 using ServiceAbstraction;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Presentation
 {
+    [AllowAnonymous]
 
     public class AdminPanelController(IServiceManager _serviceManager) : BaseApiController
     {

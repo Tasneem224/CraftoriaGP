@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
@@ -17,7 +18,7 @@ namespace Presentation
                         var user = await _serviceManager.AuthenticationService.RegisterAsync(_customerRegisterDto);
                         return SendSuccessResponse(user, "Registration successful");
                 }
-
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
