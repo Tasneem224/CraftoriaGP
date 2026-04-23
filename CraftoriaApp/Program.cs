@@ -2,6 +2,7 @@
 using AutoMapper;
 using CloudinaryDotNet;
 using CraftoriaApp.CustomeMiddleWares;
+using CraftoriaApp.Helper;
 using CraftoriaApp.Validators;
 using DomainLayer.Contracts;
 using DomainLayer.Models.Identity;
@@ -77,6 +78,7 @@ namespace CraftoriaApp
             new string[] {}
         }
     });
+                options.OperationFilter<DefaultResponsesOperationFilter>();
             });
             builder.Services.AddDbContext<StoreDbContext>(options =>
 

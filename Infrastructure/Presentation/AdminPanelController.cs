@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Presentation.Controllers;
 using ServiceAbstraction;
+using Shared;
+using Shared.Account;
 using Shared.Admin_Panel;
 using Shared.Category;
+using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,83 +23,83 @@ namespace Presentation
 
         #region Products
         [HttpGet("products")]
-        public async Task<IActionResult> GetAllProducts(int pageNumber, int pageSize)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductDto>>>> GetAllProducts(int pageNumber, int pageSize)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetAllProductsPagination(pageNumber, pageSize));
 
         [HttpGet("products/new")]
-        public async Task<IActionResult> GetNewProducts(int pageNumber, int pageSize)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductDto>>>> GetNewProducts(int pageNumber, int pageSize)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetNewProductsLast30DaysAgo(pageNumber, pageSize));
 
         [HttpGet("products/count")]
-        public async Task<IActionResult> GetProductsCount()
+        public async Task<ActionResult<ApiResponse<int>>> GetProductsCount()
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountProductsAsync());
 
         [HttpGet("products/count/new")]
-        public async Task<IActionResult> GetNewProductsCount()
+        public async Task<ActionResult<ApiResponse<int>>> GetNewProductsCount()
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountNewProductsLast30DaysAgo());
 
         [HttpPut("products/{id}/visibility")]
-        public async Task<IActionResult> ToggleProductVisibility(int id, bool isVisible)
+        public async Task<ActionResult<ApiResponse<bool>>>ToggleProductVisibility(int id, bool isVisible)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.ToggleProductVisibility(id, isVisible));
 
         [HttpPost("products/AddProductCategory")]
-        public async Task<IActionResult> AddProductCategory(AddAdminCategoryDto category)
+        public async Task<ActionResult<ApiResponse<ReturnAdminCategoriesDto>>> AddProductCategory(AddAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.AddProductCategoryAsync(category));
 
         [HttpPut("products/UpdateProductCategory")]
-        public async Task<IActionResult> UpdateProductCategory(UpdateAdminCategoryDto category)
+        public async Task<ActionResult<ApiResponse<ReturnAdminCategoriesDto>>> UpdateProductCategory(UpdateAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.UpdateProductCategoryAsync( category));
 
         [HttpDelete("products/DeleteProductCategory")]
-        public async Task<IActionResult> DeleteProductCategory(int id)
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteProductCategory(int id)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.DeleteProductCategory(id));
         #endregion
 
         #region Materials
         [HttpGet("GetAllMaterials")]
-        public async Task<IActionResult> GetAllMaterials(int pageNumber, int pageSize)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductDto>>>> GetAllMaterials(int pageNumber, int pageSize)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetAllRawMaterialPagination(pageNumber, pageSize));
 
         [HttpGet("materials/GetNewMaterials")]
-        public async Task<IActionResult> GetNewMaterials(int pageNumber, int pageSize)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductDto>>>> GetNewMaterials(int pageNumber, int pageSize)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetNewMaterialsLast30DaysAgo(pageNumber, pageSize));
 
         [HttpGet("materials/GetMaterialsCount")]
-        public async Task<IActionResult> GetMaterialsCount()
+        public async Task<ActionResult<ApiResponse<int>>> GetMaterialsCount()
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountMaterialsAsync());
 
         [HttpGet("materials/GetNewMaterialsCount")]
-        public async Task<IActionResult> GetNewMaterialsCount()
+        public async Task<ActionResult<ApiResponse<int>>> GetNewMaterialsCount()
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountNewMaterialsLast30Days());
 
         [HttpPut("materials/ToggleMaterialVisibility")]
-        public async Task<IActionResult> ToggleMaterialVisibility(int id, bool isVisible)
+        public async Task<ActionResult<ApiResponse<bool>>> ToggleMaterialVisibility(int id, bool isVisible)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.ToggleRawMaterialVisibility(id, isVisible));
 
         [HttpPost("materials/AddMaterialCategory")]
-        public async Task<IActionResult> AddMaterialCategory(AddAdminCategoryDto category)
+        public async Task<ActionResult<ApiResponse<ReturnAdminCategoriesDto>>> AddMaterialCategory(AddAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.AddRawMaterialCategoryAsync(category));
 
         [HttpPut("materials/UpdateMaterialCategory")]
-        public async Task<IActionResult> UpdateMaterialCategory( UpdateAdminCategoryDto category)
+        public async Task<ActionResult<ApiResponse<ReturnAdminCategoriesDto>>> UpdateMaterialCategory( UpdateAdminCategoryDto category)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.UpdateRawMaterialCategory( category));
 
         [HttpDelete("materials/DeleteMaterialCategory")]
-        public async Task<IActionResult> DeleteMaterialCategory(int id)
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteMaterialCategory(int id)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.DeleteRawMaterialCategory(id));
         #endregion
 
         #region Users
         [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers(int pageNumber, int pageSize)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnAccountDto>>>> GetAllUsers(int pageNumber, int pageSize)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetAllUsersAsync(pageNumber, pageSize));
 
         [HttpGet("users/GetUserById")]
-        public async Task<IActionResult> GetUserById(string id)
+        public async Task<ActionResult<ApiResponse<ReturnAccountDto>>> GetUserById(string id)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetUserByIdAsync(id));
 
         [HttpGet("users/count")]
-        public async Task<IActionResult> GetTotalUsersCount()
+        public async Task<ActionResult<ApiResponse<int>>> GetTotalUsersCount()
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetTotalUsersCount());
 
         [HttpGet("users/GetNewUsersCount")]
@@ -104,7 +107,7 @@ namespace Presentation
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetCountNewUsersLast30DaysAsync());
 
         [HttpDelete("users/DeleteUser")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.DeleteUser(id));
 
         [HttpPut("users/ToggleUserBlockStatus")]
@@ -140,7 +143,7 @@ namespace Presentation
             => SendSuccessResponse(await _serviceManager.AdminPanelService.GetRecentReviewsAsync(count, days));
 
         [HttpDelete("reviews/DeleteReview")]
-        public async Task<IActionResult> DeleteReview(int reviewId)
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteReview(int reviewId)
             => SendSuccessResponse(await _serviceManager.AdminPanelService.DeleteReview(reviewId));
         #endregion
     }
