@@ -174,7 +174,11 @@ namespace CraftoriaApp
                     Console.WriteLine("CRITICAL: MLApiSettings:BaseUrl is null. Check appsettings.json format.");
                     baseUrl = "https://ml-api-727549809675.me-central1.run.app/"; // fallback للامان
                 }
+                
 
+
+                client.BaseAddress = new Uri(baseUrl);
+            });
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddFluentValidationClientsideAdapters();
@@ -197,10 +201,6 @@ namespace CraftoriaApp
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-
-                client.BaseAddress = new Uri(baseUrl);
-            });
       
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
