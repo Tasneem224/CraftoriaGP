@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistance.Data.Contexts;
 using Persistance.Repositories;
+using Presentation.Hubs;
+using Presentation.Services;
 using Service;
 using Service.Factory;
 using Service.Mapping_Profiles;
@@ -90,26 +92,62 @@ namespace CraftoriaApp
                 );
             });
 
+            //builder.Services.AddDbContext<StoreDbContext>(options =>
+            //{
+            //    options.UseNpgsql(
+            //        builder.Configuration.GetConnectionString("PostgresConnection"),
+            //        npgsqlOptions =>
+            //        {
+            //            npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+
+            //            npgsqlOptions.MigrationsHistoryTable("__PostgresMigrationHistory");
+            //        }
+            //    );
+            //});
+            // 1. قبل builder.Build()
+
+
+            // ── CORS ──────────────────────────────────────────────────────────────
+            // NOTE FOR PRODUCTION: Replace AllowAnyOrigin with your specific origins
+            // AND add .AllowCredentials() if you use long-polling SignalR transport.
+            // For WebSocket + JWT-in-query-string (recommended), AllowAnyOrigin is fine.
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
                     builder =>
                     {
-                        builder.AllowAnyOrigin() 
-                               .AllowAnyMethod() 
-                               .AllowAnyHeader();
+                        builder.SetIsOriginAllowed(_ => true) // بيسمح لأي مكان يكلم السيرفر
+                               .AllowAnyMethod() // بيسمح بكل العمليات (GET, POST, etc)
+                               .AllowAnyHeader() // بيسمح بكل الهيدرز بما فيها الـ Authorization
+                               .AllowCredentials(); // لو بتستخدم WebSockets مع JWT في الـ query string، لازم تسمح بالكريدنشالز
                     });
             });
+
+            // ── SignalR ───────────────────────────────────────────────────────────
+            // AddSignalR() registers the hub infrastructure.
+            // The hub itself is mapped to a route further below (app.MapHub).
+            builder.Services.AddSignalR(options =>
+            {
+                // Increase timeout for mobile clients on poor connections
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+                options.KeepAliveInterval = TimeSpan.FromSeconds(30);
+                options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+            });
+
+            // ── HTTP Clients ──────────────────────────────────────────────────────
+
             builder.Services.AddHttpClient<IChatBotService, ChatBotService>(client =>
             {
                 client.BaseAddress = new Uri("https://ml-api-727549809675.me-central1.run.app/");
 
-         
+
                 client.Timeout = TimeSpan.FromMinutes(3);
 
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
 
+
+            // ── Identity ──────────────────────────────────────────────────────────
             // تسجيل الـ Service نفسها كـ Scoped
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<IdentityRole>()
@@ -136,31 +174,69 @@ namespace CraftoriaApp
                     Console.WriteLine("CRITICAL: MLApiSettings:BaseUrl is null. Check appsettings.json format.");
                     baseUrl = "https://ml-api-727549809675.me-central1.run.app/"; // fallback للامان
                 }
+                
+
 
                 client.BaseAddress = new Uri(baseUrl);
             });
+            builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddFluentValidationClientsideAdapters();
+            builder.Services.AddScoped<IEmailVerificationCodeRepository, EmailVerificationCodeRepository>();
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<IDataSeeding, DataSeeding>();
+            builder.Services.AddScoped<ICategoriesSeeding, CategoriesSeeding>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IUserInteractionRepository, UserInteractionRepository>();
+            builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ICartRepository, CartRpository>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+            builder.Services.AddScoped<ICacheService, CacheService>();
+            builder.Services.AddAutoMapper(M => M.AddProfile(new CartProfile()));
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
       
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("redisConnection")!);
             });
+
+            // ── NEW: Chat / Messaging Services ────────────────────────────────────
+
+            // The BRIDGE: Service layer calls IRealtimeNotificationService,
+            // Presentation layer provides the SignalR implementation.
+            // This resolves the circular dependency without breaking Clean Architecture.
+            builder.Services.AddScoped<IRealtimeNotificationService, SignalRNotificationService>();
+
+            // The chat business-logic service
+            builder.Services.AddScoped<IMessageService, MessageService>();
+
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-               
+
             .AddJwtBearer(options =>
             {
-               options.TokenValidationParameters = new TokenValidationParameters
-               {
-                   ValidateIssuer = true,
-                   ValidateAudience = true,
-                   ValidateLifetime = true,
-                   ValidateIssuerSigningKey = true,
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
 
-                   ValidIssuer = builder.Configuration["JWTOptions:issuer"],
-                   ValidAudience = builder.Configuration["JWTOptions:audience"],
+                    ValidIssuer = builder.Configuration["JWTOptions:issuer"],
+                    ValidAudience = builder.Configuration["JWTOptions:audience"],
 
-                   IssuerSigningKey = new SymmetricSecurityKey(
-                       Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
-               };
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8!.GetBytes(builder.Configuration["JWTOptions:secretKey"]))
+                };
+
+
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
@@ -172,6 +248,21 @@ namespace CraftoriaApp
                     OnTokenValidated = context =>
                     {
                         Console.WriteLine("✅ Token validated successfully!");
+                        return Task.CompletedTask;
+                    },
+
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        // Only apply to SignalR hub route
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/chat"))
+                        {
+                            context.Token = accessToken;
+                        }
+
                         return Task.CompletedTask;
                     }
                 };
@@ -249,15 +340,30 @@ namespace CraftoriaApp
                 });
 
             }
-                app.UseHttpsRedirection();
 
+            app.UseRouting();          // أول حاجة
+            app.UseCors("AllowAll");   // بعد UseRouting مباشرة
+           // app.UseHttpsRedirection(); ← علّق السطر ده
             app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
+            app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();
             app.Run();
+            //app.UseHttpsRedirection();
+
+            //app.UseAuthentication();
+            //app.UseAuthorization();
+
+
+            //app.MapControllers();
+
+            //// ── SignalR Hub Route ─────────────────────────────────────────────────
+            //// Clients connect to: wss://yourserver/hubs/chat?access_token=<jwt>
+            //// The hub requires [Authorize] so unauthenticated connections are rejected.
+            //app.MapHub<ChatHub>("/hubs/chat")
+            //    .RequireAuthorization();   // belt-and-suspenders on top of [Authorize]
+
+            //app.Run();
         }
     }
 }

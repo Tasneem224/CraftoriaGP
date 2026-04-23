@@ -16,6 +16,14 @@ namespace DomainLayer.Contracts
         ISessionRepository Sessions { get; } // الـ Repo الجديد
         IOrderRepository Orders { get; }
         IChatBotSessionRepository ChatBot { get; }
+
+        /// <summary>
+        /// Chat-message repository — provides all inbox / conversation / read-receipt
+        /// queries that go beyond the capabilities of the generic repository.
+        /// </summary>
+        IMessageRepository Messages { get; }
+
+
         IGenericRepository<VendorWallet, int> VendorWallets { get; }
         IAdminPanelRepo AdminPanel { get; }
         Task<int> SaveChangesAsync();

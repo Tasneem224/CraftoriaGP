@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models;
 using DomainLayer.Models.Categories;
+using DomainLayer.Models.Chat;
 using DomainLayer.Models.ChatBot;
 using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
@@ -24,6 +25,8 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<Message> Messages { get; set; }
+
         public DbSet<ChatBotMessages> ChatBotMessages { get; set; }
         public DbSet<VendorWallet> vendorWallets { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
@@ -99,6 +102,9 @@ namespace Persistance.Data.Contexts
                 .WithMany()
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // ── Message configuration ─────────────────────────────────────────────
+            builder.ApplyConfiguration(new MessageConfiguration());
         }
 
             // 2. Value Converter لكل الـ decimals
