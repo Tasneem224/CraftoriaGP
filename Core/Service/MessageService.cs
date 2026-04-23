@@ -74,7 +74,7 @@ namespace Service
 
                 // ── Persist ───────────────────────────────────────────────────────────
                 await _uow.Messages.AddAsync(message);
-                await _uow.SaveChanges();
+                await _uow.SaveChangesAsync();
 
                 // Reload with navigation properties so the DTO has names/avatars
                 var saved = await _uow.Messages.GetMessageByIdWithUsersAsync(message.Id, senderId)
@@ -163,7 +163,7 @@ namespace Service
 
                 if (updated is null) return false;
 
-                await _uow.SaveChanges();
+                await _uow.SaveChangesAsync();
 
                 // ── Real-time: notify original sender ─────────────────────────────────
                 var notification = new MessageReadNotificationDto
@@ -190,7 +190,7 @@ namespace Service
                 var count = await _uow.Messages
                     .MarkConversationAsReadAsync(currentUserId, otherUserId);
 
-                if (count > 0) await _uow.SaveChanges();
+                if (count > 0) await _uow.SaveChangesAsync();
 
                 return count;
             }
@@ -232,7 +232,7 @@ namespace Service
                 var deleted = await _uow.Messages
                     .SoftDeleteMessageAsync(messageId, currentUserId);
 
-                if (deleted) await _uow.SaveChanges();
+                if (deleted) await _uow.SaveChangesAsync();
 
                 return deleted;
             }
