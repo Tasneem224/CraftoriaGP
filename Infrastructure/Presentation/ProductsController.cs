@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Attributes;
 using Service;
 using ServiceAbstraction;
+using Shared;
+using Shared.Admin_Panel;
 using Shared.Category;
 using Shared.ProductModule;
+using Shared.Search;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,28 +23,28 @@ namespace Presentation.Controllers
 
         //[RedisCache(200)]
         [HttpGetAttribute("GetAllProducts")]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<ActionResult<ApiResponse<IEnumerable<ProductInfoDTO>>>> GetAllProducts()
         {
             var products = await _productService.GetAllProductsAsync();
             return SendSuccessResponse(products);
         }
 
         [HttpGet("GetProductsOfSpecificUser")]
-        public async Task<IActionResult> GetProductsOfSpecificUser(string userId)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ProductInfoDTO>>>> GetProductsOfSpecificUser(string userId)
         {
             var products = await _productService.GetAllProductsOfSpecifiUserAsync(userId);
             return Ok(products);
         }
         //[RedisCache(120)]
         [HttpGet("GetProductDetailsById")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<ApiResponse<ReturnProductDto>>> GetById(int id)
         {
             var product = await _productService.GetProductByIdAsync(id);
             return Ok(product);
         }
         [Authorize]
         [HttpPost("CreateProduct")]
-        public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
+        public async Task<ActionResult<ApiResponse<ReturnProductDto>>> Create([FromForm] CreateProductDto dto)
         {
 
             var result = await _productService.AddProductAsync(dto);
@@ -49,7 +52,7 @@ namespace Presentation.Controllers
         }
         [RedisCache(200)]
         [HttpGet("my-products-count")]
-        public async Task<IActionResult> GetMyProductsCount(string userId)
+        public async Task<ActionResult<ApiResponse<int>>> GetMyProductsCount(string userId)
         {
 
             var count = await _productService.GetProductsCountByUserIdAsync(userId);
@@ -57,7 +60,7 @@ namespace Presentation.Controllers
         }
         [Authorize]
         [HttpPut("UpdateProduct")]
-        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
+        public async Task<ActionResult<ApiResponse<ReturnProductDto>>> Update(int id, [FromForm] UpdateProductDto dto)
         {
            
                 var result = await _productService.UpdateProductAsync(id, dto);
@@ -66,7 +69,7 @@ namespace Presentation.Controllers
         }
         [Authorize]
         [HttpDelete("DeleteProduct")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
         {
             var success = await _productService.DeleteProductAsync(id);
             return Ok(new { message = "Deleted Successfully" });
@@ -74,7 +77,7 @@ namespace Presentation.Controllers
         [RedisCache(200)]
 
         [HttpGet("GetAllProductCategories")]
-        public async Task<IActionResult> GetAllProductCategories()
+        public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetAllProductCategories()
         {
             var result = await _categoryService.GetAllProductCategoriesAsync();
             return SendSuccessResponse(result, "Categories are returned successfully");
@@ -82,14 +85,14 @@ namespace Presentation.Controllers
         //[RedisCache(120)]
 
         [HttpGet("GetAllProductsOfSpecificCategory")]
-        public async Task<IActionResult> GetAllProductCategoriesById(int id)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductsOfCategory>>>> GetAllProductCategoriesById(int id)
         {
             var result = await _productService.GetAllProductsOfSpecificCategory(id);
             return SendSuccessResponse(result, "Categories are returned successfully");
 
         }
         [HttpGet("SearchForProductsInCategory")]
-        public async Task<IActionResult> SearchForProductsInCategory(string query ,int categoryId)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnSearchDto>>>> SearchForProductsInCategory(string query ,int categoryId)
             => SendSuccessResponse(await _productService.SearchInSpecificCategoryAsync(query,categoryId));
     }
 }
