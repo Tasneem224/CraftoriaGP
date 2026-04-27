@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations_Postgres\**" />
+    <EmbeddedResource Remove="Migrations_Postgres\**" />
+    <None Remove="Migrations_Postgres\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Seeding data Files\categories.data.json" />
     <None Remove="Seeding data Files\Raw_Material_Categories.data.json" />
   </ItemGroup>
@@ -39,10 +45,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ServiceAbstraction\ServiceAbstraction.csproj" />
     <ProjectReference Include="..\..\Core\Service\Service.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations_Postgres\" />
   </ItemGroup>
 
 </Project>
