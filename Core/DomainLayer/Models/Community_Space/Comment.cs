@@ -13,7 +13,7 @@ namespace DomainLayer.Models.Community_Space
 
     {
         public string Text { get; set; }= string.Empty;
-        public int AuthorId { get; set; }
+        public string AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
         public ApplicationUser Author { get; set; }
         public int PostId { get; set; }
