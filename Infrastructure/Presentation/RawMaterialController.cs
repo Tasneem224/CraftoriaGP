@@ -4,6 +4,7 @@ using Presentation.Attributes;
 using Presentation.Controllers;
 using Service;
 using ServiceAbstraction;
+using Shared;
 using Shared.Category;
 using Shared.ProductModule;
 using System;
@@ -18,7 +19,7 @@ namespace Presentation
     public class RawMaterialController(IRawMaterialServices _materialService, ICategoryService _categoryService):BaseApiController
     {
         [HttpGet("my-Material-count")]
-        public async Task<IActionResult> GetMyMaterialsCount(string userId)
+        public async Task<ActionResult<ApiResponse<int>>> GetMyMaterialsCount(string userId)
         {
             var count = await _materialService.GetMaterialsCountByUserIdAsync(userId);
             return Ok(new { totalRawMaterial = count });
@@ -26,7 +27,7 @@ namespace Presentation
         [RedisCache(200)]
 
         [HttpGet("GetAllMaterials")]
-        public async Task<IActionResult> GetAllMaterials()
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductDto>>>> GetAllMaterials()
         {
             var products = await _materialService.GetAllMaterialsAsync();
             return Ok(products);
@@ -35,14 +36,14 @@ namespace Presentation
         [RedisCache(120)]
 
         [HttpPost("GetRawMaterialOfSpecificUser")]
-        public async Task<IActionResult> GetAllMaterialsOfSpecifiUser(string userId)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ReturnProductDto>>>> GetAllMaterialsOfSpecifiUser(string userId)
         {
             var products = await _materialService.GetAllMaterialsOfSpecifiUserAsync(userId);
             return Ok(products);
         }
 
         [HttpGet("GetRawMaterialDetails")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<ApiResponse<ReturnProductDto>>> GetById(int id)
         {
             var product = await _materialService.GetMaterialsByIdAsync(id);
             return Ok(product);
@@ -50,7 +51,7 @@ namespace Presentation
 
         [Authorize]
         [HttpPost("CreateRawMaterial")]
-        public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
+        public async Task<ActionResult<ApiResponse<ReturnProductDto>>> Create([FromForm] CreateProductDto dto)
         {
 
             var result = await _materialService.AddMaterialsAsync(dto);
@@ -59,7 +60,7 @@ namespace Presentation
         [Authorize]
 
         [HttpPut("UpdateRawMaterial")]
-        public async Task<IActionResult> Update(int RawMaterialid, [FromForm] UpdateProductDto dto)
+        public async Task<ActionResult<ApiResponse<ReturnProductDto>>> Update(int RawMaterialid, [FromForm] UpdateProductDto dto)
         {
 
                 var result = await _materialService.UpdateMaterialsAsync(RawMaterialid, dto);
@@ -68,7 +69,7 @@ namespace Presentation
         }
         [Authorize]
         [HttpDelete("DeleteRawMaterial")]
-        public async Task<IActionResult> Delete(int RawMaterialid)
+        public async Task<ActionResult<ApiResponse<bool>>> Delete(int RawMaterialid)
         {
             var success = await _materialService.DeleteMaterialsAsync(RawMaterialid);
             return Ok(new { message = "Deleted Successfully" });
@@ -76,7 +77,7 @@ namespace Presentation
         [RedisCache(200)]
 
         [HttpGet("GetAllRawMaterialCategories")]
-        public async Task<IActionResult> GetAllMaterialsCategories()
+        public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetAllMaterialsCategories()
         {
             var result = await _categoryService.GetAllMaterialsCategoriesAsync();
             return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
@@ -84,7 +85,7 @@ namespace Presentation
 
 
         [HttpGet("GetAllRawMaterialsCategoriesById")]
-        public async Task<IActionResult> GetAllMaterialsCategoriesById(int id)
+        public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetAllMaterialsCategoriesById(int id)
         {
             var result = await _categoryService.GetAllMaterialsCategoriesByIdAsync(id);
             return SendSuccessResponse<IEnumerable<CategoryDto>>(result, "Categories are returned successfully");
