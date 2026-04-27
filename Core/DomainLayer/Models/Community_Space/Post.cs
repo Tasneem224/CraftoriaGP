@@ -17,5 +17,7 @@ namespace DomainLayer.Models.Community_Space
         [ForeignKey(nameof(AuthorId))]
         public ApplicationUser Author { get; set; }
 
+        public ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+        public ICollection<PostLoves> Loves { get; set; } = new HashSet<PostLoves>();
     }
 }
