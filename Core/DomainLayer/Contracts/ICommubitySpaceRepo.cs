@@ -14,7 +14,7 @@ namespace DomainLayer.Contracts
         Task<IEnumerable<Post>> GetAllPostsAsync();
         Task<Post> UpdatePostAsync(Post post);
         Task<bool> DeletePostAsync(int postId);
-        Task AddCommentAsync(Comment comment);
+        Task<Comment> AddCommentAsync(Comment comment);
         Task<Comment> GetCommentByIdAsync(int commentId);
         Task<IEnumerable<Comment>> GetRepliesOnCommentByIdAsync(int commentId);
         Task<IEnumerable<Comment>> GetAllCommentsAsync(int PosrId );
