@@ -85,7 +85,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("localConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -164,6 +164,7 @@ namespace CraftoriaApp
             builder.Services.AddScoped<PaymobService>();
             builder.Services.AddScoped<StripeService>();
             builder.Services.AddScoped<PaymentServiceFactory>();
+            builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddHttpClient<IRecommendationService, RecommendationService>(client =>
             {
                 // بنجيب السكشن كامل

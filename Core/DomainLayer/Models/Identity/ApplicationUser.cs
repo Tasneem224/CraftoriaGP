@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Models.ChatBot;
+using DomainLayer.Models.CommunitySpace;
 using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
 using DomainLayer.Models.RawMaterials;
@@ -76,6 +77,11 @@ namespace DomainLayer.Models.Identity
         public ICollection<UserInteraction> ReceivedReviews { get; set; }
 
         public ICollection<ChatBotMessages> ChatBotMessages { get; set; }
+
+        // علاقات الـ Community
+        public ICollection<Post> Posts { get; set; } = new List<Post>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<PostLike> LikedPosts { get; set; } = new List<PostLike>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsBlocked { get; set; } 
     }
