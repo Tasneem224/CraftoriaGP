@@ -64,9 +64,10 @@ namespace Presentation
 
         // 5. جلب كومنتات البوست
         [HttpGet("{id}/comments")]
-        public async Task<ActionResult> GetPostComments(int id)
+        public async Task<ActionResult> GetPostComments(int id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _postService.GetPostCommentsAsync(id);
+            var result = await _postService.GetPostCommentsAsync(id, pageNumber, pageSize);
+
             return SendSuccessResponse(result, "Comments retrieved successfully");
         }
 

@@ -141,24 +141,26 @@ namespace Service
             return response;
         }
 
-        public async Task<IEnumerable<CommentResponseDto>> GetPostCommentsAsync(int postId)
+        public async Task<IEnumerable<CommentResponseDto>> GetPostCommentsAsync(int postId, int pageNumber, int pageSize)
         {
-            // 1. هنجيب الكومنتات اللي تبع البوست ده بس، وهنعمل Include لليوزر عشان نجيب اسمه
+            // 1. هنجيب الكومنتات مع عمل Pagination
             var comments = await _unitOfWork.GetRepository<Comment, int>()
                 .GetAllQueryable()
                 .Where(c => c.PostId == postId)
-                .Include(c => c.User) // لازم تعملي using Microsoft.EntityFrameworkCore; فوق
-                .OrderByDescending(c => c.CreatedAt) // عشان نجيب أحدث كومنت فوق
+                .Include(c => c.User)
+                .OrderByDescending(c => c.CreatedAt) // الأحدث الأول
+                .Skip((pageNumber - 1) * pageSize)   // تخطي الكومنتات اللي شفناها قبل كده
+                .Take(pageSize)                      // هات العدد المطلوب بس (مثلاً 10)
                 .ToListAsync();
 
-            // 2. هنحول الكومنتات دي للـ DTO عشان تترد للموبايل بشكل نضيف
+            // 2. التحويل لـ DTO
             var response = comments.Select(c => new CommentResponseDto
             {
                 Id = c.Id,
                 Text = c.Text,
-                UserName = c.User?.UserName ?? "Unknown User", // لو اليوزر اتمسح أو مش موجود
+                UserName = c.User?.UserName ?? "Unknown User",
                 CreatedAt = c.CreatedAt,
-                TimeAgo = "Just now" // مؤقتاً لحد ما تعملي الـ Helper
+                TimeAgo = "Just now"
             }).ToList();
 
             return response;
