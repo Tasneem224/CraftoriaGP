@@ -2,6 +2,7 @@
 using DomainLayer.Models.Categories;
 using DomainLayer.Models.Chat;
 using DomainLayer.Models.ChatBot;
+using DomainLayer.Models.CommunitySpace;
 using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
@@ -25,6 +26,9 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<PostLike> PostLikes { get; set; }
         public DbSet<Message> Messages { get; set; }
 
         public DbSet<ChatBotMessages> ChatBotMessages { get; set; }
@@ -105,6 +109,9 @@ namespace Persistance.Data.Contexts
 
             // ── Message configuration ─────────────────────────────────────────────
             builder.ApplyConfiguration(new MessageConfiguration());
+            // تعريف مفتاح مركب للايك (اليوزر + البوست)
+            builder.Entity<PostLike>()
+                .HasKey(pl => new { pl.UserId, pl.PostId });
         }
 
             // 2. Value Converter لكل الـ decimals

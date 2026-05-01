@@ -18,7 +18,7 @@ namespace Persistance.Repositories
         private readonly UserManager<ApplicationUser> _userManager;
         public IUserInteractionRepository UserInteractions { get; }
 
-
+        public IPostRepository Posts { get; }
         public IFavouriteRepository Favourites { get; }
 
 
@@ -44,6 +44,7 @@ namespace Persistance.Repositories
             VendorWallets = new GenericRepository<VendorWallet, int>(_dbContext);
             AdminPanel = new AdminPanelRepo(_dbContext, _userManager);
             Messages = new MessageRepository(_dbContext);
+                Posts = new PostRepository(_dbContext);
 
 
 

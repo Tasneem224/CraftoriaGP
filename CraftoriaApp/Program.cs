@@ -164,7 +164,11 @@ namespace CraftoriaApp
             builder.Services.AddScoped<PaymobService>();
             builder.Services.AddScoped<StripeService>();
             builder.Services.AddScoped<PaymentServiceFactory>();
-            builder.Services.AddHttpClient<IRecommendationService, RecommendationService>(client =>
+            // سجل الـ Repository الخاص بالبوستات
+            builder.Services.AddScoped<IPostRepository, PostRepository>();
+
+            // سجل الـ PostService اللي شايل كل الـ Logic
+            builder.Services.AddScoped<IPostService, PostService>(); builder.Services.AddHttpClient<IRecommendationService, RecommendationService>(client =>
             {
                 // بنجيب السكشن كامل
                 var mlSettings = builder.Configuration.GetSection("MLApiSettings");

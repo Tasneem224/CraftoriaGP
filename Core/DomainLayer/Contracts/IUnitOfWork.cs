@@ -22,6 +22,7 @@ namespace DomainLayer.Contracts
         /// queries that go beyond the capabilities of the generic repository.
         /// </summary>
         IMessageRepository Messages { get; }
+        public IPostRepository Posts { get; }
 
 
         IGenericRepository<VendorWallet, int> VendorWallets { get; }
