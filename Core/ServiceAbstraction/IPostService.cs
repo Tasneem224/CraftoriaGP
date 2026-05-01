@@ -18,5 +18,6 @@ namespace ServiceAbstraction
         // إضافة كومنت
         Task<CommentResponseDto> AddCommentAsync(string userId, int postId, string text);
         Task<IEnumerable<CommentResponseDto>> GetPostCommentsAsync(int postId);
+        Task<PostResponseDto> GetPostByIdAsync(int postId, string userId = null);
     }
 }

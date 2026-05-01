@@ -13,39 +13,35 @@ using System.Threading.Tasks;
 namespace Presentation
 {
     [Authorize] // لازم يكون عامل Login
-   
     public class PostsController : BaseApiController
     {
         private readonly IPostService _postService;
 
         public PostsController(IPostService postService) => _postService = postService;
 
-
         // 1. جلب كل البوستات (Pagination)
         [HttpGet]
-        public async Task<IActionResult> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _postService.GetAllPostsAsync(pageNumber, pageSize);
-            return Ok(result);
+            return SendSuccessResponse(result, "Posts retrieved successfully");
         }
 
         // 2. عمل لايك أو إلغاؤه
         [HttpPost("{id}/like")]
-        public async Task<IActionResult> ToggleLike(int id)
+        public async Task<ActionResult> ToggleLike(int id)
         {
             // بنجيب الـ UserId من الـ Token بتاع الشخص اللي عامل Log in
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
             var result = await _postService.ToggleLikeAsync(userId, id);
-            return Ok(result); // هيرجع LikeResponseDto المنظم
+            return SendSuccessResponse(result, "Post like toggled successfully");
         }
-
-
 
         // 3. إضافة كومنت جديد
         [HttpPost("{id}/comments")]
-        public async Task<IActionResult> AddComment(int id, [FromBody] string text)
+        public async Task<ActionResult> AddComment(int id, [FromBody] string text)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
@@ -53,32 +49,41 @@ namespace Presentation
             if (string.IsNullOrWhiteSpace(text)) return BadRequest("Comment text cannot be empty");
 
             var result = await _postService.AddCommentAsync(userId, id, text);
-            return Ok(result); // هيرجع CommentResponseDto اللي فيه بيانات اليوزر والوقت
+            return SendSuccessResponse(result, "Comment added successfully");
         }
 
+        // 4. إنشاء بوست جديد
         [HttpPost]
-        public async Task<IActionResult> CreatePost([FromForm] PostCreateDto dto)
+        public async Task<ActionResult> CreatePost([FromForm] PostCreateDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // جلب الـ ID بتاع اليوزر اللي عامل Login
+
             var result = await _postService.CreatePostAsync(userId, dto);
-            return Ok(result);
+            return SendSuccessResponse(result, "Post is created successfully");
         }
 
-        [HttpPost("{id}/like")]
-        public async Task<IActionResult> LikePost(int id)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _postService.ToggleLikeAsync(userId, id);
-            return Ok(new { isLiked = result });
-        }
-
+        // 5. جلب كومنتات البوست
         [HttpGet("{id}/comments")]
-        public async Task<IActionResult> GetPostComments(int id)
+        public async Task<ActionResult> GetPostComments(int id)
         {
             var result = await _postService.GetPostCommentsAsync(id);
+            return SendSuccessResponse(result, "Comments retrieved successfully");
+        }
 
-            // مش محتاجين نتشيك إذا كان البوست موجود ولا لأ، لو مش موجود هيرجع ليستة فاضية وده صح
-            return Ok(result);
+        // 6. جلب تفاصيل بوست معين
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetPostById(int id)
+        {
+            // بنجيب الـ UserId عشان نبعته للـ Service فتعرف تحسب الـ IsLikedByMe
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _postService.GetPostByIdAsync(id, userId);
+
+            // لو الـ Service رجعت null معناه إن البوست اتمسح أو مش موجود
+            if (result == null)
+                return NotFound(new { message = "Post not found" });
+
+            return SendSuccessResponse(result, "Post details retrieved successfully");
         }
     }
 }

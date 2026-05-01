@@ -31,19 +31,42 @@ namespace Service
 
         public async Task<PostResponseDto> CreatePostAsync(string userId, PostCreateDto dto)
         {
-            var uploadResult = await _cloudinary.UploadAsync(dto.Image)??null;
+            // 1. رفع الصورة بأمان (لو الموبايل بعت صورة فعلاً)
+            string? imageUrl = null;
+            if (dto.Image != null)
+            {
+                var uploadResult = await _cloudinary.UploadAsync(dto.Image);
+                imageUrl = uploadResult?.ToString();
+            }
 
+            // 2. جلب بيانات اليوزر عشان محتاجين اسمه في الـ Response
+            var user = await _userManager.FindByIdAsync(userId);
+
+            // 3. تكريت البوست وإعطائه الوقت الحالي
             var post = new Post
             {
                 Content = dto.Content,
-                ImageUrl = uploadResult.ToString(),
-                UserId = userId
+                ImageUrl = imageUrl,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow // <-- هنا حلينا مشكلة الوقت
             };
 
-            await _unitOfWork.Posts.AddAsync(post); // استخدام الـ UnitOfWork
-            await _unitOfWork.SaveChangesAsync(); // الحفظ النهائي
+            // 4. الحفظ في الداتابيز
+            await _unitOfWork.Posts.AddAsync(post);
+            await _unitOfWork.SaveChangesAsync();
 
-            return new PostResponseDto { Id = post.Id, Content = post.Content };
+            // 5. إرجاع الـ DTO متكامل ومفيش فيه حاجة Null
+            return new PostResponseDto
+            {
+                Id = post.Id,
+                Content = post.Content,
+                ImageUrl = post.ImageUrl,          // <-- هنا حلينا مشكلة الصورة
+                UserName = user?.UserName,         // <-- هنا حلينا مشكلة الاسم
+                CreatedAt = post.CreatedAt,        // <-- تمرير الوقت للـ Response
+                LikesCount = 0,                    // بوست لسه متكريت فاكيد اللايكات 0
+                CommentsCount = 0,                 // وأكيد الكومنتات 0
+                IsLikedByMe = false                // طبيعي لسه معملتلوش لايك
+            };
         }
 
         public async Task<bool> ToggleLikeAsync(string userId, int postId)
@@ -139,6 +162,37 @@ namespace Service
             }).ToList();
 
             return response;
+        }
+
+
+
+
+        public async Task<PostResponseDto> GetPostByIdAsync(int postId, string userId = null)
+        {
+            // 1. هنجيب البوست مع الداتا المرتبطة بيه (اليوزر، اللايكات، الكومنتات)
+            var post = await _unitOfWork.GetRepository<Post, int>()
+                .GetAllQueryable()
+                .Include(p => p.User)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            // 2. لو البوست مش موجود، هنرجع null عشان الكنترولر يتصرف
+            if (post == null) return null;
+
+            // 3. تحويل البوست لـ PostResponseDto
+            return new PostResponseDto
+            {
+                Id = post.Id,
+                Content = post.Content,
+                ImageUrl = post.ImageUrl,
+                CreatedAt = post.CreatedAt,
+                UserName = post.User?.UserName ?? "Unknown User",
+                LikesCount = post.Likes?.Count ?? 0,
+                CommentsCount = post.Comments?.Count ?? 0,
+                // بنتشيك هل اليوزر ده موجود جوه ليستة اللايكات بتاعة البوست ولا لأ
+                IsLikedByMe = userId != null && post.Likes != null && post.Likes.Any(l => l.UserId == userId)
+            };
         }
     }
 }

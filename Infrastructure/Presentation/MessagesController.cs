@@ -9,274 +9,278 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+
 namespace Presentation
 {
-    
+    /// <summary>
+    /// REST API for the chat system.
+    /// All endpoints require a valid JWT — [Authorize] is at class level.
+    ///
+    /// FK-BUG FIX
+    /// ──────────
+    /// SenderId is NEVER read from the request body.  It is extracted from
+    /// ClaimTypes.NameIdentifier (the "sub" claim set by your JWT middleware).
+    /// This guarantees the ID exists in AspNetUsers, eliminating the FK conflict.
+    /// </summary>
+
+    [Authorize]
+    public class MessagesController : BaseApiController
+    {
+        private readonly IMessageService _messageService;
+
+        public MessagesController(IMessageService messageService)
+        {
+            _messageService = messageService;
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // HELPER — extract current user's Id safely from JWT claims
+        // ════════════════════════════════════════════════════════════════════════
 
         /// <summary>
-        /// REST API for the chat system.
-        /// All endpoints require a valid JWT — [Authorize] is at class level.
-        ///
-        /// FK-BUG FIX
-        /// ──────────
-        /// SenderId is NEVER read from the request body.  It is extracted from
-        /// ClaimTypes.NameIdentifier (the "sub" claim set by your JWT middleware).
-        /// This guarantees the ID exists in AspNetUsers, eliminating the FK conflict.
+        /// Reads the authenticated user's ID from the NameIdentifier claim.
+        /// Returns null only if the JWT is somehow missing the claim — in
+        /// practice [Authorize] prevents any unauthenticated call from reaching here.
         /// </summary>
-        
-        [Authorize]
-        public class MessagesController : BaseApiController
-    {
-            private readonly IMessageService _messageService;
+        private string? CurrentUserId =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            public MessagesController(IMessageService messageService)
-            {
-                _messageService = messageService;
-            }
+        // ════════════════════════════════════════════════════════════════════════
+        // 1. POST /api/messages/send
+        // ════════════════════════════════════════════════════════════════════════
 
-            // ════════════════════════════════════════════════════════════════════════
-            // HELPER — extract current user's Id safely from JWT claims
-            // ════════════════════════════════════════════════════════════════════════
+        /// <summary>
+        /// Sends a message from the authenticated user to a specified receiver.
+        /// The message is persisted to the database AND pushed in real-time to
+        /// the receiver via SignalR.
+        /// </summary>
+        [HttpPost("send")]
+        [ProducesResponseType(typeof(MessageResponseDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        public async Task<ActionResult> SendMessage([FromBody] SendMessageDto dto)
+        {
+            var senderId = CurrentUserId;
+            if (senderId is null)
+                return Unauthorized(new { message = "Could not determine sender identity from token." });
 
-            /// <summary>
-            /// Reads the authenticated user's ID from the NameIdentifier claim.
-            /// Returns null only if the JWT is somehow missing the claim — in
-            /// practice [Authorize] prevents any unauthenticated call from reaching here.
-            /// </summary>
-            private string? CurrentUserId =>
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 1. POST /api/messages/send
-            // ════════════════════════════════════════════════════════════════════════
+            var result = await _messageService.SendMessageAsync(senderId, dto);
 
-            /// <summary>
-            /// Sends a message from the authenticated user to a specified receiver.
-            /// The message is persisted to the database AND pushed in real-time to
-            /// the receiver via SignalR.
-            /// </summary>
-            [HttpPost("send")]
-            [ProducesResponseType(typeof(MessageResponseDto), 201)]
-            [ProducesResponseType(400)]
-            [ProducesResponseType(401)]
-            public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
-            {
-                var senderId = CurrentUserId;
-                if (senderId is null)
-                    return Unauthorized(new { message = "Could not determine sender identity from token." });
+            return SendSuccessResponse(result, "Message sent successfully");
+        }
 
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+        // ════════════════════════════════════════════════════════════════════════
+        // 2. GET /api/messages/conversation/{otherUserId}
+        // ════════════════════════════════════════════════════════════════════════
 
-                var result = await _messageService.SendMessageAsync(senderId, dto);
+        /// <summary>
+        /// Returns a paginated, chronological list of messages between the
+        /// current user and the specified other user.
+        /// Query params: pageNumber (default 1), pageSize (default 20, max 50).
+        /// </summary>
+        [HttpGet("conversation/{otherUserId}")]
+        [ProducesResponseType(typeof(PagedResultDto<MessageResponseDto>), 200)]
+        [ProducesResponseType(401)]
+        public async Task<ActionResult> GetConversation(
+            string otherUserId,
+            [FromQuery] ConversationRequestDto request)
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-                // 201 Created with a link to retrieve the message
-                return CreatedAtAction(
-                    nameof(GetMessageById),
-                    new { messageId = result.Id },
-                    result);
-            }
+            var result = await _messageService.GetConversationAsync(
+                currentUserId, otherUserId, request);
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 2. GET /api/messages/conversation/{otherUserId}
-            // ════════════════════════════════════════════════════════════════════════
+            return SendSuccessResponse(result, "Conversation retrieved successfully");
+        }
 
-            /// <summary>
-            /// Returns a paginated, chronological list of messages between the
-            /// current user and the specified other user.
-            /// Query params: pageNumber (default 1), pageSize (default 20, max 50).
-            /// </summary>
-            [HttpGet("conversation/{otherUserId}")]
-            [ProducesResponseType(typeof(PagedResultDto<MessageResponseDto>), 200)]
-            [ProducesResponseType(401)]
-            public async Task<IActionResult> GetConversation(
-                string otherUserId,
-                [FromQuery] ConversationRequestDto request)
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+        // ════════════════════════════════════════════════════════════════════════
+        // 3. GET /api/messages/inbox
+        // ════════════════════════════════════════════════════════════════════════
 
-                var result = await _messageService.GetConversationAsync(
-                    currentUserId, otherUserId, request);
+        /// <summary>
+        /// Returns the inbox: the latest message from each distinct conversation
+        /// the current user participates in, with unread counts — mirrors the
+        /// WhatsApp/Telegram home screen UX shown in the provided mockups.
+        /// </summary>
+        [HttpGet("inbox")]
+        [ProducesResponseType(typeof(IEnumerable<InboxItemDto>), 200)]
+        [ProducesResponseType(401)]
+        public async Task<ActionResult> GetInbox()
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-                return Ok(result);
-            }
+            var result = await _messageService.GetInboxAsync(currentUserId);
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 3. GET /api/messages/inbox
-            // ════════════════════════════════════════════════════════════════════════
+            return SendSuccessResponse(result, "Inbox retrieved successfully");
+        }
 
-            /// <summary>
-            /// Returns the inbox: the latest message from each distinct conversation
-            /// the current user participates in, with unread counts — mirrors the
-            /// WhatsApp/Telegram home screen UX shown in the provided mockups.
-            /// </summary>
-            [HttpGet("inbox")]
-            [ProducesResponseType(typeof(IEnumerable<InboxItemDto>), 200)]
-            [ProducesResponseType(401)]
-            public async Task<IActionResult> GetInbox()
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+        // ════════════════════════════════════════════════════════════════════════
+        // 4. PUT /api/messages/{messageId}/read
+        // ════════════════════════════════════════════════════════════════════════
 
-                var result = await _messageService.GetInboxAsync(currentUserId);
-                return Ok(result);
-            }
+        /// <summary>
+        /// Marks a single message as read.
+        /// The database is updated AND a real-time read-receipt is pushed to the
+        /// original sender via SignalR ("MessageRead" event).
+        /// Only the RECEIVER of the message can call this — the service enforces it.
+        /// </summary>
+        [HttpPut("{messageId:int}/read")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> MarkAsRead(int messageId)
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 4. PUT /api/messages/{messageId}/read
-            // ════════════════════════════════════════════════════════════════════════
+            var success = await _messageService.MarkMessageAsReadAsync(messageId, currentUserId);
 
-            /// <summary>
-            /// Marks a single message as read.
-            /// The database is updated AND a real-time read-receipt is pushed to the
-            /// original sender via SignalR ("MessageRead" event).
-            /// Only the RECEIVER of the message can call this — the service enforces it.
-            /// </summary>
-            [HttpPut("{messageId:int}/read")]
-            [ProducesResponseType(204)]
-            [ProducesResponseType(400)]
-            [ProducesResponseType(401)]
-            [ProducesResponseType(404)]
-            public async Task<IActionResult> MarkAsRead(int messageId)
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+            if (!success)
+                return NotFound(new { message = "Message not found or not addressed to you." });
 
-                var success = await _messageService.MarkMessageAsReadAsync(messageId, currentUserId);
+            return SendSuccessResponse(success, "Message marked as read successfully");
+        }
 
-                return success ? NoContent() : NotFound(new { message = "Message not found or not addressed to you." });
-            }
+        // ════════════════════════════════════════════════════════════════════════
+        // 5. PUT /api/messages/conversation/{otherUserId}/read-all
+        // ════════════════════════════════════════════════════════════════════════
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 5. PUT /api/messages/conversation/{otherUserId}/read-all
-            // ════════════════════════════════════════════════════════════════════════
+        /// <summary>
+        /// Bulk-marks ALL unread messages from a specific user as read.
+        /// Call this when the user opens a conversation screen.
+        /// </summary>
+        [HttpPut("conversation/{otherUserId}/read-all")]
+        [ProducesResponseType(typeof(object), 200)]
+        [ProducesResponseType(401)]
+        public async Task<ActionResult> MarkConversationAsRead(string otherUserId)
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-            /// <summary>
-            /// Bulk-marks ALL unread messages from a specific user as read.
-            /// Call this when the user opens a conversation screen.
-            /// </summary>
-            [HttpPut("conversation/{otherUserId}/read-all")]
-            [ProducesResponseType(typeof(object), 200)]
-            [ProducesResponseType(401)]
-            public async Task<IActionResult> MarkConversationAsRead(string otherUserId)
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+            var count = await _messageService.MarkConversationAsReadAsync(currentUserId, otherUserId);
 
-                var count = await _messageService.MarkConversationAsReadAsync(currentUserId, otherUserId);
-                return Ok(new { markedAsRead = count });
-            }
+            return SendSuccessResponse(new { markedAsRead = count }, "Conversation marked as read successfully");
+        }
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 6. GET /api/messages/unread-count
-            // ════════════════════════════════════════════════════════════════════════
+        // ════════════════════════════════════════════════════════════════════════
+        // 6. GET /api/messages/unread-count
+        // ════════════════════════════════════════════════════════════════════════
 
-            /// <summary>
-            /// Returns the total number of unread messages for the current user.
-            /// Useful for the global notification badge / dot on the Messages tab icon.
-            /// </summary>
-            [HttpGet("unread-count")]
-            [ProducesResponseType(typeof(object), 200)]
-            [ProducesResponseType(401)]
-            public async Task<IActionResult> GetUnreadCount()
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+        /// <summary>
+        /// Returns the total number of unread messages for the current user.
+        /// Useful for the global notification badge / dot on the Messages tab icon.
+        /// </summary>
+        [HttpGet("unread-count")]
+        [ProducesResponseType(typeof(object), 200)]
+        [ProducesResponseType(401)]
+        public async Task<ActionResult> GetUnreadCount()
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-                var count = await _messageService.GetTotalUnreadCountAsync(currentUserId);
-                return Ok(new { unreadCount = count });
-            }
+            var count = await _messageService.GetTotalUnreadCountAsync(currentUserId);
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 7. GET /api/messages/unread-count/per-sender
-            // ════════════════════════════════════════════════════════════════════════
+            return SendSuccessResponse(new { unreadCount = count }, "Unread count retrieved successfully");
+        }
 
-            /// <summary>
-            /// Returns unread message counts grouped by sender ID.
-            /// Used to populate the per-conversation unread badges in the inbox.
-            /// </summary>
-            [HttpGet("unread-count/per-sender")]
-            [ProducesResponseType(typeof(Dictionary<string, int>), 200)]
-            [ProducesResponseType(401)]
-            public async Task<IActionResult> GetUnreadCountPerSender()
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+        // ════════════════════════════════════════════════════════════════════════
+        // 7. GET /api/messages/unread-count/per-sender
+        // ════════════════════════════════════════════════════════════════════════
 
-                var result = await _messageService.GetUnreadCountPerSenderAsync(currentUserId);
-                return Ok(result);
-            }
+        /// <summary>
+        /// Returns unread message counts grouped by sender ID.
+        /// Used to populate the per-conversation unread badges in the inbox.
+        /// </summary>
+        [HttpGet("unread-count/per-sender")]
+        [ProducesResponseType(typeof(Dictionary<string, int>), 200)]
+        [ProducesResponseType(401)]
+        public async Task<ActionResult> GetUnreadCountPerSender()
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 8. GET /api/messages/{messageId}
-            // ════════════════════════════════════════════════════════════════════════
+            var result = await _messageService.GetUnreadCountPerSenderAsync(currentUserId);
 
-            /// <summary>
-            /// Retrieves a single message by ID.
-            /// Returns 404 if the message does not belong to the current user.
-            /// </summary>
-            [HttpGet("{messageId:int}")]
-            [ProducesResponseType(typeof(MessageResponseDto), 200)]
-            [ProducesResponseType(401)]
-            [ProducesResponseType(404)]
-            public async Task<IActionResult> GetMessageById(int messageId)
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+            return SendSuccessResponse(result, "Unread count per sender retrieved successfully");
+        }
 
-                var result = await _messageService.GetMessageByIdAsync(messageId, currentUserId);
+        // ════════════════════════════════════════════════════════════════════════
+        // 8. GET /api/messages/{messageId}
+        // ════════════════════════════════════════════════════════════════════════
 
-                return result is null
-                    ? NotFound(new { message = "Message not found." })
-                    : Ok(result);
-            }
+        /// <summary>
+        /// Retrieves a single message by ID.
+        /// Returns 404 if the message does not belong to the current user.
+        /// </summary>
+        [HttpGet("{messageId:int}")]
+        [ProducesResponseType(typeof(MessageResponseDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> GetMessageById(int messageId)
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 9. DELETE /api/messages/{messageId}
-            // ════════════════════════════════════════════════════════════════════════
+            var result = await _messageService.GetMessageByIdAsync(messageId, currentUserId);
 
-            /// <summary>
-            /// Soft-deletes a message (sets IsDeleted = true in the database).
-            /// Only the original SENDER may delete their own messages.
-            /// The global query filter in MessageConfiguration ensures deleted messages
-            /// never appear in any subsequent query.
-            /// </summary>
-            [HttpDelete("{messageId:int}")]
-            [ProducesResponseType(204)]
-            [ProducesResponseType(401)]
-            [ProducesResponseType(403)]
-            [ProducesResponseType(404)]
-            public async Task<IActionResult> DeleteMessage(int messageId)
-            {
-                var currentUserId = CurrentUserId;
-                if (currentUserId is null) return Unauthorized();
+            if (result is null)
+                return NotFound(new { message = "Message not found." });
 
-                var success = await _messageService.DeleteMessageAsync(messageId, currentUserId);
+            return SendSuccessResponse(result, "Message retrieved successfully");
+        }
 
-                return success
-                    ? NoContent()
-                    : NotFound(new { message = "Message not found or you are not the sender." });
-            }
+        // ════════════════════════════════════════════════════════════════════════
+        // 9. DELETE /api/messages/{messageId}
+        // ════════════════════════════════════════════════════════════════════════
 
-            // ════════════════════════════════════════════════════════════════════════
-            // 10. GET /api/messages/online-status/{userId}
-            // ════════════════════════════════════════════════════════════════════════
+        /// <summary>
+        /// Soft-deletes a message (sets IsDeleted = true in the database).
+        /// Only the original SENDER may delete their own messages.
+        /// The global query filter in MessageConfiguration ensures deleted messages
+        /// never appear in any subsequent query.
+        /// </summary>
+        [HttpDelete("{messageId:int}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> DeleteMessage(int messageId)
+        {
+            var currentUserId = CurrentUserId;
+            if (currentUserId is null) return Unauthorized();
 
-            /// <summary>
-            /// Checks whether a specific user currently has an active SignalR connection.
-            /// Uses the static presence dictionary in ChatHub.
-            /// </summary>
-            [HttpGet("online-status/{userId}")]
-            [ProducesResponseType(typeof(object), 200)]
-            [ProducesResponseType(401)]
-            public IActionResult GetOnlineStatus(string userId)
-            {
-                if (CurrentUserId is null) return Unauthorized();
+            var success = await _messageService.DeleteMessageAsync(messageId, currentUserId);
 
-                var isOnline = Presentation.Hubs.ChatHub.IsUserOnline(userId);
-                return Ok(new { userId, isOnline });
-            }
+            if (!success)
+                return NotFound(new { message = "Message not found or you are not the sender." });
+
+            return SendSuccessResponse(success, "Message deleted successfully");
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // 10. GET /api/messages/online-status/{userId}
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Checks whether a specific user currently has an active SignalR connection.
+        /// Uses the static presence dictionary in ChatHub.
+        /// </summary>
+        [HttpGet("online-status/{userId}")]
+        [ProducesResponseType(typeof(object), 200)]
+        [ProducesResponseType(401)]
+        public ActionResult GetOnlineStatus(string userId)
+        {
+            if (CurrentUserId is null) return Unauthorized();
+
+            var isOnline = Presentation.Hubs.ChatHub.IsUserOnline(userId);
+
+            return SendSuccessResponse(new { userId, isOnline }, "Online status retrieved successfully");
         }
     }
-
+}
