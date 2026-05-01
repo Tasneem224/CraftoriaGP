@@ -42,6 +42,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NameAr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -59,7 +62,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Categories.Raw_Category_Material", b =>
@@ -79,6 +82,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NameAr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -96,63 +102,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RawMaterialCategories");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.Chat.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReceiverId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId")
-                        .HasDatabaseName("IX_Messages_ReceiverId");
-
-                    b.HasIndex("SenderId")
-                        .HasDatabaseName("IX_Messages_SenderId");
-
-                    b.HasIndex("SenderId", "ReceiverId", "CreatedAt")
-                        .HasDatabaseName("IX_Messages_Conversation");
-
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("RawMaterialCategories", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.ChatBot.ChatBotMessages", b =>
@@ -182,7 +132,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatBotMessages");
+                    b.ToTable("ChatBotMessages", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.EmailVerificationCodes", b =>
@@ -221,7 +171,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailVerificationCodes");
+                    b.ToTable("EmailVerificationCodes", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Favourite.Favourite", b =>
@@ -241,6 +191,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -258,7 +211,7 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("UserId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("Favourites");
+                    b.ToTable("Favourites", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Identity.ApplicationUser", b =>
@@ -279,6 +232,9 @@ namespace Persistance.Identity.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -297,6 +253,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -386,6 +345,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
@@ -398,7 +360,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("vendorWallets");
+                    b.ToTable("vendorWallets", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Interaction.UserInteraction", b =>
@@ -419,6 +381,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
                     b.Property<int?>("ProductId")
@@ -463,7 +428,7 @@ namespace Persistance.Identity.Migrations
                         .IsUnique()
                         .HasFilter("[TargetUserId] IS NOT NULL");
 
-                    b.ToTable("UserInteractions");
+                    b.ToTable("UserInteractions", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Items.Item", b =>
@@ -492,6 +457,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
                     b.Property<string>("NameAr")
@@ -544,6 +512,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -551,7 +522,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("ItemTags");
+                    b.ToTable("ItemTags", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Items.Tag", b =>
@@ -571,6 +542,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -584,7 +558,7 @@ namespace Persistance.Identity.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Order.Address_Book", b =>
@@ -614,6 +588,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -635,7 +612,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AddressBooks");
+                    b.ToTable("AddressBooks", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Order.DeliveryMethod", b =>
@@ -666,6 +643,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -680,7 +660,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeliveryMethods");
+                    b.ToTable("DeliveryMethods", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Order.Order", b =>
@@ -702,6 +682,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset>("OrderDate")
@@ -736,7 +719,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("DeliveryMethodId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.Order.OrderItem", b =>
@@ -761,6 +744,9 @@ namespace Persistance.Identity.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
                     b.Property<Guid?>("OrderId")
@@ -788,7 +774,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.session.ExpertAvailability", b =>
@@ -818,6 +804,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -828,7 +817,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("ExpertId");
 
-                    b.ToTable("ExpertAvailabilities");
+                    b.ToTable("ExpertAvailabilities", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.session.ExpertService", b =>
@@ -861,6 +850,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -879,7 +871,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("ExpertId");
 
-                    b.ToTable("ExpertServices");
+                    b.ToTable("ExpertServices", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.session.Session", b =>
@@ -919,6 +911,9 @@ namespace Persistance.Identity.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("MeetingLink")
                         .HasColumnType("nvarchar(max)");
 
@@ -941,7 +936,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("ExpertServiceId");
 
-                    b.ToTable("Sessions");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1001,7 +996,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.RawMaterials.RawMaterial", b =>
@@ -1019,26 +1014,7 @@ namespace Persistance.Identity.Migrations
 
                     b.HasIndex("supplierId");
 
-                    b.ToTable("RawMaterials");
-                });
-
-            modelBuilder.Entity("DomainLayer.Models.Chat.Message", b =>
-                {
-                    b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DomainLayer.Models.Identity.ApplicationUser", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
+                    b.ToTable("RawMaterials", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Models.ChatBot.ChatBotMessages", b =>
@@ -1126,7 +1102,7 @@ namespace Persistance.Identity.Migrations
                         .HasForeignKey("DeliveryMethodId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.OwnsOne("DomainLayer.Models.Order.Address", "ShippingAddress", b1 =>
+                    b.OwnsOne("DomainLayer.Models.Order.Order.ShippingAddress#DomainLayer.Models.Order.Address", "ShippingAddress", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
                                 .HasColumnType("uniqueidentifier");
@@ -1153,7 +1129,7 @@ namespace Persistance.Identity.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Orders");
+                            b1.ToTable("Orders", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -1172,7 +1148,7 @@ namespace Persistance.Identity.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.OwnsOne("DomainLayer.Models.Order.ItemInOrderItem", "Item", b1 =>
+                    b.OwnsOne("DomainLayer.Models.Order.OrderItem.Item#DomainLayer.Models.Order.ItemInOrderItem", "Item", b1 =>
                         {
                             b1.Property<int>("OrderItemId")
                                 .HasColumnType("int");
@@ -1190,7 +1166,7 @@ namespace Persistance.Identity.Migrations
 
                             b1.HasKey("OrderItemId");
 
-                            b1.ToTable("OrderItems");
+                            b1.ToTable("OrderItems", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderItemId");
