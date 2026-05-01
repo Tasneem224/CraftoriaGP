@@ -20,6 +20,42 @@ namespace Presentation
 
         public PostsController(IPostService postService) => _postService = postService;
 
+
+        // 1. جلب كل البوستات (Pagination)
+        [HttpGet]
+        public async Task<IActionResult> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _postService.GetAllPostsAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        // 2. عمل لايك أو إلغاؤه
+        [HttpPost("{id}/like")]
+        public async Task<IActionResult> ToggleLike(int id)
+        {
+            // بنجيب الـ UserId من الـ Token بتاع الشخص اللي عامل Log in
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var result = await _postService.ToggleLikeAsync(userId, id);
+            return Ok(result); // هيرجع LikeResponseDto المنظم
+        }
+
+
+
+        // 3. إضافة كومنت جديد
+        [HttpPost("{id}/comments")]
+        public async Task<IActionResult> AddComment(int id, [FromBody] string text)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(text)) return BadRequest("Comment text cannot be empty");
+
+            var result = await _postService.AddCommentAsync(userId, id, text);
+            return Ok(result); // هيرجع CommentResponseDto اللي فيه بيانات اليوزر والوقت
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreatePost([FromForm] PostCreateDto dto)
         {
@@ -36,11 +72,12 @@ namespace Presentation
             return Ok(new { isLiked = result });
         }
 
-        [HttpPost("{id}/comments")]
-        public async Task<IActionResult> AddComment(int id, [FromBody] string text)
+        [HttpGet("{id}/comments")]
+        public async Task<IActionResult> GetPostComments(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _postService.AddCommentAsync(userId, id, text);
+            var result = await _postService.GetPostCommentsAsync(id);
+
+            // مش محتاجين نتشيك إذا كان البوست موجود ولا لأ، لو مش موجود هيرجع ليستة فاضية وده صح
             return Ok(result);
         }
     }

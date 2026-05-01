@@ -2,6 +2,7 @@
 using DomainLayer.Models.CommunitySpace;
 using DomainLayer.Models.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ServiceAbstraction;
 using Shared.CommunityModule;
 using Shared.IdentityModule;
@@ -112,6 +113,29 @@ namespace Service
                 LikesCount = post.Likes?.Count ?? 0,
                 CommentsCount = post.Comments?.Count ?? 0,
                 IsLikedByMe = false // مؤقتاً، عشان نعرف هي بـ true محتاجين نمرر الـ userId للميثود دي قدام
+            }).ToList();
+
+            return response;
+        }
+
+        public async Task<IEnumerable<CommentResponseDto>> GetPostCommentsAsync(int postId)
+        {
+            // 1. هنجيب الكومنتات اللي تبع البوست ده بس، وهنعمل Include لليوزر عشان نجيب اسمه
+            var comments = await _unitOfWork.GetRepository<Comment, int>()
+                .GetAllQueryable()
+                .Where(c => c.PostId == postId)
+                .Include(c => c.User) // لازم تعملي using Microsoft.EntityFrameworkCore; فوق
+                .OrderByDescending(c => c.CreatedAt) // عشان نجيب أحدث كومنت فوق
+                .ToListAsync();
+
+            // 2. هنحول الكومنتات دي للـ DTO عشان تترد للموبايل بشكل نضيف
+            var response = comments.Select(c => new CommentResponseDto
+            {
+                Id = c.Id,
+                Text = c.Text,
+                UserName = c.User?.UserName ?? "Unknown User", // لو اليوزر اتمسح أو مش موجود
+                CreatedAt = c.CreatedAt,
+                TimeAgo = "Just now" // مؤقتاً لحد ما تعملي الـ Helper
             }).ToList();
 
             return response;
