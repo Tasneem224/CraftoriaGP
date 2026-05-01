@@ -1,4 +1,5 @@
-﻿using Shared.IdentityModule;
+﻿using Shared.Admin_Panel;
+using Shared.IdentityModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace ServiceAbstraction
 {
     public interface IAuthenticationService
     {
+        Task<ReturnUserDTO> RegisterAdminAsync(RegisterAdmintDto RegisterExpertDto);
+        Task<ReturnUserDTO> LoginAdminAsync(LoginDTO loginDto);
         Task<ReturnUserDTO> RegisterAsync(RegisterDto RegisterDto);
         Task<ReturnUserDTO> LoginAsync(LoginDTO loginDto);
         Task<string> ForgotPasswordAsync(string email);

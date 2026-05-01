@@ -7,6 +7,7 @@ using Shared;
 using Shared.Account;
 using Shared.Admin_Panel;
 using Shared.Category;
+using Shared.IdentityModule;
 using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
@@ -18,8 +19,16 @@ namespace Presentation
 {
     [AllowAnonymous]
 
-    public class AdminPanelController(IServiceManager _serviceManager) : BaseApiController
+    public class AdminPanelController(IAuthenticationService _authService,IServiceManager _serviceManager) : BaseApiController
     {
+        #region Auth Admin
+        [HttpPost("Admin-Register")]
+        public async Task<ActionResult<ApiResponse<ReturnUserDTO>>> RegisterAsync(RegisterAdmintDto admintDto)=>
+            SendSuccessResponse(await _authService.RegisterAdminAsync(admintDto));
+        [HttpPost("Admin-/Login")]
+        public async Task<ActionResult<ApiResponse<ReturnUserDTO>>> LoginAdminAsync(LoginDTO admintDto)=>
+            SendSuccessResponse(await _authService.LoginAdminAsync(admintDto));
+        #endregion
 
         #region Products
         [HttpGet("products")]

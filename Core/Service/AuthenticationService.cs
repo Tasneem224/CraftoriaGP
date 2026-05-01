@@ -17,19 +17,104 @@
     using System.Threading.Tasks;
 using Google.Apis.Auth;
 using static System.Net.WebRequestMethods;
+using Shared.Admin_Panel;
 
 namespace Service
     {
         public class AuthenticationService(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinary, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationRepo) : IAuthenticationService
         {
-          
-            public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
+            public async Task<ReturnUserDTO> RegisterAdminAsync(RegisterAdmintDto adminDto)
+            {
+            var profileImagePath="";
+
+            try
+            {
+
+                var existingUser = await _userManager.FindByEmailAsync(adminDto.Email);
+                if (existingUser is not null)
+                {
+                    throw new UserAlreadyExistsException(adminDto.Email);
+                }
+                var userName = CreatingUserName(adminDto.Email);
+                profileImagePath = adminDto.Image is not null ? await _cloudinary.UploadAsync(adminDto.Image) : null;
+
+                var user = new ApplicationUser
+                {
+                    Email=adminDto.Email,
+                    UserName=userName,
+                    FirstName=adminDto.FirstName,
+                    SecondName=adminDto.SecondName,
+                    NormalizedUserName=userName,
+                    NormalizedEmail=adminDto.Email,
+                    ProfileImage=profileImagePath,
+                    DisplayName=adminDto.FirstName+" "+adminDto.SecondName,
+                    
+                    
+
+                };
+                var result =await _userManager.CreateAsync(user, adminDto.Password);
+                if (result.Succeeded) {
+                    await _userManager.AddToRoleAsync(user, "Admin");
+                    return new ReturnUserDTO
+                    {
+                        Email = user.Email,
+                        UserName = user.UserName,
+                        Token = await CreateTokenAsync(user)
+                    };
+
+                }
+                else
+                {
+                    throw new DomainLayer.Exceptions.InvalidOperationExceptionCustome(result.Errors.Select(e => e.Description).ToList());
+                }
+            }
+            catch (Exception)
+            {
+                exceptionConditionForProfileAndPortfolio(profileImagePath,null);
+
+               
+                throw;
+            }
+
+
+        }
+        public async Task<ReturnUserDTO> LoginAdminAsync(LoginDTO loginDto)
+        {
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            if (user is null)
+            {
+                throw new UserNotFoundException(loginDto.Email);
+            }
+            var role = _userManager.IsInRoleAsync(user, "Admin");
+            if(role is null)             {
+                throw new InvalidOperationException();
+            }
+           
+            var checkPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+            if (checkPassword)
+            {
+                return new ReturnUserDTO
+                {
+                    Email = user.Email,
+                    UserName = user.DisplayName,
+                    Token = await CreateTokenAsync(user)
+
+                };
+            }
+            throw new UnauthorizedException();
+
+            {
+
+            }
+        }
+
+        public async Task<ReturnUserDTO> RegisterAsync(RegisterDto _registerDto)
             {
                 string? profileImagePath = null;
 
                 string roleName = _registerDto.Role.ToString();
                 string gender = _registerDto.Gender.ToString();
-                string portfolioPath = null;
+                string portfolioPath = "";
 
                 try
                 {
@@ -468,6 +553,7 @@ namespace Service
                 throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
 
         }
+
     }
 
 }
