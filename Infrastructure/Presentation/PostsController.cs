@@ -54,7 +54,6 @@ namespace Presentation
             return SendSuccessResponse(result, "Comment added successfully");
         }
 
-        // 4. إنشاء بوست جديد
         [HttpPost]
         public async Task<ActionResult<ApiResponse<IEnumerable<PostResponseDto>>>> CreatePost([FromForm] PostCreateDto dto)
         {
@@ -64,13 +63,9 @@ namespace Presentation
             return SendSuccessResponse(result, "Post is created successfully");
         }
 
-        // 5. جلب كومنتات البوست
         [HttpGet("{id}/comments")]
-<<<<<<< HEAD
-        public async Task<ActionResult<ApiResponse<IEnumerable<CommentResponseDto>>>> GetPostComments(int id)
-=======
-        public async Task<ActionResult> GetPostComments(int id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
->>>>>>> dca4dc6a22d3094fcf5b38756c1f6faa9d8ee8f7
+
+        public async Task<ActionResult<ApiResponse<IEnumerable<CommentResponseDto>>>> GetPostComments(int id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _postService.GetPostCommentsAsync(id, pageNumber, pageSize);
 
