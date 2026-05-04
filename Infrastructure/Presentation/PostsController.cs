@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
+using Shared;
 using Shared.CommunityModule;
+using Shared.ProductModule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,15 +23,15 @@ namespace Presentation
 
         // 1. جلب كل البوستات (Pagination)
         [HttpGet]
-        public async Task<ActionResult> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var result = await _postService.GetAllPostsAsync(pageNumber, pageSize);
-            return SendSuccessResponse(result, "Posts retrieved successfully");
-        }
+        public async Task<ActionResult<ApiResponse<IEnumerable<PostResponseDto>>>> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        =>
+            
+             SendSuccessResponse(await _postService.GetAllPostsAsync(pageNumber, pageSize), "Posts retrieved successfully");
+        
 
         // 2. عمل لايك أو إلغاؤه
         [HttpPost("{id}/like")]
-        public async Task<ActionResult> ToggleLike(int id)
+        public async Task<ActionResult<ApiResponse<bool>>> ToggleLike(int id)
         {
             // بنجيب الـ UserId من الـ Token بتاع الشخص اللي عامل Log in
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -41,7 +43,7 @@ namespace Presentation
 
         // 3. إضافة كومنت جديد
         [HttpPost("{id}/comments")]
-        public async Task<ActionResult> AddComment(int id, [FromBody] string text)
+        public async Task<ActionResult<ApiResponse<IEnumerable<CommentResponseDto>>>> AddComment(int id, [FromBody] string text)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
@@ -54,7 +56,7 @@ namespace Presentation
 
         // 4. إنشاء بوست جديد
         [HttpPost]
-        public async Task<ActionResult> CreatePost([FromForm] PostCreateDto dto)
+        public async Task<ActionResult<ApiResponse<IEnumerable<PostResponseDto>>>> CreatePost([FromForm] PostCreateDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // جلب الـ ID بتاع اليوزر اللي عامل Login
 
@@ -64,7 +66,7 @@ namespace Presentation
 
         // 5. جلب كومنتات البوست
         [HttpGet("{id}/comments")]
-        public async Task<ActionResult> GetPostComments(int id)
+        public async Task<ActionResult<ApiResponse<IEnumerable<CommentResponseDto>>>> GetPostComments(int id)
         {
             var result = await _postService.GetPostCommentsAsync(id);
             return SendSuccessResponse(result, "Comments retrieved successfully");
@@ -72,7 +74,7 @@ namespace Presentation
 
         // 6. جلب تفاصيل بوست معين
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetPostById(int id)
+        public async Task<ActionResult<ApiResponse<IEnumerable<PostResponseDto>>>> GetPostById(int id)
         {
             // بنجيب الـ UserId عشان نبعته للـ Service فتعرف تحسب الـ IsLikedByMe
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
