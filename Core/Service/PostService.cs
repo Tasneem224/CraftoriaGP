@@ -196,5 +196,33 @@ namespace Service
                 IsLikedByMe = userId != null && post.Likes != null && post.Likes.Any(l => l.UserId == userId)
             };
         }
+
+        //  جلب عدد بوستات يوزر معين
+        public async Task<int> GetUserPostsCountAsync(string userId)
+        {
+            return await _unitOfWork.GetRepository<Post, int>()
+                .GetAllQueryable()
+                .CountAsync(p => p.UserId == userId);
+        }
+
+        //  مسح البوست
+        public async Task<bool> DeletePostAsync(int postId, string userId)
+        {
+            var post = await _unitOfWork.GetRepository<Post, int>().GetByIdAsync(postId);
+
+            // لو البوست مش موجود أو اليوزر اللي بيمسح مش هو صاحب البوست
+            if (post == null || post.UserId != userId)
+            {
+                return false;
+            }
+
+            // (اختياري) لو البوست فيه صورة، ممكن تمسحيها من Cloudinary هنا لو حبيتي
+            if (!string.IsNullOrEmpty(post.ImageUrl)) {_cloudinary.DeleteAsync(post.ImageUrl); }
+
+            _unitOfWork.GetRepository<Post, int>().Remove(post);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

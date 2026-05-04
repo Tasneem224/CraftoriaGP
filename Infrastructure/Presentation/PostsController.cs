@@ -87,5 +87,28 @@ namespace Presentation
 
             return SendSuccessResponse(result, "Post details retrieved successfully");
         }
+
+        // 7. جلب عدد بوستات يوزر معين (بتبعتي الـ UserId في الـ URL)
+        [HttpGet("user/{userId}/count")]
+        public async Task<ActionResult> GetUserPostsCount(string userId)
+        {
+            var count = await _postService.GetUserPostsCountAsync(userId);
+            return SendSuccessResponse(new { postCount = count }, "User posts count retrieved successfully");
+        }
+
+        // 8. مسح بوست
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeletePost(int id)
+        {
+            // بنجيب الـ UserId من التوكن عشان نتأكد إنه بيمسح بوسته هو بس
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var deleted = await _postService.DeletePostAsync(id, userId);
+
+            if (!deleted)
+                return BadRequest(new { message = "You are not authorized to delete this post or post doesn't exist" });
+
+            return SendSuccessResponse(new { }, "Post deleted successfully");
+        }
     }
 }
