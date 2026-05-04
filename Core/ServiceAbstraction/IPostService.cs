@@ -17,7 +17,7 @@ namespace ServiceAbstraction
         Task<bool> ToggleLikeAsync(string userId, int postId);
         // إضافة كومنت
         Task<CommentResponseDto> AddCommentAsync(string userId, int postId, string text);
-        Task<IEnumerable<CommentResponseDto>> GetPostCommentsAsync(int postId);
+        Task<IEnumerable<CommentResponseDto>> GetPostCommentsAsync(int postId, int pageNumber, int pageSize);
         Task<PostResponseDto> GetPostByIdAsync(int postId, string userId = null);
     }
 }
