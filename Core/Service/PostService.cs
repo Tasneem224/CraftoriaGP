@@ -61,6 +61,7 @@ namespace Service
                 Id = post.Id,
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,          // <-- هنا حلينا مشكلة الصورة
+                UserImage=user?.ProfileImage,
                 UserName = user?.UserName,         // <-- هنا حلينا مشكلة الاسم
                 CreatedAt = post.CreatedAt,        // <-- تمرير الوقت للـ Response
                 LikesCount = 0,                    // بوست لسه متكريت فاكيد اللايكات 0
@@ -132,6 +133,7 @@ namespace Service
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,
                 CreatedAt = post.CreatedAt,
+                UserImage=post.User?.ProfileImage,
                 UserName = post.User?.UserName ?? "Unknown User",
                 LikesCount = post.Likes?.Count ?? 0,
                 CommentsCount = post.Comments?.Count ?? 0,

@@ -12,7 +12,8 @@ namespace Shared.CommunityModule
         public string Content { get; set; }
         public string? ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string UserName { get; set; } // اسم اللي نزل البوست
+        public string UserName { get; set; }
+        public string UserImage { get; set; }
         public int LikesCount { get; set; }
         public int CommentsCount { get; set; }
         public bool IsLikedByMe { get; set; } // عشان الموبايل يلون القلب أحمر أو لأ
