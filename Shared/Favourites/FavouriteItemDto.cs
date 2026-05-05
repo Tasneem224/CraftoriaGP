@@ -8,10 +8,10 @@ namespace Shared.Favourites
 {
     public class FavouriteItemDto
     {
-        public int Id { get; set; }           // Product Id
-        public string Name { get; set; }
-        public string ImageUrl { get; set; }
-        public decimal Price { get; set; }
-        public string category { get; set; }
+        public int? Id { get; set; }          
+        public string? Name { get; set; }
+        public string? ImageUrl { get; set; }
+        public decimal? Price { get; set; }
+        public string? category { get; set; }
     }
 }

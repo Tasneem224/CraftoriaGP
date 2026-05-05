@@ -23,12 +23,12 @@ namespace Service
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<string> ToggleFavouriteAsync(int productId)
+        public async Task<string> ToggleFavouriteProductAsync(int productId)
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
 
             var userId = AuthFun(isArabic);
-            var existingFav = await _unitOfWork.Favourites.GetFavouriteAsync(userId, productId);
+            var existingFav = await _unitOfWork.Favourites.GetFavouriteProductAsync(userId, productId);
 
             if (existingFav != null)
             {
@@ -49,6 +49,32 @@ namespace Service
                 return isArabic? "تمت الاضافة الى المفضلة": "Added to favourites";
             }
         }
+        public async Task<string> ToggleFavouriteMaterialAsync(int materialId)
+        {
+            var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
+
+            var userId = AuthFun(isArabic);
+            var existingFav = await _unitOfWork.Favourites.GetFavouriteMaterialAsync(userId, materialId);
+
+            if (existingFav != null)
+            {
+                _unitOfWork.Favourites.Remove(existingFav);
+                await _unitOfWork.SaveChangesAsync();
+                return "Removed from favourites";
+            }
+            else
+            {
+                var newFav = new Favourite 
+                {
+                    UserId = userId,
+                    RawMaterialId = materialId
+                };
+
+                await _unitOfWork.Favourites.AddAsync(newFav);
+                await _unitOfWork.SaveChangesAsync();
+                return isArabic? "تمت الاضافة الى المفضلة": "Added to favourites";
+            }
+        }
         public async Task<List<FavouriteItemDto>> GetUserFavouritesAsync()
         {
             var isArabic = Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
@@ -61,14 +87,15 @@ namespace Service
            
             var favs = await _unitOfWork.Favourites.GetFavouritesByUserIdAsync(userId);
             return favs.
-                
                 Select(f => new FavouriteItemDto{
-                Id = f.Product.Id,
-                Name =isArabic? f.Product.NameAr:f.Product.NameEn,
-                ImageUrl = f.Product.ImageUrl,
-                category=f.Product.Category.NameEn,
-                Price = f.Product.Price
-            }).ToList();
+                    Id = (f.ProductId != null && f.ProductId != 0) ? f.ProductId.Value : (f.RawMaterialId ?? 0),
+                    Name =isArabic?( f.Product?.NameAr?? f.RawMaterial?.NameAr) : (f.Product?.NameEn ??f.RawMaterial?.NameEn),
+                    ImageUrl = f.Product?.ImageUrl ?? f.RawMaterial?.ImageUrl,
+                    category=isArabic?( f.Product?.Category?.NameAr ?? f.RawMaterial?.Category?.NameAr):(f.RawMaterial?.Category?.NameEn??f.Product?.Category.NameEn),
+                    Price = (f.Product != null && f.Product?.Price != 0)
+                    ? f.Product?.Price
+                    : (f.RawMaterial?.Price ?? 0)
+                    }).ToList();
         }
         private string? AuthFun(bool isArabic)
         {

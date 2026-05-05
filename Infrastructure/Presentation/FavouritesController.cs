@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Controllers;
 using ServiceAbstraction;
+using Shared.Favourites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace Presentation
 
         [Authorize]
         [HttpPost("Toggle")]
-        public async Task<IActionResult> Toggle([FromQuery] int productId)
+        public async Task<ActionResult<string>> Toggle([FromQuery] int productId)
         {
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -32,14 +33,28 @@ namespace Presentation
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _favService.ToggleFavouriteAsync( productId);
+            var result = await _favService.ToggleFavouriteProductAsync( productId);
+            return SendSuccessResponse(result);
+        }
+
+        [Authorize]
+        [HttpPost("ToggleForMaterials")]
+        public async Task<ActionResult<string>> ToggleForMaterials([FromQuery] int materialId)
+        {
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await _favService.ToggleFavouriteMaterialAsync( materialId);
             return SendSuccessResponse(result);
         }
 
 
         [Authorize]
         [HttpGet("MyFavourites")]
-        public async Task<IActionResult> GetMyFavourites()
+        public async Task<ActionResult<IEnumerable<FavouriteItemDto>>> GetMyFavourites()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

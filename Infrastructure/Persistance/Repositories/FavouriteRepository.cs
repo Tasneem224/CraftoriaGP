@@ -23,14 +23,21 @@ namespace Persistance.Repositories
         {
             return await _context.Favourites
                .Where(f => f.UserId == userId)
-        .Include(f => f.Product)
-            .ThenInclude(p => p.Category) // ده السطر السحري اللي هيمنع الـ NullReference
-        .ToListAsync();
+               .Include(f=>f.RawMaterial)
+               .ThenInclude(f=>f.Category)
+               .Include(f => f.Product)
+               .ThenInclude(p => p.Category) // ده السطر السحري اللي هيمنع الـ NullReference
+               .ToListAsync();
         }
-        public async Task<Favourite?> GetFavouriteAsync(string userId, int productId)
+        public async Task<Favourite?> GetFavouriteProductAsync(string userId, int productId)
         {
             return await _context.Favourites
                 .FirstOrDefaultAsync(f => f.UserId == userId && f.ProductId == productId);
+        }
+        public async Task<Favourite?> GetFavouriteMaterialAsync(string userId, int materialId)
+        {
+            return await _context.Favourites
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.RawMaterialId == materialId);
         }
     }
 }
