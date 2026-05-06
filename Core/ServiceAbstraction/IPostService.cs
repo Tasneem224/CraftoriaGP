@@ -12,8 +12,7 @@ namespace ServiceAbstraction
         // إنشاء بوست
         Task<PostResponseDto> CreatePostAsync(string userId, PostCreateDto dto);
         // عرض كل البوستات (Pagination)
-        Task<IEnumerable<PostResponseDto>> GetAllPostsAsync(int pageNumber, int pageSize);
-        // عمل لايك أو إلغاؤه
+        Task<IEnumerable<PostResponseDto>> GetAllPostsAsync(int pageNumber, int pageSize, string userId);        // عمل لايك أو إلغاؤه
         Task<bool> ToggleLikeAsync(string userId, int postId);
         // إضافة كومنت
         Task<CommentResponseDto> AddCommentAsync(string userId, int postId, string text);

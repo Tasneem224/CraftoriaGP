@@ -24,10 +24,15 @@ namespace Presentation
         // 1. جلب كل البوستات (Pagination)
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PostResponseDto>>>> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        =>
-            
-             SendSuccessResponse(await _postService.GetAllPostsAsync(pageNumber, pageSize), "Posts retrieved successfully");
-        
+        {
+            // سحب الـ ID بتاع اليوزر اللي فاتح التطبيق دلوقتي
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // تمرير الـ userId للميثود
+            var posts = await _postService.GetAllPostsAsync(pageNumber, pageSize, userId);
+
+            return SendSuccessResponse(posts, "Posts retrieved successfully");
+        }
 
         // 2. عمل لايك أو إلغاؤه
         [HttpPost("{id}/like")]

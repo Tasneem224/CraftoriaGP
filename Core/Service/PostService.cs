@@ -121,23 +121,23 @@ namespace Service
             };
         }
 
-        public async Task<IEnumerable<PostResponseDto>> GetAllPostsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<PostResponseDto>> GetAllPostsAsync(int pageNumber, int pageSize, string userId) // أضفنا الـ userId هنا
         {
-            // 1. بنجيب البوستات من الـ Repository (بالميثود اللي عملناها عشان تجيب الداتا كاملة)
             var posts = await _unitOfWork.Posts.GetPostsWithDataAsync(pageNumber, pageSize);
 
-            // 2. بنحول الـ Posts لـ PostResponseDto عشان نرجعها للموبايل شكلها نضيف
             var response = posts.Select(post => new PostResponseDto
             {
                 Id = post.Id,
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,
                 CreatedAt = post.CreatedAt,
-                UserImage=post.User?.ProfileImage,
+                UserImage = post.User?.ProfileImage,
                 UserName = post.User?.UserName ?? "Unknown User",
                 LikesCount = post.Likes?.Count ?? 0,
                 CommentsCount = post.Comments?.Count ?? 0,
-                IsLikedByMe = false // مؤقتاً، عشان نعرف هي بـ true محتاجين نمرر الـ userId للميثود دي قدام
+
+                // التعديل هنا: بنشوف هل اليوزر الحالي موجود في لستة اللايكات بتاعة البوست ده؟
+                IsLikedByMe = userId != null && post.Likes != null && post.Likes.Any(l => l.UserId == userId)
             }).ToList();
 
             return response;
