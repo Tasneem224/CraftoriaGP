@@ -115,5 +115,17 @@ namespace Presentation
 
             return SendSuccessResponse(new { }, "Post deleted successfully");
         }
+
+        // 9. جلب بوستات يوزر معين للبروفايل
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<PostResponseDto>>>> GetUserPosts(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            // اليوزر اللي "بيتفرج" حالياً عشان نعرف هو عامل لايك ولا لأ
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _postService.GetUserPostsAsync(userId, currentUserId, pageNumber, pageSize);
+
+            return SendSuccessResponse(result, "User posts retrieved successfully");
+        }
     }
 }

@@ -20,5 +20,6 @@ namespace ServiceAbstraction
         Task<PostResponseDto> GetPostByIdAsync(int postId, string userId = null);
         Task<int> GetUserPostsCountAsync(string userId); // لجلب عدد البوستات
         Task<bool> DeletePostAsync(int postId, string userId); // لمسح البوست
+        Task<IEnumerable<PostResponseDto>> GetUserPostsAsync(string profileUserId, string currentUserId, int pageNumber, int pageSize);
     }
 }

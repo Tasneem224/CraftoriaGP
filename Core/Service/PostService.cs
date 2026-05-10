@@ -226,5 +226,35 @@ namespace Service
 
             return true;
         }
+
+        public async Task<IEnumerable<PostResponseDto>> GetUserPostsAsync(string profileUserId, string currentUserId, int pageNumber, int pageSize)
+        {
+            // 1. نجلب بوستات الشخص ده بس مع البيانات المرتبطة
+            var posts = await _unitOfWork.GetRepository<Post, int>()
+                .GetAllQueryable()
+                .Where(p => p.UserId == profileUserId) // فلترة لصاحب البروفايل
+                .Include(p => p.User)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
+                .OrderByDescending(p => p.CreatedAt) // الأحدث فوق
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // 2. تحويل النتائج لـ DTO
+            return posts.Select(post => new PostResponseDto
+            {
+                Id = post.Id,
+                Content = post.Content,
+                ImageUrl = post.ImageUrl,
+                CreatedAt = post.CreatedAt,
+                UserImage = post.User?.ProfileImage,
+                UserName = post.User?.UserName ?? "Unknown User",
+                LikesCount = post.Likes?.Count ?? 0,
+                CommentsCount = post.Comments?.Count ?? 0,
+                // هنا بنشوف لو اليوزر اللي بيتفرج (currentUserId) عامل لايك
+                IsLikedByMe = currentUserId != null && post.Likes != null && post.Likes.Any(l => l.UserId == currentUserId)
+            }).ToList();
+        }
     }
 }
