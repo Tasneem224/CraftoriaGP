@@ -59,6 +59,7 @@ namespace Service
             return new PostResponseDto
             {
                 Id = post.Id,
+                UserId = userId, // <--- السطر الجديد
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,          // <-- هنا حلينا مشكلة الصورة
                 UserImage=user?.ProfileImage,
@@ -115,9 +116,10 @@ namespace Service
             {
                 Id = comment.Id,
                 Text = comment.Text,
+                UserId = userId, // ضيفي الحقل ده في الـ DTO كمان
                 UserName = user.UserName,
                 CreatedAt = comment.CreatedAt,
-                TimeAgo = "Just now" // أو استخدمي Helper يحسب الفرق الزمني
+                TimeAgo = GetTimeAgo(comment.CreatedAt) // استخدام الميثود الجديدة
             };
         }
 
@@ -128,6 +130,7 @@ namespace Service
             var response = posts.Select(post => new PostResponseDto
             {
                 Id = post.Id,
+                UserId = post.UserId, // <--- السطر الجديد
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,
                 CreatedAt = post.CreatedAt,
@@ -160,16 +163,14 @@ namespace Service
             {
                 Id = c.Id,
                 Text = c.Text,
+                UserId = c.UserId, // مهم جداً
                 UserName = c.User?.UserName ?? "Unknown User",
                 CreatedAt = c.CreatedAt,
-                TimeAgo = "Just now"
+                TimeAgo = GetTimeAgo(c.CreatedAt) // هنا هيتحسب الوقت صح (مثلاً: 5h ago)
             }).ToList();
 
             return response;
         }
-
-
-
 
         public async Task<PostResponseDto> GetPostByIdAsync(int postId, string userId = null)
         {
@@ -188,6 +189,7 @@ namespace Service
             return new PostResponseDto
             {
                 Id = post.Id,
+                UserId = post.UserId, // <--- السطر الجديد
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,
                 CreatedAt = post.CreatedAt,
@@ -245,6 +247,7 @@ namespace Service
             return posts.Select(post => new PostResponseDto
             {
                 Id = post.Id,
+                UserId = post.UserId, // <--- السطر الجديد
                 Content = post.Content,
                 ImageUrl = post.ImageUrl,
                 CreatedAt = post.CreatedAt,
@@ -256,5 +259,17 @@ namespace Service
                 IsLikedByMe = currentUserId != null && post.Likes != null && post.Likes.Any(l => l.UserId == currentUserId)
             }).ToList();
         }
+
+
+        private string GetTimeAgo(DateTime dateTime)
+        {
+            var span = DateTime.UtcNow - dateTime;
+            if (span.TotalMinutes < 1) return "Just now";
+            if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+            if (span.TotalHours < 24) return $"{(int)span.TotalHours}h ago";
+            if (span.TotalDays < 30) return $"{(int)span.TotalDays}d ago";
+            return dateTime.ToString("MMM dd, yyyy");
+        }
     }
+
 }

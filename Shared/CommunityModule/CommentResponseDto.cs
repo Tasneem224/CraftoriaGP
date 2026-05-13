@@ -10,6 +10,8 @@ namespace Shared.CommunityModule
     {
         public int Id { get; set; }
         public string Text { get; set; }
+        public string UserId { get; set; } // المعرف الخاص بكاتب المنشور
+
         public string UserName { get; set; } // عشان يظهر "John Smith"
         public string? UserImageUrl { get; set; } // لو حابة تحطي صورة البروفايل
         public DateTime CreatedAt { get; set; }
