@@ -12,6 +12,6 @@ namespace DomainLayer.Contracts
         Task<List<Favourite>> GetFavouritesByUserIdAsync(string userId);
         Task<Favourite?> GetFavouriteMaterialAsync(string userId, int materialId);
         
-            Task<Favourite?> GetFavouriteProductAsync(string userId, int productId);
+        Task<Favourite?> GetFavouriteProductAsync(string userId, int productId);
     }
 }

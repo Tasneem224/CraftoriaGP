@@ -9,8 +9,8 @@ namespace ServiceAbstraction
 {
     public interface IFavouriteService
     {
-        Task<string> ToggleFavouriteProductAsync( int productId);
-        Task<string> ToggleFavouriteMaterialAsync(int materialId);
-        Task<List<FavouriteItemDto>> GetUserFavouritesAsync();
+        Task<string> ToggleFavouriteProductAsync(string userId, int productId);
+        Task<string> ToggleFavouriteMaterialAsync(string userId, int materialId);
+        Task<List<FavouriteItemDto>> GetUserFavouritesAsync(string userId);
     }
 }

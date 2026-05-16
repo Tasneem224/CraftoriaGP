@@ -33,7 +33,7 @@ namespace Presentation
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _favService.ToggleFavouriteProductAsync( productId);
+            var result = await _favService.ToggleFavouriteProductAsync(userId, productId);
             return SendSuccessResponse(result);
         }
 
@@ -47,7 +47,7 @@ namespace Presentation
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _favService.ToggleFavouriteMaterialAsync( materialId);
+            var result = await _favService.ToggleFavouriteMaterialAsync(userId, materialId);
             return SendSuccessResponse(result);
         }
 
@@ -61,7 +61,7 @@ namespace Presentation
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _favService.GetUserFavouritesAsync();
+            var result = await _favService.GetUserFavouritesAsync(userId);
             return SendSuccessResponse(result);
         }
 
