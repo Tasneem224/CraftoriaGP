@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Shared.Chat;
+using Shared.Notifications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Shared.Chat;
 
 namespace Presentation.Hubs
 {
@@ -42,6 +43,15 @@ namespace Presentation.Hubs
             /// Client handler: connection.on("UserOffline", (userId) => { ... })
             /// </summary>
             Task UserOffline(string userId);
-        }
+
+        /// <summary>
+        /// Pushed to the user when a general notification (Order, System, etc.) arrives.
+        /// Client handler: connection.on("ReceiveNotification", (notification) => { ... })
+        /// </summary>
+        Task ReceiveNotification(NotificationResponseDto notification);
+
+
+
     }
+}
 

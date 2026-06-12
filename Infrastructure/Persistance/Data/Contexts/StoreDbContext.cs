@@ -7,6 +7,7 @@ using DomainLayer.Models.Favourite;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Interaction;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.Notifications;
 using DomainLayer.Models.Order;
 using DomainLayer.Models.RawMaterials;
 using DomainLayer.Models.session;
@@ -26,6 +27,7 @@ namespace Persistance.Data.Contexts
 {
     public class StoreDbContext(DbContextOptions<StoreDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<PostLike> PostLikes { get; set; }

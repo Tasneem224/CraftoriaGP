@@ -36,7 +36,7 @@ namespace Presentation.Hubs
         /// </summary>
         [Authorize]
         public class ChatHub : Hub<IChatClient>
-        {
+    {
             // ── Presence store: userId → { connectionId, connectionId, ... } ──────────
             private static readonly ConcurrentDictionary<string, HashSet<string>> _connections
                 = new(StringComparer.OrdinalIgnoreCase);

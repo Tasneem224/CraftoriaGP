@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-//using global::Presentation.Hubs;
+﻿//using global::Presentation.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Presentation.Hubs;
 using ServiceAbstraction;
 using Shared.Chat;
+using Shared.Notifications;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 namespace Presentation.Services
 {
     
@@ -69,6 +70,13 @@ namespace Presentation.Services
                 else
                     await _hub.Clients.User(targetUserId).UserOffline(onlineUserId);
             }
+
+        /// <inheritdoc/>
+        public async Task SendNotificationToUserAsync(string userId, NotificationResponseDto notification)
+        {
+            // Clients.User بتضمن إن الإشعار يروح لكل الأجهزة اللي المستخدم فاتح حسابه منها حالياً
+            await _hub.Clients.User(userId).ReceiveNotification(notification);
         }
+    }
     }
 

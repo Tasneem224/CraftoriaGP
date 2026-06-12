@@ -85,7 +85,7 @@ namespace CraftoriaApp
             {
                 options.UseSqlServer(
 
-                    builder.Configuration.GetConnectionString("Connection"),
+                    builder.Configuration.GetConnectionString("localConnection"),
                     sqlOptions => sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),
@@ -151,6 +151,7 @@ namespace CraftoriaApp
 
             // ── Identity ──────────────────────────────────────────────────────────
             // تسجيل الـ Service نفسها كـ Scoped
+            builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreDbContext>();

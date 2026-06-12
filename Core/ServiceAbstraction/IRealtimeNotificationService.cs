@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Shared.Chat;
+using Shared.Notifications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Shared.Chat;
 
 
 namespace ServiceAbstraction
@@ -55,6 +56,13 @@ namespace ServiceAbstraction
             /// Invokes "UserOnline" or "UserOffline" on ChatHub.
             /// </summary>
             Task NotifyPresenceAsync(string targetUserId, string onlineUserId, bool isOnline);
-        }
+
+        /// <summary>
+        /// Pushes a general notification to all active connections of a specific user.
+        /// </summary>
+        Task SendNotificationToUserAsync(string userId, NotificationResponseDto notification);
+
+
+    }
     }
 
