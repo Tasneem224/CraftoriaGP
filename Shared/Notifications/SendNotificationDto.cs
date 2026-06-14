@@ -14,6 +14,6 @@ namespace Shared.Notifications
         public string MessageEn { get; set; }
         public string MessageAr { get; set; }
         public NotificationType2 Type { get; set; }
-        public int? RelatedId { get; set; }
+        public string? RelatedId { get; set; }
     }
 }

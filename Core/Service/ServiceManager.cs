@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 
 namespace Service
 {
-    public class ServiceManager(IRecommendationService _mlService,PaymentServiceFactory _paymentFactory,IUserInteractionService userInteractionService,IHttpContextAccessor _httpContextAccessor,ITranslationService _translationService,ICartRepository cartRepository,ICartService cartService,IAccountService accountService,ICacheRepository cacheRepository,ICacheService cacheService,IUnitOfWork unitOfWork,UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationrRepo,IMapper _mapper,ICartRepository _cacheRepository) : IServiceManager
+    public class ServiceManager(IRecommendationService _mlService,PaymentServiceFactory _paymentFactory,IUserInteractionService userInteractionService,IHttpContextAccessor _httpContextAccessor,ITranslationService _translationService,ICartRepository cartRepository,ICartService cartService,IAccountService accountService,ICacheRepository cacheRepository,ICacheService cacheService,IUnitOfWork unitOfWork,UserManager<ApplicationUser> _userManager, IConfiguration _configuration, ICloudinaryService _cloudinaryService, IEmailService _emailService,IEmailVerificationCodeRepository _emailVerificationrRepo,IMapper _mapper,ICartRepository _cacheRepository,INotificationService _notification) : IServiceManager
     {
         private readonly Lazy<IAuthenticationService> _LazyAuthenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _configuration, _cloudinaryService,_emailService, _emailVerificationrRepo));
         private readonly Lazy<ICartService> _LazyCartService = new Lazy<ICartService>(() => new CartService(unitOfWork, _cacheRepository,_mapper));
         private readonly Lazy<ICacheService> _LazyCacheService = new Lazy<ICacheService>(() => new CacheService(cacheRepository));
         private readonly Lazy<IAccountService> _LazyAccountService = new Lazy<IAccountService>(() => new AccountService(_userManager, unitOfWork));
-        private readonly Lazy<IOrderService> _LazyOrderService = new Lazy<IOrderService>(() => new OrderService(_paymentFactory,_userManager, cartRepository, unitOfWork,cartService));
+        private readonly Lazy<IOrderService> _LazyOrderService = new Lazy<IOrderService>(() => new OrderService(_paymentFactory,_userManager, cartRepository, unitOfWork,cartService, _notification));
         private readonly Lazy<IProductService> _LazyProductService = new Lazy<IProductService>(() => new ProductService(_mlService,userInteractionService, _translationService, _httpContextAccessor, _userManager,_cloudinaryService,unitOfWork));
         private readonly Lazy<ITopRatedService> _LazyTopRatedService = new Lazy<ITopRatedService>(() => new TopRatedService(unitOfWork,_userManager));
         private readonly Lazy<IAdminPanelService> _LazyAdminPanelService = new Lazy<IAdminPanelService>(() => new AdminPanelService(_cloudinaryService,unitOfWork,_userManager));

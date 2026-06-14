@@ -3,11 +3,13 @@ using DomainLayer.Exceptions;
 using DomainLayer.Models.CartModule;
 using DomainLayer.Models.Identity;
 using DomainLayer.Models.Items;
+using DomainLayer.Models.Notifications;
 using DomainLayer.Models.Order;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service.Factory;
 using ServiceAbstraction;
+using Shared.Notifications;
 using Shared.Order;
 using System;
 using System.Collections.Generic;
@@ -18,7 +20,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Service
 {
-    public class OrderService(PaymentServiceFactory _paymentFactory,UserManager<ApplicationUser> _userManager,ICartRepository _cartRepository,IUnitOfWork _unitOfWork,ICartService _cartService) : IOrderService
+    public class OrderService(PaymentServiceFactory _paymentFactory,UserManager<ApplicationUser> _userManager,ICartRepository _cartRepository,IUnitOfWork _unitOfWork,ICartService _cartService, INotificationService _notificationService) : IOrderService
     {
         public async Task<OrderToReturnDto?> CreateOrderAsync(string userEmail, int deliveryMethodId, string basketId, AddressBookDto shippingAddress)
         {
@@ -40,6 +42,23 @@ namespace Service
                     if (result > 0)
                     {
                         await _cartRepository.DeleteAsync(basketId);
+
+                        // 🔔 [إشعار 1]: إرسال إشعار للمستخدم بأن الطلب تم إنشاؤه بنجاح وgاري الدفع
+                        var user = await _userManager.FindByEmailAsync(userEmail);
+                        if (user != null)
+                        {
+                            await _notificationService.SendNotificationAsync(new SendNotificationDto
+                            {
+                                UserId = user.Id,
+                                TitleEn = "Order Placed Successfully",
+                                TitleAr = "تم تسجيل طلبك بنجاح",
+                                MessageEn = $"Your order has been created. Total: {order.GetTotal()} EGP. Please proceed to payment.",
+                                MessageAr = $"تم إنشاء طلبك بنجاح. الإجمالي: {order.GetTotal()} ج.م. يمكنك الآن إتمام عملية الدفع.",
+                                Type = (NotificationType2)NotificationType.Order,
+                                RelatedId = order.Id.ToString() // تحويل الـ Guid لـ string
+                            });
+                        }
+
                         return await GetOrderByIdAsync(order.Id, userEmail);
                     }
                 }
@@ -202,6 +221,22 @@ namespace Service
 
             // 4. حفظ كل التغييرات (الأوردر والمحافظ) في Transaction واحدة
             await _unitOfWork.SaveChangesAsync();
+
+            // 🔔 [إشعار 2]: إرسال إشعار فوري للمستخدم بعد ما السيف تم والمحفظة اتحدثت إن الدفع نجح والأوردر اتأكد!
+            var user = await _userManager.FindByEmailAsync(order.UserEmail);
+            if (user != null)
+            {
+                await _notificationService.SendNotificationAsync(new SendNotificationDto
+                {
+                    UserId = user.Id,
+                    TitleEn = "Payment Confirmed! 🎉",
+                    TitleAr = "تم تأكيد الدفع بنجاح! 🎉",
+                    MessageEn = $"Payment for order #{order.Id} was received. Your order is now confirmed.",
+                    MessageAr = $"تم استلام دفع الطلب رقم #{order.Id} بنجاح، وطلبك الآن قيد التجهيز.",
+                    Type = (NotificationType2)NotificationType.Order,
+                    RelatedId = order.Id.ToString()
+                });
+            }
         }
         private async Task<List<OrderItem>> PrepareOrderItemsAsync(CustomerCart basket)
         {

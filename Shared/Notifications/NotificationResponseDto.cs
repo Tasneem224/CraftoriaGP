@@ -16,6 +16,6 @@ namespace Shared.Notifications
         public string Type { get; set; } // هنباصيها كـ string (Order, Chat, AppUpdate) عشان الفلاتر يتعامل معاها أسهل
         public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int? RelatedId { get; set; }
+        public string? RelatedId { get; set; }
     }
 }

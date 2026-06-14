@@ -29,7 +29,7 @@ namespace DomainLayer.Models.Notifications
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // ID إضافي اختياري (ممكن يشيل OrderId أو ChatId) عشان الـ Navigation في الموبايل
-        public int? RelatedId { get; set; }
+        public string? RelatedId { get; set; }
 
     }
 }
